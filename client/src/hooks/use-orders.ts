@@ -63,10 +63,27 @@ export function useOrders() {
     }
   });
 
+  const createOrder = useMutation({
+    mutationFn: async (newOrder: any) => {
+      const { error } = await supabase
+        .from('orders')
+        .insert([{
+          ...newOrder,
+          status: 'pending_payment'
+        }]);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    }
+  });
+
   return {
     orders,
     isLoading,
     updateOrderStatus,
-    updateOrderNotes
+    updateOrderNotes,
+    createOrder
   };
 }

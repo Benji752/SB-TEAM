@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useOrders } from "@/hooks/use-orders";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
@@ -10,7 +11,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -23,7 +35,30 @@ const STATUS_OPTIONS = [
 ];
 
 export default function Orders() {
-  const { orders, isLoading, updateOrderStatus, updateOrderNotes } = useOrders();
+  const { orders, isLoading, updateOrderStatus, updateOrderNotes, createOrder } = useOrders();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    client_name: "",
+    service: "",
+    price: "",
+    notes: ""
+  });
+
+  const handleCreateOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createOrder.mutateAsync({
+        client_name: formData.client_name,
+        service: formData.service,
+        price: parseInt(formData.price),
+        notes: formData.notes,
+      });
+      setIsDialogOpen(false);
+      setFormData({ client_name: "", service: "", price: "", notes: "" });
+    } catch (err) {
+      console.error("Error creating order:", err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -37,9 +72,72 @@ export default function Orders() {
 
   return (
     <DashboardLayout>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">Clients / Commandes</h1>
-        <p className="text-muted-foreground text-lg">Suivi collaboratif des prestations et paiements.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-4xl font-bold text-white mb-2">Clients / Commandes</h1>
+          <p className="text-muted-foreground text-lg">Suivi collaboratif des prestations et paiements.</p>
+        </div>
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="luxury-button flex gap-2">
+              <Plus size={20} />
+              Nouvelle Commande
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="glass-card border-white/[0.1] bg-black text-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Créer une commande</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateOrder} className="space-y-6 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="client">Nom Client</Label>
+                <Input
+                  id="client"
+                  required
+                  value={formData.client_name}
+                  onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
+                  className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="service">Type de Prestation</Label>
+                <Input
+                  id="service"
+                  required
+                  value={formData.service}
+                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                  className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="price">Prix (€)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  required
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  className="bg-white/[0.03] border-white/[0.08] rounded-xl min-h-[100px]"
+                />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="luxury-button w-full h-12" disabled={createOrder.isPending}>
+                  {createOrder.isPending ? <Loader2 className="animate-spin" /> : "Créer la commande"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="glass-card border-none overflow-hidden rounded-3xl">
