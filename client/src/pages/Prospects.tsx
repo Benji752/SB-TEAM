@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, UserCheck, Clock, AlertCircle } from "lucide-react";
 
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
 const mockProspects = [
   { id: 1, name: "Clara M.", email: "clara@example.com", source: "Instagram", status: "new" },
   { id: 2, name: "Sophie L.", email: "sophie@example.com", source: "Referral", status: "contacted" },
