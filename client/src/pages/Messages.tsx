@@ -211,24 +211,44 @@ export default function Messages() {
               ) : allConversations?.map((conv: any, idx: number) => (
                 <div 
                   key={idx} 
-                  onClick={() => setSelectedContactId(`${conv.id1}-${conv.id2}`)}
-                  className={`p-6 flex items-center gap-5 cursor-pointer border-b border-white/[0.03] last:border-0 ${selectedContactId === `${conv.id1}-${conv.id2}` ? 'bg-red-500/10' : 'hover:bg-white/[0.02]'}`}
+                  onClick={() => {
+                    if (conv.type === 'channel') {
+                      setSelectedChannelId('general');
+                      setSelectedContactId(null);
+                    } else {
+                      setSelectedContactId(`${conv.id1}_${conv.id2}`);
+                      setSelectedChannelId(null);
+                    }
+                  }}
+                  className={`p-6 flex items-center gap-5 cursor-pointer border-b border-white/[0.03] last:border-0 ${
+                    (conv.type === 'channel' && selectedChannelId === 'general') || 
+                    (conv.type === 'direct' && selectedContactId === `${conv.id1}_${conv.id2}`) 
+                      ? 'bg-red-500/10' : 'hover:bg-white/[0.02]'
+                  }`}
                 >
-                  <div className="flex -space-x-3">
-                    <Avatar className="h-10 w-10 border-2 border-black">
-                      <AvatarImage src={getAvatar(conv.id1)} />
-                      <AvatarFallback className="bg-white/[0.03] text-gold">{getUsername(conv.id1)[0]}</AvatarFallback>
-                    </Avatar>
-                    <Avatar className="h-10 w-10 border-2 border-black">
-                      <AvatarImage src={getAvatar(conv.id2)} />
-                      <AvatarFallback className="bg-white/[0.03] text-gold">{getUsername(conv.id2)[0]}</AvatarFallback>
-                    </Avatar>
-                  </div>
+                  {conv.type === 'channel' ? (
+                    <div className="h-10 w-10 rounded-xl bg-gold/20 flex items-center justify-center text-gold">
+                      <Users size={20} />
+                    </div>
+                  ) : (
+                    <div className="flex -space-x-3">
+                      <Avatar className="h-10 w-10 border-2 border-black">
+                        <AvatarImage src={getAvatar(conv.id1)} />
+                        <AvatarFallback className="bg-white/[0.03] text-gold">{getUsername(conv.id1)[0]}</AvatarFallback>
+                      </Avatar>
+                      <Avatar className="h-10 w-10 border-2 border-black">
+                        <AvatarImage src={getAvatar(conv.id2)} />
+                        <AvatarFallback className="bg-white/[0.03] text-gold">{getUsername(conv.id2)[0]}</AvatarFallback>
+                      </Avatar>
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="font-bold text-sm text-white">
-                      {getUsername(conv.id1)} ↔ {getUsername(conv.id2)}
+                      {conv.type === 'channel' ? '📢 Canal Général' : `${getUsername(conv.id1)} ↔ ${getUsername(conv.id2)}`}
                     </div>
-                    <div className="text-[10px] text-muted-foreground uppercase font-black">Conversation privée</div>
+                    <div className="text-[10px] text-muted-foreground uppercase font-black">
+                      {conv.type === 'channel' ? 'Canal Public' : 'Conversation privée'}
+                    </div>
                   </div>
                 </div>
               ))

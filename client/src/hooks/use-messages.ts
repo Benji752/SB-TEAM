@@ -47,21 +47,22 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
     queryFn: async () => {
       const { data, error } = await supabase
         .from('messages')
-        .select('sender_id, receiver_id')
-        .is('channel_id', null);
+        .select('sender_id, receiver_id, channel_id');
       if (error) throw error;
       
-      const uniquePairs = new Set();
+      const uniqueConversations = new Map();
+      
       data.forEach(m => {
-        if (m.sender_id && m.receiver_id && !m.channel_id) {
+        if (m.channel_id === 'general') {
+          uniqueConversations.set('general', { type: 'channel', id: 'general' });
+        } else if (m.sender_id && m.receiver_id) {
           const ids = [m.sender_id, m.receiver_id].sort();
-          uniquePairs.add(ids.join('-'));
+          const convId = ids.join('_');
+          uniqueConversations.set(convId, { type: 'direct', id1: ids[0], id2: ids[1] });
         }
       });
-      return Array.from(uniquePairs).map((pair: any) => {
-        const [id1, id2] = pair.split('-');
-        return { id1, id2 };
-      });
+      
+      return Array.from(uniqueConversations.values());
     },
     enabled: !!user?.id && user.role === 'admin' && isSupervision,
   });
@@ -76,9 +77,15 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
         query = query.eq('channel_id', channelId);
       } else if (recipientId) {
         if (isSupervision) {
-          const [id1, id2] = recipientId.split('-');
-          query = query.or(`and(sender_id.eq.${id1},receiver_id.eq.${id2}),and(sender_id.eq.${id2},receiver_id.eq.${id1})`);
+          // supervision pair is either 'general' or 'id1_id2'
+          if (recipientId === 'general') {
+            query = query.eq('channel_id', 'general');
+          } else {
+            const [id1, id2] = recipientId.split('_');
+            query = query.or(`and(sender_id.eq.${id1},receiver_id.eq.${id2}),and(sender_id.eq.${id2},receiver_id.eq.${id1})`);
+          }
         } else {
+          // Normal mode: my conversation with recipient
           query = query.or(`and(sender_id.eq.${user?.id},receiver_id.eq.${recipientId}),and(sender_id.eq.${recipientId},receiver_id.eq.${user?.id})`);
         }
       } else {
@@ -102,9 +109,11 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         () => {
+          // Invalidate messages to trigger re-fetch and unread count
           queryClient.invalidateQueries({ queryKey: ["messages"] });
           queryClient.invalidateQueries({ queryKey: ["unread-count"] });
           queryClient.invalidateQueries({ queryKey: ["contacts"] });
+          queryClient.invalidateQueries({ queryKey: ["supervision-conversations"] });
         }
       )
       .subscribe();
