@@ -118,6 +118,13 @@ export const orders = pgTable("client_requests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const modelStats = pgTable("model_stats", {
+  id: serial("id").primaryKey(),
+  isOnline: boolean("is_online").notNull(),
+  currentPrice: integer("current_price").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const tickets = pgTable("tickets", {
   id: serial("id").primaryKey(),
   subject: text("subject").notNull(),

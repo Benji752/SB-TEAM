@@ -5,7 +5,9 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  LineChart,
+  Line
 } from "recharts";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,14 +20,27 @@ import {
   ArrowDownRight,
   HardDrive,
   CheckSquare,
-  Loader2
+  Loader2,
+  Activity
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/use-auth";
+import { format } from "date-fns";
 
 export default function Dashboard() {
   const { user } = useAuth();
+
+  const { data: modelStats, isLoading: modelStatsLoading } = useQuery({
+    queryKey: ["/api/model-stats"],
+  });
+
+  const latestModelStat = modelStats?.[modelStats.length - 1];
+
+  const chartData = modelStats?.map((s: any) => ({
+    time: format(new Date(s.createdAt), "HH:mm"),
+    price: s.currentPrice
+  })) || [];
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["stats"],
@@ -130,11 +145,68 @@ export default function Dashboard() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4 glass-card p-8 border-none">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-1">Suivi WildgirlShow</h3>
+                <p className="text-sm text-muted-foreground">Évolution du tarif (tokens/min) - 24h</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className={`h-3 w-3 rounded-full ${latestModelStat?.isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
+                  <span className="text-sm font-medium text-white">
+                    {latestModelStat?.isOnline ? 'En ligne' : 'Hors ligne'}
+                  </span>
+                </div>
+                <div className="text-gold font-bold bg-gold/10 px-3 py-1 rounded-lg border border-gold/20">
+                  {latestModelStat?.currentPrice || 0} tks/min
+                </div>
+              </div>
+            </div>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                  <XAxis 
+                    dataKey="time" 
+                    stroke="rgba(255,255,255,0.2)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    dy={10}
+                  />
+                  <YAxis 
+                    stroke="rgba(255,255,255,0.2)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "rgba(20, 20, 20, 0.95)", 
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      borderRadius: "12px",
+                      backdropFilter: "blur(10px)"
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="price" 
+                    stroke="#C9A24D" 
+                    strokeWidth={3}
+                    dot={false}
+                    activeDot={{ r: 6, fill: "#C9A24D", stroke: "#000", strokeWidth: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card className="col-span-3 glass-card p-8 border-none">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-white mb-1">Aperçu des Revenus</h3>
               <p className="text-sm text-muted-foreground">Suivi de la performance financière.</p>
             </div>
-            <div className="h-[350px]">
+            <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={stats}>
                   <defs>
@@ -164,7 +236,6 @@ export default function Dashboard() {
                       backgroundColor: "rgba(20, 20, 20, 0.95)", 
                       border: "1px solid rgba(255, 255, 255, 0.08)",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                       backdropFilter: "blur(10px)"
                     }}
                   />
@@ -180,6 +251,7 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           </Card>
+        </div>
 
           <Card className="col-span-3 glass-card p-8 border-none">
             <div className="mb-8">
