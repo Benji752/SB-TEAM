@@ -6,13 +6,6 @@ import { relations } from "drizzle-orm";
 // Import Auth tables to ensure they are included in migrations
 export * from "./models/auth";
 
-// Extended User Profile (linked to Auth User via ID, but for app-specific fields)
-// We'll use the same 'users' table from auth model if possible, but Replit Auth blueprint 
-// owns 'users'. The blueprint instructions say: "The users and sessions tables are mandatory - don't drop them".
-// To add roles, we can either extend the table or add a separate 'profiles' table.
-// Blueprint says: "When generating users table schema, always keep the default config for the id column".
-// I will create a 'profiles' table to hold role and other specific data, linked by id (which is the auth sub).
-
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey(), // Linked to auth.users.id
   username: text("username").notNull().unique(),
@@ -70,6 +63,38 @@ export const agencyStats = pgTable("agency_stats", {
 });
 
 export type AgencyStats = typeof agencyStats.$inferSelect;
+
+// --- New Tables for Prospects, Messages, Drive ---
+
+export const prospects = pgTable("prospects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  source: text("source"), // e.g., "Instagram", "Referral"
+  status: text("status", { enum: ["new", "contacted", "qualified", "rejected"] }).default("new").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  senderId: text("sender_id").notNull(),
+  receiverId: text("receiver_id").notNull(),
+  content: text("content").notNull(),
+  read: boolean("read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const driveFiles = pgTable("drive_files", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  size: integer("size"),
+  type: text("type"), // e.g., "image/png", "application/pdf"
+  folderId: integer("folder_id"),
+  ownerId: text("owner_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 // Relations
 export const profilesRelations = relations(profiles, ({ many }) => ({

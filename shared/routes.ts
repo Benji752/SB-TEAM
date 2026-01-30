@@ -35,6 +35,15 @@ export const api = {
       responses: {
         200: z.custom<typeof profiles.$inferSelect>(),
       },
+    },
+    // Simulation route for dev testing
+    mockLogin: {
+      method: 'POST' as const,
+      path: '/api/auth/mock-login',
+      input: z.object({ role: z.enum(["admin", "staff", "model"]) }),
+      responses: {
+        200: z.object({ success: z.boolean() }),
+      }
     }
   },
   

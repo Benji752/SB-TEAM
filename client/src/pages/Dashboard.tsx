@@ -1,188 +1,193 @@
-import { useStats } from "@/hooks/use-stats";
-import { useTasks } from "@/hooks/use-tasks";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Area, 
-  AreaChart, 
-  ResponsiveContainer, 
-  Tooltip, 
+  BarChart, 
+  Bar, 
   XAxis, 
   YAxis, 
-  CartesianGrid 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area
 } from "recharts";
-import { ArrowUpRight, ArrowDownRight, DollarSign, Users, Activity } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { 
+  Users, 
+  TrendingUp, 
+  DollarSign, 
+  Calendar as CalendarIcon,
+  MessageSquare,
+  ArrowUpRight,
+  ArrowDownRight,
+  HardDrive,
+  CheckSquare
+} from "lucide-react";
+
+const mockRevenueData = [
+  { month: "Jan", revenue: 4500, users: 120 },
+  { month: "Feb", revenue: 5200, users: 150 },
+  { month: "Mar", revenue: 4800, users: 140 },
+  { month: "Apr", revenue: 6100, users: 180 },
+  { month: "May", revenue: 5900, users: 175 },
+  { month: "Jun", revenue: 7200, users: 210 },
+];
+
+const mockStats = [
+  { 
+    title: "Revenu Total", 
+    value: "24,500€", 
+    change: "+12.5%", 
+    trend: "up", 
+    icon: DollarSign,
+    color: "text-green-500" 
+  },
+  { 
+    title: "Nouveaux Prospects", 
+    value: "48", 
+    change: "+18%", 
+    trend: "up", 
+    icon: Users,
+    color: "text-blue-500" 
+  },
+  { 
+    title: "Messages", 
+    value: "156", 
+    change: "-5%", 
+    trend: "down", 
+    icon: MessageSquare,
+    color: "text-purple-500" 
+  },
+  { 
+    title: "Taux de Conversion", 
+    value: "24%", 
+    change: "+2.4%", 
+    trend: "up", 
+    icon: TrendingUp,
+    color: "text-orange-500" 
+  },
+];
 
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useStats();
-  const { data: tasks, isLoading: tasksLoading } = useTasks();
-
-  const recentTasks = tasks?.slice(0, 5) || [];
-  const currentStats = stats?.[stats.length - 1]; // Get latest month
-
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-8">
+      <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-display font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Overview of your agency's performance.</p>
+          <h1 className="text-3xl font-display font-bold tracking-tight">Bonjour ! 👋</h1>
+          <p className="text-muted-foreground">Voici ce qui se passe dans votre agence aujourd'hui.</p>
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
-        <StatCard 
-          title="Monthly Revenue"
-          value={currentStats ? `$${currentStats.revenue.toLocaleString()}` : "$0"}
-          icon={DollarSign}
-          trend="+12.5%"
-          trendUp={true}
-          loading={statsLoading}
-        />
-        <StatCard 
-          title="New Subscribers"
-          value={currentStats ? `+${currentStats.newSubscribers}` : "0"}
-          icon={Users}
-          trend="+4.2%"
-          trendUp={true}
-          loading={statsLoading}
-        />
-        <StatCard 
-          title="Churn Rate"
-          value={currentStats ? `${(currentStats.churnRate / 100).toFixed(1)}%` : "0%"}
-          icon={Activity}
-          trend="-0.5%"
-          trendUp={true} // Good because it went down (handled visually below though)
-          inverseTrend // Green if down
-          loading={statsLoading}
-        />
-      </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {mockStats.map((stat) => (
+            <Card key={stat.title} className="hover-card-effect">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <stat.icon className={stat.color} size={20} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="flex items-center text-xs mt-1">
+                  {stat.trend === "up" ? (
+                    <span className="text-green-500 flex items-center">
+                      <ArrowUpRight size={12} className="mr-1" /> {stat.change}
+                    </span>
+                  ) : (
+                    <span className="text-red-500 flex items-center">
+                      <ArrowDownRight size={12} className="mr-1" /> {stat.change}
+                    </span>
+                  )}
+                  <span className="text-muted-foreground ml-1">vs mois dernier</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-      <div className="grid gap-8 lg:grid-cols-7">
-        {/* Main Chart */}
-        <Card className="lg:col-span-4 shadow-sm border-border/60">
-          <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-0">
-            <div className="h-[300px] w-full">
-              {statsLoading ? (
-                <div className="h-full w-full flex items-center justify-center bg-muted/10 animate-pulse rounded-lg" />
-              ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Aperçu des Revenus</CardTitle>
+              <CardDescription>Croissance mensuelle de l'agence.</CardDescription>
+            </CardHeader>
+            <CardContent className="pl-2">
+              <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats}>
+                  <AreaChart data={mockRevenueData}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
                         <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
                     <XAxis 
                       dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12} 
-                      tickLine={false} 
-                      axisLine={false} 
-                      dy={10}
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
                     />
                     <YAxis 
-                      stroke="hsl(var(--muted-foreground))" 
-                      fontSize={12} 
-                      tickLine={false} 
-                      axisLine={false} 
-                      tickFormatter={(value) => `$${value/1000}k`} 
-                      dx={-10}
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${value}€`}
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        borderColor: 'hsl(var(--border))', 
-                        borderRadius: '8px',
-                        boxShadow: 'var(--shadow-lg)'
+                        backgroundColor: "hsl(var(--card))", 
+                        borderColor: "hsl(var(--border))",
+                        borderRadius: "var(--radius)",
+                        color: "hsl(var(--foreground))"
                       }}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="revenue" 
                       stroke="hsl(var(--primary))" 
-                      strokeWidth={3}
                       fillOpacity={1} 
                       fill="url(#colorRevenue)" 
+                      strokeWidth={2}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Tasks */}
-        <Card className="lg:col-span-3 shadow-sm border-border/60">
-          <CardHeader>
-            <CardTitle>Recent Tasks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {tasksLoading ? (
-               <div className="space-y-4">
-                 {[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
-               </div>
-            ) : recentTasks.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No active tasks
               </div>
-            ) : (
-              <div className="space-y-4">
-                {recentTasks.map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium text-sm">{task.title}</span>
-                      <span className="text-xs text-muted-foreground capitalize">
-                        {task.status.replace('_', ' ')} • {task.priority}
-                      </span>
+            </CardContent>
+          </Card>
+
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Activités Récentes</CardTitle>
+              <CardDescription>Les dernières actions de l'équipe.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                {[
+                  { user: "Alice V.", action: "a téléchargé un nouveau média", time: "Il y a 2h", icon: HardDrive },
+                  { user: "Staff Admin", action: "a validé le contrat de Bella", time: "Il y a 4h", icon: CheckSquare },
+                  { user: "Prospect", action: "Nouveau message de @clara_m", time: "Il y a 5h", icon: MessageSquare },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <div className={cn(
-                      "h-2 w-2 rounded-full",
-                      task.status === 'completed' ? "bg-green-500" :
-                      task.status === 'in_progress' ? "bg-blue-500" : "bg-orange-500"
-                    )} />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        <span className="font-bold">{item.user}</span> {item.action}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{item.time}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
-  );
-}
-
-function StatCard({ title, value, icon: Icon, trend, trendUp, inverseTrend, loading }: any) {
-  if (loading) return <Skeleton className="h-32 w-full rounded-xl" />;
-  
-  const isPositive = inverseTrend ? !trendUp : trendUp;
-  
-  return (
-    <Card className="shadow-sm hover:shadow-md transition-all border-border/60">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold font-display">{value}</div>
-        <p className={cn(
-          "text-xs flex items-center mt-1 font-medium",
-          isPositive ? "text-green-600" : "text-red-600"
-        )}>
-          {trendUp ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
-          {trend}
-          <span className="text-muted-foreground font-normal ml-1">from last month</span>
-        </p>
-      </CardContent>
-    </Card>
   );
 }

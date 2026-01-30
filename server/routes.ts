@@ -47,6 +47,14 @@ export async function registerRoutes(
     }
   });
 
+  // Mock Login for Dev Testing
+  app.post(api.profiles.mockLogin.path, isAuthenticated, async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const { role } = api.profiles.mockLogin.input.parse(req.body);
+    await storage.updateProfile(userId, { role });
+    res.json({ success: true });
+  });
+
   // Models
   app.get(api.models.list.path, isAuthenticated, async (req, res) => {
     const models = await storage.getModels();

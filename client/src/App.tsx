@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,29 +11,11 @@ import Dashboard from "@/pages/Dashboard";
 import Models from "@/pages/Models";
 import Tasks from "@/pages/Tasks";
 import Settings from "@/pages/Settings";
+import Prospects from "@/pages/Prospects";
+import Messages from "@/pages/Messages";
+import CalendarPage from "@/pages/CalendarPage";
+import Drive from "@/pages/Drive";
 import NotFound from "@/pages/NotFound";
-
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-
-  if (isLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    // Should render Landing instead of redirecting if it's the root path, 
-    // but for sub-routes we might want to redirect.
-    // However, since we have a Landing page at root, let's just use Wouter switch logic.
-    return <Landing />;
-  }
-
-  return <Component />;
-}
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -51,19 +33,27 @@ function Router() {
       <Route path="/">
         {user ? <Dashboard /> : <Landing />}
       </Route>
-      
+      <Route path="/prospects">
+        {user ? <Prospects /> : <Landing />}
+      </Route>
+      <Route path="/messages">
+        {user ? <Messages /> : <Landing />}
+      </Route>
+      <Route path="/calendar">
+        {user ? <CalendarPage /> : <Landing />}
+      </Route>
       <Route path="/models">
         {user ? <Models /> : <Landing />}
       </Route>
-      
       <Route path="/tasks">
         {user ? <Tasks /> : <Landing />}
       </Route>
-      
+      <Route path="/drive">
+        {user ? <Drive /> : <Landing />}
+      </Route>
       <Route path="/settings">
         {user ? <Settings /> : <Landing />}
       </Route>
-      
       <Route component={NotFound} />
     </Switch>
   );
