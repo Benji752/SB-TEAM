@@ -14,13 +14,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { useProfile } from "@/hooks/use-profile";
 import { Separator } from "@/components/ui/separator";
 
 export function Sidebar() {
   const [location] = useLocation();
   const { logout, user } = useAuth();
-  const { data: profile } = useProfile();
 
   const navigation = [
     { name: "Tableau de bord", href: "/", icon: LayoutDashboard },
@@ -70,17 +68,15 @@ export function Sidebar() {
 
       <div className="p-4 border-t space-y-4">
         <div className="flex items-center gap-3 mb-2 px-3">
-          <img
-            src={user?.profileImageUrl || "https://github.com/shadcn.png"}
-            alt={user?.firstName || "User"}
-            className="h-9 w-9 rounded-full border border-border"
-          />
+          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+            {user?.firstName?.[0]}
+          </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-sm font-semibold truncate">
               {user?.firstName} {user?.lastName}
             </span>
             <span className="text-xs text-muted-foreground capitalize">
-              {profile?.role || "..."}
+              {user?.role}
             </span>
           </div>
         </div>
