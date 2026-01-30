@@ -101,6 +101,10 @@ export default function Drive() {
     return <File className="text-muted-foreground" />;
   };
 
+  const openFile = (file: any) => {
+    window.open(file.url, '_blank');
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -136,14 +140,21 @@ export default function Drive() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {files?.map((file: any) => (
-              <Card key={file.id} className="glass-card p-6 border-none group cursor-pointer transition-all duration-300 hover:bg-white/[0.06]" onClick={() => setSelectedFile(file)}>
+              <Card 
+                key={file.id} 
+                className="glass-card p-6 border-none group cursor-pointer transition-all duration-300 hover:bg-white/[0.06]" 
+                onClick={() => openFile(file)}
+              >
                 <div className="flex items-start justify-between mb-6">
                   <div className="h-14 w-14 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] group-hover:border-gold/30 group-hover:bg-gold/5 transition-all">
                     {getIcon(file.type)}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <p className="font-bold text-white truncate text-base">{file.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-white truncate text-base">{file.name}</p>
+                    <Download className="w-3.5 h-3.5 text-white/30 group-hover:text-gold transition-colors" />
+                  </div>
                   <p className="text-xs text-muted-foreground/60 font-medium tracking-wide uppercase">
                     {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.createdAt).toLocaleDateString()}
                   </p>
