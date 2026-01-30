@@ -13,6 +13,7 @@ export default function Messages() {
   const { user } = useAuth();
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+  const [generalUnreadCount, setGeneralUnreadCount] = useState(0);
   const [isSupervision, setIsSupervision] = useState(false);
   const [search, setSearch] = useState("");
   const [messageText, setMessageText] = useState("");
@@ -72,6 +73,11 @@ export default function Messages() {
               if (prev.find(m => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
+          }
+
+          // Handle General Channel Unread Notifications
+          if (newMsg.channel_id === 'general' && selectedChannelId !== 'general') {
+            setGeneralUnreadCount(prev => prev + 1);
           }
         }
       )
@@ -168,15 +174,28 @@ export default function Messages() {
                 onClick={() => {
                   setSelectedChannelId('general');
                   setSelectedContactId(null);
+                  setGeneralUnreadCount(0);
                 }}
                 className={`p-4 rounded-2xl flex items-center gap-4 cursor-pointer transition-all border border-gold/10 ${selectedChannelId === 'general' ? 'bg-gold/10 border-gold/30' : 'hover:bg-white/[0.02]'}`}
               >
-                <div className="h-10 w-10 rounded-xl bg-gold/20 flex items-center justify-center text-gold">
+                <div className="h-10 w-10 rounded-xl bg-gold/20 flex items-center justify-center text-gold relative">
                   <Users size={20} />
+                  {generalUnreadCount > 0 && (
+                    <div className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-[8px] text-white font-black shadow-lg shadow-red-500/20">
+                      {generalUnreadCount}
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <div className="font-bold text-sm text-white">📢 Général - Team</div>
-                  <div className="text-[10px] text-gold uppercase tracking-widest font-black">Canal Public</div>
+                <div className="flex-1 flex justify-between items-center">
+                  <div>
+                    <div className="font-bold text-sm text-white">📢 Général - Team</div>
+                    <div className="text-[10px] text-gold uppercase tracking-widest font-black">Canal Public</div>
+                  </div>
+                  {generalUnreadCount > 0 && (
+                    <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-lg shadow-red-500/20">
+                      {generalUnreadCount}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
