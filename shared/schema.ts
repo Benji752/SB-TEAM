@@ -80,7 +80,8 @@ export const prospects = pgTable("prospects", {
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   senderId: text("sender_id").notNull(),
-  receiverId: text("receiver_id").notNull(),
+  receiverId: text("receiver_id"), // Nullable for channel messages
+  channelId: text("channel_id"), // New field for group chats
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
