@@ -34,8 +34,10 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
       
       const uniquePairs = new Set();
       data.forEach(m => {
-        const ids = [m.sender_id, m.receiver_id].sort();
-        uniquePairs.add(ids.join('-'));
+        if (m.sender_id && m.receiver_id) {
+          const ids = [m.sender_id, m.receiver_id].sort();
+          uniquePairs.add(ids.join('-'));
+        }
       });
       return Array.from(uniquePairs).map((pair: any) => {
         const [id1, id2] = pair.split('-');
@@ -73,21 +75,19 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
     enabled: !!user?.id && (!!recipientId || !!channelId),
   });
 
-  // Real-time subscription
+  // Real-time subscription - GLOBAL VERSION FOR INSTANT UPDATES
   useEffect(() => {
     if (!user?.id) return;
 
     const channel = supabase
-      .channel('realtime-messages-improved')
+      .channel('custom-all-channel')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
-        (payload) => {
-          const newMsg = payload.new;
-          if (newMsg.channel_id === 'general' || newMsg.receiver_id === user.id || newMsg.sender_id === user.id || isSupervision) {
-            queryClient.invalidateQueries({ queryKey: ["messages"] });
-            queryClient.invalidateQueries({ queryKey: ["unread-count"] });
-          }
+        () => {
+          // Invalidate messages to trigger re-fetch and unread count
+          queryClient.invalidateQueries({ queryKey: ["messages"] });
+          queryClient.invalidateQueries({ queryKey: ["unread-count"] });
         }
       )
       .subscribe();
@@ -95,7 +95,7 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient, isSupervision]);
+  }, [user?.id, queryClient]);
 
   const sendMessage = useMutation({
     mutationFn: async (content: string) => {
