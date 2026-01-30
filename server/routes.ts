@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { setupAuth } from "./auth";
 
-export function registerRoutes(app: Express) {
+export async function registerRoutes(_httpServer: any, app: Express) {
   setupAuth(app);
 
   // Stats
