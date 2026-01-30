@@ -62,7 +62,11 @@ export default function Drive() {
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       setUploading(true);
-      const filePath = file.name; // DIRECTLY AT ROOT
+      const fileExt = file.name.split('.').pop();
+      // Nettoyage du nom de fichier : remplace tout ce qui n'est pas alphanumérique par des underscores
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const cleanName = `${Date.now()}_${baseName.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
+      const filePath = cleanName; // DIRECTLY AT ROOT
 
       const { error: uploadError } = await supabase.storage
         .from('sb-drive')
@@ -81,7 +85,7 @@ export default function Drive() {
       const { error: dbError } = await supabase
         .from('drive_assets')
         .upsert({
-          name: file.name,
+          name: cleanName,
           url: publicUrl,
           size: file.size,
           type: file.type,
