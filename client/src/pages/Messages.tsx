@@ -119,7 +119,10 @@ export default function Messages() {
     c.username.toLowerCase().includes(search.toLowerCase())
   );
 
-  const getUsername = (id: string) => contacts?.find((c: any) => c.id === id)?.username || "Utilisateur";
+  const getUsername = (id: string) => {
+    const profile = contacts?.find((c: any) => c.id === id);
+    return profile?.username || 'Inconnu';
+  };
   const getAvatar = (id: string) => contacts?.find((c: any) => c.id === id)?.avatar_url;
 
   const getChatHeader = () => {
