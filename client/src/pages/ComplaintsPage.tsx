@@ -161,7 +161,7 @@ export default function ComplaintsPage() {
                         <div className="flex items-center gap-4 text-xs text-white/30">
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('fr-FR', {
+                            {ticket.created_at ? new Date(ticket.created_at).toLocaleString('fr-FR', {
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
