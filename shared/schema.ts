@@ -79,10 +79,10 @@ export const prospects = pgTable("prospects", {
 
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  senderId: integer("sender_id").notNull(),
-  receiverId: integer("receiver_id").notNull(),
+  senderId: text("sender_id").notNull(),
+  receiverId: text("receiver_id").notNull(),
   content: text("content").notNull(),
-  read: boolean("read").default(false),
+  isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

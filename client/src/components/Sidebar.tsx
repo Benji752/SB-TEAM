@@ -16,14 +16,17 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import { useUnreadCount } from "@/hooks/use-messages";
+
 export function Sidebar() {
   const [location] = useLocation();
   const { logout, user } = useAuth();
+  const { data: unreadCount } = useUnreadCount();
 
   const navigation = [
     { name: "Tableau de bord", href: "/", icon: LayoutDashboard },
     { name: "Prospects", href: "/prospects", icon: Users },
-    { name: "Messages", href: "/messages", icon: MessageSquare },
+    { name: "Messages", href: "/messages", icon: MessageSquare, badge: unreadCount },
     { name: "Calendrier", href: "/calendar", icon: Calendar },
     { name: "Modèles", href: "/models", icon: UserCircle },
     { name: "Tâches", href: "/tasks", icon: CheckSquare },
@@ -58,7 +61,12 @@ export function Sidebar() {
                 location === item.href ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
               )} />
               {item.name}
-              {location === item.href && (
+              {item.badge !== undefined && item.badge > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg shadow-red-500/20">
+                  {item.badge}
+                </span>
+              )}
+              {location === item.href && !item.badge && (
                 <ChevronRight className="ml-auto h-4 w-4" />
               )}
             </div>
