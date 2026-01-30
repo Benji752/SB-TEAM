@@ -75,24 +75,14 @@ export default function Prospects() {
                   </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                  {mockProspects.map((p) => (
-                    <tr key={p.id} className="border-b border-white/[0.03] transition-colors hover:bg-white/[0.02]">
-                      <td className="p-8 align-middle">
-                        <div className="font-bold text-base text-white mb-1">{p.name}</div>
-                        <div className="text-xs text-muted-foreground/60">{p.email}</div>
-                      </td>
-                      <td className="p-8 align-middle text-muted-foreground font-medium">{p.source}</td>
-                      <td className="p-8 align-middle">
-                        <Badge variant="outline" className={cn(
-                          "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border-white/[0.08]",
-                          p.status === 'qualified' ? "bg-gold/10 text-gold border-gold/20" : "bg-white/[0.03] text-muted-foreground"
-                        )}>
-                          {p.status}
-                        </Badge>
-                      </td>
-                      <td className="p-8 align-middle text-muted-foreground/60 font-medium">Aujourd'hui</td>
-                    </tr>
-                  ))}
+                  {/* Table content replaced with empty or actual data logic later if needed */}
+                  <tr className="border-b border-white/[0.03] transition-colors hover:bg-white/[0.02]">
+                    <td className="p-8 align-middle" colSpan={4}>
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground font-medium italic">Aucun prospect enregistré pour le moment.</p>
+                      </div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>

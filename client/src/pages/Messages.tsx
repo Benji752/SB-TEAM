@@ -28,25 +28,9 @@ export default function Messages() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {mockChats.map((chat) => (
-              <div key={chat.id} className="p-8 flex items-center gap-5 hover:bg-white/[0.02] cursor-pointer transition-all border-b border-white/[0.03] last:border-0">
-                <Avatar className="h-14 w-14 border-2 border-white/[0.05]">
-                  <AvatarFallback className="bg-white/[0.03] text-gold font-bold text-lg">{chat.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 overflow-hidden">
-                  <div className="flex justify-between items-baseline mb-1">
-                    <span className="font-bold text-base text-white">{chat.name}</span>
-                    <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">{chat.time}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground/60 truncate font-medium">{chat.lastMsg}</p>
-                </div>
-                {chat.unread > 0 && (
-                  <div className="h-6 w-6 bg-gold rounded-full flex items-center justify-center text-[10px] text-black font-black shadow-lg shadow-gold/20">
-                    {chat.unread}
-                  </div>
-                )}
-              </div>
-            ))}
+            <div className="p-12 text-center">
+              <p className="text-muted-foreground text-sm font-medium italic">Aucune conversation active.</p>
+            </div>
           </div>
         </Card>
 
