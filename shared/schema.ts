@@ -118,10 +118,15 @@ export const orders = pgTable("client_requests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertOrderSchema = createInsertSchema(orders).omit({ 
-  id: true,
-  createdAt: true 
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  date: timestamp("date").notNull(),
+  time: text("time"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export type Order = typeof orders.$inferSelect;
-export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true });
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;

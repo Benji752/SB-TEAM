@@ -10,12 +10,11 @@ import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Models from "@/pages/Models";
 import Tasks from "@/pages/Tasks";
-import Settings from "@/pages/Settings";
-import Prospects from "@/pages/Prospects";
-import Messages from "@/pages/Messages";
 import CalendarPage from "@/pages/CalendarPage";
-import Drive from "@/pages/Drive";
+import Settings from "@/pages/Settings";
 import Orders from "@/pages/Orders";
+import Messages from "@/pages/Messages";
+import Drive from "@/pages/Drive";
 import NotFound from "@/pages/NotFound";
 
 function Router() {
@@ -33,9 +32,6 @@ function Router() {
     <Switch>
       <Route path="/">
         {user ? <Dashboard /> : <Landing />}
-      </Route>
-      <Route path="/prospects">
-        {user ? <Prospects /> : <Landing />}
       </Route>
       <Route path="/messages">
         {user ? <Messages /> : <Landing />}
