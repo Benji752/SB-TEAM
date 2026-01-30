@@ -1,38 +1,112 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import {
+  profiles, models, tasks, agencyStats,
+  type Profile, type InsertProfile,
+  type Model, type InsertModel,
+  type Task, type InsertTask,
+  type AgencyStats
+} from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Profiles
+  getProfile(id: string): Promise<Profile | undefined>;
+  createProfile(profile: InsertProfile): Promise<Profile>;
+  updateProfile(id: string, updates: Partial<InsertProfile>): Promise<Profile>;
+  
+  // Models
+  getModels(): Promise<Model[]>;
+  getModel(id: number): Promise<Model | undefined>;
+  createModel(model: InsertModel): Promise<Model>;
+  updateModel(id: number, updates: Partial<InsertModel>): Promise<Model>;
+  deleteModel(id: number): Promise<void>;
+
+  // Tasks
+  getTasks(): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, updates: Partial<InsertTask>): Promise<Task>;
+  deleteTask(id: number): Promise<void>;
+
+  // Stats
+  getAgencyStats(): Promise<AgencyStats[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  // Profiles
+  async getProfile(id: string): Promise<Profile | undefined> {
+    const [profile] = await db.select().from(profiles).where(eq(profiles.id, id));
+    return profile;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async createProfile(profile: InsertProfile): Promise<Profile> {
+    const [newProfile] = await db.insert(profiles).values(profile).returning();
+    return newProfile;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async updateProfile(id: string, updates: Partial<InsertProfile>): Promise<Profile> {
+    const [updated] = await db
+      .update(profiles)
+      .set(updates)
+      .where(eq(profiles.id, id))
+      .returning();
+    return updated;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  // Models
+  async getModels(): Promise<Model[]> {
+    return await db.select().from(models);
+  }
+
+  async getModel(id: number): Promise<Model | undefined> {
+    const [model] = await db.select().from(models).where(eq(models.id, id));
+    return model;
+  }
+
+  async createModel(model: InsertModel): Promise<Model> {
+    const [newModel] = await db.insert(models).values(model).returning();
+    return newModel;
+  }
+
+  async updateModel(id: number, updates: Partial<InsertModel>): Promise<Model> {
+    const [updated] = await db
+      .update(models)
+      .set(updates)
+      .where(eq(models.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteModel(id: number): Promise<void> {
+    await db.delete(models).where(eq(models.id, id));
+  }
+
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    return await db.select().from(tasks);
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const [newTask] = await db.insert(tasks).values(task).returning();
+    return newTask;
+  }
+
+  async updateTask(id: number, updates: Partial<InsertTask>): Promise<Task> {
+    const [updated] = await db
+      .update(tasks)
+      .set(updates)
+      .where(eq(tasks.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTask(id: number): Promise<void> {
+    await db.delete(tasks).where(eq(tasks.id, id));
+  }
+
+  // Stats
+  async getAgencyStats(): Promise<AgencyStats[]> {
+    return await db.select().from(agencyStats);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
