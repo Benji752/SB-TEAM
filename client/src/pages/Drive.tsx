@@ -49,31 +49,26 @@ export default function Drive() {
         });
 
       if (storageError) throw storageError;
-      console.log('Fichiers trouvés dans storage:', storageFiles);
-
-      // Then, get the metadata from the drive_assets table
-      const { data: assets, error: assetsError } = await supabase
-        .from('drive_assets')
-        .select('*')
-        .order('createdAt', { ascending: false });
       
-      if (assetsError) throw assetsError;
-      console.log('Assets trouvés dans DB:', assets);
+      // Filter out folders (items without an id or specific metadata that indicates it's a file)
+      // In Supabase storage list, files have metadata, folders usually don't or have specific properties
+      const filesOnly = storageFiles.filter(item => item.id !== null);
+      console.log('Fichiers réels trouvés:', filesOnly);
 
-      return assets;
+      return filesOnly;
     }
   });
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       setUploading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = fileName; // Upload directly to root
+      const filePath = file.name; // DIRECTLY AT ROOT
 
       const { error: uploadError } = await supabase.storage
         .from('sb-drive')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          upsert: true // Allow overwriting if file exists
+        });
 
       if (uploadError) throw uploadError;
 
@@ -81,15 +76,17 @@ export default function Drive() {
         .from('sb-drive')
         .getPublicUrl(filePath);
 
+      // We still log the asset in DB for easier tracking if needed, 
+      // but the source of truth for the list is now the storage bucket directly
       const { error: dbError } = await supabase
         .from('drive_assets')
-        .insert({
+        .upsert({
           name: file.name,
           url: publicUrl,
           size: file.size,
           type: file.type,
           owner_id: user?.id
-        });
+        }, { onConflict: 'name' });
 
       if (dbError) throw dbError;
     },
@@ -110,7 +107,8 @@ export default function Drive() {
     }
   };
 
-  const getIcon = (type: string) => {
+  const getIcon = (metadata: any) => {
+    const type = metadata?.mimetype || '';
     if (type.startsWith('image/')) return <ImageIcon className="text-blue-500" />;
     if (type.includes('pdf')) return <FileText className="text-red-500" />;
     return <File className="text-muted-foreground" />;
@@ -124,10 +122,11 @@ export default function Drive() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">Drive</h1>
             <p className="text-muted-foreground text-lg">Stockage sécurisé SB Digital.</p>
+            <p className="text-gold text-sm mt-2 font-medium">Fichiers trouvés : {files?.length || 0}</p>
           </div>
           <div className="flex gap-2">
             <Button 
@@ -171,7 +170,7 @@ export default function Drive() {
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="h-14 w-14 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] group-hover:border-gold/30 group-hover:bg-gold/5 transition-all">
-                    {getIcon(file.type)}
+                    {getIcon(file.metadata)}
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -180,7 +179,7 @@ export default function Drive() {
                     <Download className="w-3.5 h-3.5 text-white/30 group-hover:text-gold transition-colors" />
                   </div>
                   <p className="text-xs text-muted-foreground/60 font-medium tracking-wide uppercase">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.createdAt).toLocaleDateString()}
+                    {(file.metadata?.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </Card>
