@@ -1,226 +1,111 @@
 import { useState } from "react";
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/use-tasks";
-import { useModels } from "@/hooks/use-models";
+import { useTasks } from "@/hooks/use-tasks";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Calendar, MoreHorizontal, Trash2 } from "lucide-react";
-import { format } from "date-fns";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTaskSchema, type InsertTask, type Task } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2, RotateCcw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
 
 export default function Tasks() {
-  const { data: tasks, isLoading } = useTasks();
-  const updateMutation = useUpdateTask();
-  const deleteMutation = useDeleteTask();
-  const { toast } = useToast();
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const { tasks, isLoading, createTask, toggleTask, deleteTask, resetDailyRoutine } = useTasks();
 
-  const columns = [
-    { id: "todo", label: "To Do", color: "bg-slate-500/10 text-slate-500" },
-    { id: "in_progress", label: "In Progress", color: "bg-blue-500/10 text-blue-500" },
-    { id: "completed", label: "Completed", color: "bg-green-500/10 text-green-500" },
-  ];
-
-  const handleStatusChange = async (task: Task, newStatus: string) => {
+  const handleAddTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskTitle.trim()) return;
     try {
-      await updateMutation.mutateAsync({ id: task.id, status: newStatus as any });
-      toast({ title: "Task updated", description: `Moved to ${newStatus.replace('_', ' ')}` });
-    } catch (e) {
-      toast({ title: "Error", description: "Failed to update task", variant: "destructive" });
+      await createTask.mutateAsync(newTaskTitle);
+      setNewTaskTitle("");
+    } catch (err) {
+      console.error("Error adding task:", err);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteMutation.mutateAsync(id);
-      toast({ title: "Task deleted" });
-    } catch (e) {
-      toast({ title: "Error", description: "Failed to delete task", variant: "destructive" });
-    }
-  };
-
-  if (isLoading) return <DashboardLayout><div>Loading...</div></DashboardLayout>;
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-gold" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-display font-bold">Tasks</h1>
-          <p className="text-muted-foreground mt-1">Manage project workflows.</p>
-        </div>
-        <CreateTaskDialog />
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-6 h-[calc(100vh-200px)] overflow-hidden">
-        {columns.map(col => (
-          <div key={col.id} className="flex flex-col h-full bg-muted/20 rounded-xl border border-border/50">
-            <div className="p-4 flex items-center justify-between border-b border-border/50">
-              <h3 className="font-bold flex items-center gap-2">
-                <div className={cn("h-2 w-2 rounded-full bg-current", col.color.split(' ')[1])} />
-                {col.label}
-              </h3>
-              <Badge variant="secondary" className="bg-background">
-                {tasks?.filter(t => t.status === col.id).length || 0}
-              </Badge>
-            </div>
-            <div className="p-3 space-y-3 overflow-y-auto flex-1">
-              {tasks?.filter(t => t.status === col.id).map(task => (
-                <Card key={task.id} className="shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border-l-4" style={{ 
-                  borderLeftColor: task.priority === 'high' ? '#ef4444' : task.priority === 'medium' ? '#f97316' : '#22c55e'
-                }}>
-                  <CardHeader className="p-3 pb-0 flex flex-row items-start justify-between space-y-0">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {task.priority}
-                    </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleStatusChange(task, 'todo')}>Move to Todo</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(task, 'in_progress')}>Move to In Progress</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(task, 'completed')}>Move to Completed</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(task.id)}>
-                          <Trash2 className="mr-2 h-4 w-4" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-2">
-                    <h4 className="font-semibold text-sm mb-1">{task.title}</h4>
-                    {task.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{task.description}</p>
-                    )}
-                    {task.dueDate && (
-                      <div className="flex items-center text-xs text-muted-foreground mt-2">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {format(new Date(task.dueDate), "MMM d")}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+      <div className="p-8 space-y-8 bg-[#050505] min-h-screen">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Routine Quotidienne</h1>
+            <p className="text-white/60">Checklist collaborative pour la gestion de l'agence.</p>
           </div>
-        ))}
+          <Button 
+            onClick={() => resetDailyRoutine.mutate()}
+            variant="outline"
+            className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-11 px-6 rounded-xl no-default-hover-elevate"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset Journée
+          </Button>
+        </div>
+
+        <Card className="bg-[#0A0A0A]/40 border-white/[0.08] backdrop-blur-xl p-6">
+          <form onSubmit={handleAddTask} className="flex gap-4 mb-8">
+            <Input
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder="Ajouter une tâche quotidienne..."
+              className="bg-white/[0.03] border-white/[0.08] focus:border-gold/50 h-12 text-white placeholder:text-white/30"
+            />
+            <Button 
+              type="submit" 
+              className="bg-gold hover:bg-gold/90 text-black font-bold h-12 px-6 rounded-xl"
+              disabled={createTask.isPending}
+            >
+              {createTask.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+            </Button>
+          </form>
+
+          <div className="space-y-3">
+            {tasks?.length === 0 ? (
+              <div className="text-center py-12 text-white/30">
+                Aucune tâche pour le moment.
+              </div>
+            ) : (
+              tasks?.map((task) => (
+                <div 
+                  key={task.id}
+                  className="group flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl hover:bg-white/[0.04] transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <Checkbox 
+                      checked={task.is_done}
+                      onCheckedChange={(checked) => toggleTask.mutate({ id: task.id, is_done: !!checked })}
+                      className="border-white/20 data-[state=checked]:bg-gold data-[state=checked]:border-gold h-5 w-5 rounded"
+                    />
+                    <span className={cn(
+                      "text-white transition-all",
+                      task.is_done && "text-white/30 line-through"
+                    )}>
+                      {task.title}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => deleteTask.mutate(task.id)}
+                    className="text-white/20 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
       </div>
     </DashboardLayout>
-  );
-}
-
-function CreateTaskDialog() {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
-  const createMutation = useCreateTask();
-  const { data: models } = useModels();
-  
-  const form = useForm<InsertTask>({
-    resolver: zodResolver(insertTaskSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      status: "todo",
-      priority: "medium",
-    }
-  });
-
-  const onSubmit = async (data: InsertTask) => {
-    try {
-      await createMutation.mutateAsync(data);
-      toast({ title: "Success", description: "Task created successfully" });
-      setOpen(false);
-      form.reset();
-    } catch (e) {
-      toast({ title: "Error", description: (e as Error).message, variant: "destructive" });
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" /> New Task
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create Task</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Title</Label>
-            <Input {...form.register("title")} placeholder="Review contract" />
-            {form.formState.errors.title && <p className="text-xs text-red-500">{form.formState.errors.title.message}</p>}
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <Textarea {...form.register("description")} placeholder="Details about the task..." />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Priority</Label>
-              <Select onValueChange={(v) => form.setValue("priority", v as any)} defaultValue="medium">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Assign Model (Optional)</Label>
-              <Select onValueChange={(v) => form.setValue("modelId", parseInt(v))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {models?.map(m => (
-                    <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Task
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

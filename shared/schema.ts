@@ -44,7 +44,7 @@ export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status", { enum: ["todo", "in_progress", "completed"] }).default("todo").notNull(),
+  isDone: boolean("is_done").default(false).notNull(),
   priority: text("priority", { enum: ["low", "medium", "high"] }).default("medium").notNull(),
   assignedTo: integer("assigned_to"),
   modelId: integer("model_id"),

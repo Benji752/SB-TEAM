@@ -1,73 +1,97 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl } from "@shared/routes";
-import { type InsertTask } from "@shared/schema";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export function useTasks() {
-  return useQuery({
-    queryKey: [api.tasks.list.path],
+  const queryClient = useQueryClient();
+
+  const { data: tasks, isLoading } = useQuery({
+    queryKey: ["tasks"],
     queryFn: async () => {
-      const res = await fetch(api.tasks.list.path, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch tasks");
-      return api.tasks.list.responses[200].parse(await res.json());
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
   });
-}
 
-export function useCreateTask() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: InsertTask) => {
-      const res = await fetch(api.tasks.create.path, {
-        method: api.tasks.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to create task");
-      }
-      return api.tasks.create.responses[201].parse(await res.json());
+  useEffect(() => {
+    const channel = supabase
+      .channel('tasks-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  const createTask = useMutation({
+    mutationFn: async (title: string) => {
+      const { error } = await supabase
+        .from('tasks')
+        .insert([{ title, is_done: false }]);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-    },
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }
   });
-}
 
-export function useUpdateTask() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: number } & Partial<InsertTask>) => {
-      const url = buildUrl(api.tasks.update.path, { id });
-      const res = await fetch(url, {
-        method: api.tasks.update.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to update task");
-      return api.tasks.update.responses[200].parse(await res.json());
+  const toggleTask = useMutation({
+    mutationFn: async ({ id, is_done }: { id: number; is_done: boolean }) => {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ is_done })
+        .eq('id', id);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-    },
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }
   });
-}
 
-export function useDeleteTask() {
-  const queryClient = useQueryClient();
-  return useMutation({
+  const deleteTask = useMutation({
     mutationFn: async (id: number) => {
-      const url = buildUrl(api.tasks.delete.path, { id });
-      const res = await fetch(url, { 
-        method: api.tasks.delete.method,
-        credentials: "include" 
-      });
-      if (!res.ok) throw new Error("Failed to delete task");
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.tasks.list.path] });
-    },
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }
   });
+
+  const resetDailyRoutine = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ is_done: false })
+        .eq('is_done', true);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }
+  });
+
+  return {
+    tasks,
+    isLoading,
+    createTask,
+    toggleTask,
+    deleteTask,
+    resetDailyRoutine
+  };
 }
