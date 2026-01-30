@@ -75,24 +75,6 @@ export default function Drive() {
         });
 
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('sb-drive')
-        .getPublicUrl(filePath);
-
-      // We still log the asset in DB for easier tracking if needed, 
-      // but the source of truth for the list is now the storage bucket directly
-      const { error: dbError } = await supabase
-        .from('drive_assets')
-        .upsert({
-          name: cleanName,
-          url: publicUrl,
-          size: file.size,
-          type: file.type,
-          owner_id: user?.id
-        }, { onConflict: 'name' });
-
-      if (dbError) throw dbError;
     },
     onSuccess: () => {
       setTimeout(() => {
@@ -135,12 +117,6 @@ export default function Drive() {
         .remove([file.name]);
       
       if (storageError) throw storageError;
-
-      // Also remove from DB
-      await supabase
-        .from('drive_assets')
-        .delete()
-        .eq('name', file.name);
 
       queryClient.invalidateQueries({ queryKey: ["drive-files"] });
       toast({ title: "Succès", description: "Fichier supprimé." });
