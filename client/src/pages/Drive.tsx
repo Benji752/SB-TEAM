@@ -102,7 +102,8 @@ export default function Drive() {
   };
 
   const openFile = (file: any) => {
-    window.open(file.url, '_blank');
+    const { data } = supabase.storage.from('sb-drive').getPublicUrl(file.path || file.name);
+    window.open(data.publicUrl, '_blank');
   };
 
   return (
