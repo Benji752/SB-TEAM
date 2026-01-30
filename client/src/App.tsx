@@ -12,6 +12,7 @@ import Models from "@/pages/Models";
 import Tasks from "@/pages/Tasks";
 import CalendarPage from "@/pages/CalendarPage";
 import ResourcesPage from "@/pages/ResourcesPage";
+import ComplaintsPage from "@/pages/ComplaintsPage";
 import Settings from "@/pages/Settings";
 import Orders from "@/pages/Orders";
 import Messages from "@/pages/Messages";
@@ -42,6 +43,9 @@ function Router() {
       </Route>
       <Route path="/resources">
         {user ? <ResourcesPage /> : <Landing />}
+      </Route>
+      <Route path="/complaints">
+        {user ? <ComplaintsPage /> : <Landing />}
       </Route>
       <Route path="/models">
         {user ? <Models /> : <Landing />}

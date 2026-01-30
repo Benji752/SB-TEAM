@@ -118,6 +118,20 @@ export const orders = pgTable("client_requests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const tickets = pgTable("tickets", {
+  id: serial("id").primaryKey(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  priority: text("priority", { enum: ["normal", "urgent"] }).default("normal").notNull(),
+  status: text("status").default("pending").notNull(),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTicketSchema = createInsertSchema(tickets).omit({ id: true, createdAt: true });
+export type Ticket = typeof tickets.$inferSelect;
+export type InsertTicket = z.infer<typeof insertTicketSchema>;
+
 export const resources = pgTable("resources", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),

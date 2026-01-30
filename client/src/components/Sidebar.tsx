@@ -9,7 +9,8 @@ import {
   HardDrive,
   Settings,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  LifeBuoy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -27,6 +28,7 @@ export function Sidebar() {
     { name: "Tableau de bord", href: "/", icon: LayoutDashboard },
     { name: "Commandes", href: "/orders", icon: LayoutDashboard },
     { name: "Ressources", href: "/resources", icon: HardDrive },
+    { name: "Réclamations", href: "/complaints", icon: LifeBuoy },
     { name: "Messages", href: "/messages", icon: MessageSquare, badge: unreadCount },
     { name: "Calendrier", href: "/calendar", icon: Calendar },
     { name: "Modèles", href: "/models", icon: UserCircle },
