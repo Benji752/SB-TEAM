@@ -68,10 +68,24 @@ export function useTickets() {
     }
   });
 
+  const deleteTicket = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tickets"] });
+    }
+  });
+
   return {
     tickets,
     isLoading,
     createTicket,
-    resolveTicket
+    resolveTicket,
+    deleteTicket
   };
 }

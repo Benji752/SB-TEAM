@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle, Clock, Loader2, Send } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Loader2, Send, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function ComplaintsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { tickets, isLoading, createTicket, resolveTicket } = useTickets();
+  const { tickets, isLoading, createTicket, resolveTicket, deleteTicket } = useTickets();
   
   const [formData, setFormData] = useState({
     subject: "",
@@ -44,7 +44,7 @@ export default function ComplaintsPage() {
     }
   };
 
-  const activeTickets = tickets?.filter(t => t.status === 'pending') || [];
+  const allTickets = tickets || [];
 
   return (
     <DashboardLayout>
@@ -109,9 +109,9 @@ export default function ComplaintsPage() {
 
         <div className="space-y-6">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-white">Réclamations en cours</h2>
+            <h2 className="text-2xl font-bold text-white">Historique des Réclamations</h2>
             <Badge variant="outline" className="bg-white/[0.03] border-white/[0.1] text-white/50">
-              {activeTickets.length}
+              {allTickets.length}
             </Badge>
           </div>
 
@@ -121,40 +121,53 @@ export default function ComplaintsPage() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {activeTickets.length === 0 ? (
+              {allTickets.length === 0 ? (
                 <div className="text-center py-12 text-white/20 border border-dashed border-white/[0.08] rounded-2xl">
-                  Aucun ticket en attente.
+                  Aucun ticket enregistré.
                 </div>
               ) : (
-                activeTickets.map((ticket) => (
+                allTickets.map((ticket) => (
                   <Card 
                     key={ticket.id} 
                     className={cn(
-                      "bg-[#0A0A0A]/40 backdrop-blur-xl border-white/[0.08] p-6 transition-all",
-                      ticket.priority === 'urgent' && "border-red-500/30 bg-red-500/[0.02]"
+                      "bg-[#0A0A0A]/40 backdrop-blur-xl border-white/[0.08] p-6 transition-all relative group",
+                      ticket.priority === 'urgent' && ticket.status !== 'resolved' && "border-red-500/30 bg-red-500/[0.02]",
+                      ticket.status === 'resolved' && "opacity-60 bg-white/[0.02]"
                     )}
                   >
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                       <div className="space-y-4 flex-1">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 flex-wrap">
                           <h3 className="text-lg font-bold text-white">{ticket.subject}</h3>
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "font-bold uppercase tracking-wider text-[10px]",
-                              ticket.priority === 'urgent' 
-                                ? "border-red-500/50 text-red-500 bg-red-500/10" 
-                                : "border-green-500/50 text-green-500 bg-green-500/10"
-                            )}
-                          >
-                            {ticket.priority === 'urgent' ? 'Urgent 🔴' : 'Normal 🟢'}
-                          </Badge>
+                          {ticket.status === 'resolved' ? (
+                            <Badge className="bg-green-500/20 text-green-500 border-green-500/30 font-bold uppercase tracking-wider text-[10px]">
+                              RÉSOLU ✅
+                            </Badge>
+                          ) : (
+                            <Badge 
+                              variant="outline" 
+                              className={cn(
+                                "font-bold uppercase tracking-wider text-[10px]",
+                                ticket.priority === 'urgent' 
+                                  ? "border-red-500/50 text-red-500 bg-red-500/10" 
+                                  : "border-green-500/50 text-green-500 bg-green-500/10"
+                              )}
+                            >
+                              {ticket.priority === 'urgent' ? 'Urgent 🔴' : 'Normal 🟢'}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-white/70 whitespace-pre-wrap leading-relaxed">{ticket.message}</p>
                         <div className="flex items-center gap-4 text-xs text-white/30">
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            {ticket.createdAt ? format(new Date(ticket.createdAt), "d MMMM yyyy 'à' HH:mm", { locale: fr }) : "Date inconnue"}
+                            {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString('fr-FR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }).replace(',', ' à') : "Date inconnue"}
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
@@ -163,16 +176,30 @@ export default function ComplaintsPage() {
                         </div>
                       </div>
                       
-                      {user?.role === 'admin' && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        {user?.role === 'admin' && ticket.status !== 'resolved' && (
+                          <Button
+                            onClick={() => resolveTicket.mutate(ticket.id)}
+                            disabled={resolveTicket.isPending}
+                            className="bg-white/[0.05] hover:bg-green-500/20 hover:text-green-500 text-white border border-white/[0.08] font-semibold gap-2 h-11 no-default-hover-elevate"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Marquer comme Résolu
+                          </Button>
+                        )}
                         <Button
-                          onClick={() => resolveTicket.mutate(ticket.id)}
-                          disabled={resolveTicket.isPending}
-                          className="bg-white/[0.05] hover:bg-green-500/20 hover:text-green-500 text-white border border-white/[0.08] font-semibold gap-2 h-11 no-default-hover-elevate shrink-0"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Supprimer définitivement ce ticket ?")) {
+                              deleteTicket.mutate(ticket.id);
+                            }
+                          }}
+                          className="text-white/10 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all h-11 w-11"
                         >
-                          <CheckCircle className="w-4 h-4" />
-                          Marquer comme Résolu
+                          <Trash2 className="w-5 h-5" />
                         </Button>
-                      )}
+                      </div>
                     </div>
                   </Card>
                 ))
