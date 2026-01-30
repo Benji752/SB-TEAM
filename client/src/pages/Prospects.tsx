@@ -20,53 +20,53 @@ export default function Prospects() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="glass-card gold-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Prospects</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Prospects</CardTitle>
+              <Users className="h-4 w-4 text-gold" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">124</div>
+              <div className="text-2xl font-bold text-white">124</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass-card gold-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Nouveaux</CardTitle>
-              <Clock className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Nouveaux</CardTitle>
+              <Clock className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold text-white">12</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass-card gold-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Qualifiés</CardTitle>
-              <UserCheck className="h-4 w-4 text-green-500" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Qualifiés</CardTitle>
+              <UserCheck className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">45</div>
+              <div className="text-2xl font-bold text-white">45</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="glass-card gold-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">En attente</CardTitle>
-              <AlertCircle className="h-4 w-4 text-orange-500" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">En attente</CardTitle>
+              <AlertCircle className="h-4 w-4 text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8</div>
+              <div className="text-2xl font-bold text-white">8</div>
             </CardContent>
           </Card>
         </div>
 
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Liste des Prospects</CardTitle>
+            <CardTitle className="text-gold">Liste des Prospects</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b">
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              <table className="w-full caption-bottom text-sm text-white">
+                <thead className="[&_tr]:border-b border-gold/10">
+                  <tr className="border-b border-gold/10 transition-colors hover:bg-muted/50">
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Nom</th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Source</th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Statut</th>
@@ -75,14 +75,14 @@ export default function Prospects() {
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
                   {mockProspects.map((p) => (
-                    <tr key={p.id} className="border-b transition-colors hover:bg-muted/50">
+                    <tr key={p.id} className="border-b border-gold/5 transition-colors hover:bg-white/5">
                       <td className="p-4 align-middle">
-                        <div className="font-medium">{p.name}</div>
+                        <div className="font-medium text-white">{p.name}</div>
                         <div className="text-xs text-muted-foreground">{p.email}</div>
                       </td>
-                      <td className="p-4 align-middle">{p.source}</td>
+                      <td className="p-4 align-middle text-muted-foreground">{p.source}</td>
                       <td className="p-4 align-middle">
-                        <Badge variant={p.status === 'new' ? 'default' : p.status === 'qualified' ? 'outline' : 'secondary'}>
+                        <Badge variant={p.status === 'new' ? 'default' : p.status === 'qualified' ? 'outline' : 'secondary'} className={p.status === 'qualified' ? 'border-gold text-gold' : ''}>
                           {p.status}
                         </Badge>
                       </td>

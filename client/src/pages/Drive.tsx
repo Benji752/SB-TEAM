@@ -9,12 +9,10 @@ import {
   File, 
   Search, 
   Upload, 
-  Folder, 
   MoreVertical,
   Download,
   Trash2,
-  Loader2,
-  X
+  Loader2
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -27,6 +25,10 @@ import { supabase } from "@/lib/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default function Drive() {
   const { user } = useAuth();
@@ -104,12 +106,12 @@ export default function Drive() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold">Drive</h1>
+            <h1 className="text-3xl font-display font-bold text-gold">Drive</h1>
             <p className="text-muted-foreground">Stockage sécurisé SB Digital.</p>
           </div>
           <div className="flex gap-2">
             <label className="cursor-pointer">
-              <Button asChild disabled={uploading}>
+              <Button asChild disabled={uploading} className="bg-gold text-black hover:bg-gold/90 gold-glow">
                 <span>
                   {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                   Téléverser
@@ -120,22 +122,29 @@ export default function Drive() {
           </div>
         </div>
 
+        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-gold/10">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input className="pl-9 bg-black/50 border-gold/20 text-white" placeholder="Rechercher des fichiers..." />
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[200px]">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-gold" />
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {files?.map((file: any) => (
-              <Card key={file.id} className="hover-card-effect group cursor-pointer" onClick={() => setSelectedFile(file)}>
+              <Card key={file.id} className="glass-card gold-glow cursor-pointer" onClick={() => setSelectedFile(file)}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                    <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center">
                       {getIcon(file.type)}
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="font-medium text-sm truncate">{file.name}</p>
+                    <p className="font-medium text-sm truncate text-white">{file.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.createdAt).toLocaleDateString()}
                     </p>
@@ -148,20 +157,20 @@ export default function Drive() {
       </div>
 
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl glass-card premium-border">
           <DialogHeader>
-            <DialogTitle>{selectedFile?.name}</DialogTitle>
+            <DialogTitle className="text-gold">{selectedFile?.name}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 py-4">
             {selectedFile?.type.startsWith('image/') ? (
-              <img src={selectedFile.url} alt={selectedFile.name} className="max-h-[60vh] rounded-lg object-contain" />
+              <img src={selectedFile.url} alt={selectedFile.name} className="max-h-[60vh] rounded-lg object-contain border border-gold/20" />
             ) : (
-              <div className="h-40 w-40 bg-muted rounded-2xl flex items-center justify-center">
+              <div className="h-40 w-40 bg-gold/10 rounded-2xl flex items-center justify-center">
                 {selectedFile && getIcon(selectedFile.type)}
               </div>
             )}
             <div className="flex gap-4">
-              <Button asChild variant="outline">
+              <Button asChild className="bg-gold text-black hover:bg-gold/90 gold-glow">
                 <a href={selectedFile?.url} download target="_blank">
                   <Download className="mr-2 h-4 w-4" /> Télécharger
                 </a>
