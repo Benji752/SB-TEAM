@@ -191,9 +191,7 @@ export default function ComplaintsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            if (confirm("Supprimer définitivement ce ticket ?")) {
-                              deleteTicket.mutate(ticket.id);
-                            }
+                            deleteTicket.mutate(ticket.id);
                           }}
                           className="text-white/10 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all h-11 w-11"
                         >
