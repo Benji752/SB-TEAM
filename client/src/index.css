@@ -1,59 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 3.5%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 6.5%;
-    --popover-foreground: 0 0% 96%;
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
     --primary: 41 54% 54.5%;
-    --primary-foreground: 0 0% 3.5%;
-    --secondary: 41 54% 40%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 71%;
+    --primary-foreground: 0 0% 2%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
     --accent: 41 54% 54.5%;
-    --accent-foreground: 0 0% 3.5%;
-    --destructive: 0 84.2% 60.2%;
+    --accent-foreground: 0 0% 2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 41 54% 40% / 0.3;
-    --input: 41 54% 40% / 0.3;
+    --border: 0 0% 100% / 0.08;
+    --input: 0 0% 100% / 0.08;
     --ring: 41 54% 54.5%;
-    --radius: 0.75rem;
+    --radius: 16px;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   body {
-    @apply bg-background text-foreground font-sans;
-    background-color: #0E0E0E;
+    background-color: #050505;
+    @apply text-foreground antialiased;
   }
 }
 
 @layer components {
   .glass-card {
-    background: rgba(26, 26, 26, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(158, 124, 47, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  }
-
-  .premium-border {
-    border: 1px solid rgba(158, 124, 47, 0.3);
-  }
-
-  .gold-glow:hover {
-    box-shadow: 0 0 15px rgba(201, 162, 77, 0.4);
-    transform: translateY(-1px);
-    transition: all 0.3s ease;
+    background: rgba(30, 30, 30, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
   }
 
   .text-gold {
@@ -63,18 +56,28 @@
   .bg-gold {
     background-color: #C9A24D;
   }
+
+  .luxury-button {
+    @apply bg-gold text-black font-medium transition-all duration-300;
+    border-radius: 12px;
+  }
+  
+  .luxury-button:hover {
+    background-color: rgba(201, 162, 77, 0.9);
+    box-shadow: 0 0 20px rgba(201, 162, 77, 0.2);
+    transform: translateY(-1px);
+  }
 }
 
-/* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0E0E0E;
+  background: #050505;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1A1A1A;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #C9A24D;

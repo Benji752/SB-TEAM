@@ -104,16 +104,16 @@ export default function Drive() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <h1 className="text-3xl font-display font-bold text-gold">Drive</h1>
-            <p className="text-muted-foreground">Stockage sécurisé SB Digital.</p>
+            <h1 className="text-4xl font-bold text-white mb-2">Drive</h1>
+            <p className="text-muted-foreground text-lg">Stockage sécurisé SB Digital.</p>
           </div>
           <div className="flex gap-2">
             <label className="cursor-pointer">
-              <Button asChild disabled={uploading} className="bg-gold text-black hover:bg-gold/90 gold-glow">
+              <Button asChild disabled={uploading} className="luxury-button px-8 h-12">
                 <span>
-                  {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                  {uploading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Upload className="mr-2 h-5 w-5" />}
                   Téléverser
                 </span>
               </Button>
@@ -122,34 +122,32 @@ export default function Drive() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-gold/10">
+        <div className="flex items-center gap-4 bg-white/[0.03] p-6 rounded-2xl border border-white/[0.05] mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-9 bg-black/50 border-gold/20 text-white" placeholder="Rechercher des fichiers..." />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input className="pl-12 bg-black border-white/[0.08] text-white h-12 rounded-xl focus:ring-gold/20" placeholder="Rechercher des fichiers..." />
           </div>
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader2 className="h-8 w-8 animate-spin text-gold" />
+          <div className="flex items-center justify-center min-h-[300px]">
+            <Loader2 className="h-10 w-10 animate-spin text-gold" />
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {files?.map((file: any) => (
-              <Card key={file.id} className="glass-card gold-glow cursor-pointer" onClick={() => setSelectedFile(file)}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center">
-                      {getIcon(file.type)}
-                    </div>
+              <Card key={file.id} className="glass-card p-6 border-none group cursor-pointer transition-all duration-300 hover:bg-white/[0.06]" onClick={() => setSelectedFile(file)}>
+                <div className="flex items-start justify-between mb-6">
+                  <div className="h-14 w-14 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] group-hover:border-gold/30 group-hover:bg-gold/5 transition-all">
+                    {getIcon(file.type)}
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-sm truncate text-white">{file.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </CardContent>
+                </div>
+                <div className="space-y-1">
+                  <p className="font-bold text-white truncate text-base">{file.name}</p>
+                  <p className="text-xs text-muted-foreground/60 font-medium tracking-wide uppercase">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
               </Card>
             ))}
           </div>
@@ -157,22 +155,22 @@ export default function Drive() {
       </div>
 
       <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-3xl glass-card premium-border">
-          <DialogHeader>
-            <DialogTitle className="text-gold">{selectedFile?.name}</DialogTitle>
+        <DialogContent className="max-w-3xl glass-card border-none p-10 backdrop-blur-3xl">
+          <DialogHeader className="mb-8">
+            <DialogTitle className="text-2xl font-bold text-white">{selectedFile?.name}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4">
+          <div className="flex flex-col items-center gap-8">
             {selectedFile?.type.startsWith('image/') ? (
-              <img src={selectedFile.url} alt={selectedFile.name} className="max-h-[60vh] rounded-lg object-contain border border-gold/20" />
+              <img src={selectedFile.url} alt={selectedFile.name} className="max-h-[60vh] rounded-2xl object-contain shadow-2xl border border-white/[0.05]" />
             ) : (
-              <div className="h-40 w-40 bg-gold/10 rounded-2xl flex items-center justify-center">
-                {selectedFile && getIcon(selectedFile.type)}
+              <div className="h-60 w-60 bg-white/[0.03] rounded-[32px] flex items-center justify-center border border-white/[0.05]">
+                <div className="scale-[2.5]">{selectedFile && getIcon(selectedFile.type)}</div>
               </div>
             )}
-            <div className="flex gap-4">
-              <Button asChild className="bg-gold text-black hover:bg-gold/90 gold-glow">
+            <div className="flex gap-4 w-full">
+              <Button asChild className="luxury-button flex-1 h-14 text-lg">
                 <a href={selectedFile?.url} download target="_blank">
-                  <Download className="mr-2 h-4 w-4" /> Télécharger
+                  <Download className="mr-3 h-6 w-6" /> Télécharger
                 </a>
               </Button>
             </div>

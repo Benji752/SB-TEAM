@@ -31,16 +31,16 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="hidden md:flex flex-col w-64 glass-card border-r fixed h-screen overflow-y-auto z-40">
-      <div className="p-6 flex items-center gap-3">
-        <div className="h-8 w-8 bg-gold rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+    <div className="hidden md:flex flex-col w-64 glass-card border-r fixed h-screen overflow-y-auto z-40 rounded-none">
+      <div className="p-8 flex items-center gap-3">
+        <div className="h-8 w-8 bg-gold rounded-lg flex items-center justify-center shadow-lg shadow-primary/10">
           <LayoutDashboard className="h-5 w-5 text-black" />
         </div>
-        <span className="font-display font-bold text-xl tracking-tight text-gold">SB Digital</span>
+        <span className="font-bold text-xl tracking-tight text-white">SB Digital</span>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2 mt-4">
+      <nav className="flex-1 px-6 space-y-2">
+        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-3 mb-4 mt-6">
           Principal
         </div>
         {navigation.map((item) => (

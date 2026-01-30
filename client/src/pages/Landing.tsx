@@ -44,53 +44,49 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <div className="h-12 w-12 bg-gold rounded-xl flex items-center justify-center mx-auto shadow-lg shadow-primary/20 mb-4">
-            <LayoutDashboard className="h-7 w-7 text-black" />
+    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_rgba(201,162,77,0.05)_0%,_transparent_70%)]">
+      <div className="w-full max-w-md space-y-10">
+        <div className="text-center space-y-4">
+          <div className="h-16 w-16 bg-gold rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-gold/20 mb-6">
+            <LayoutDashboard className="h-8 w-8 text-black" />
           </div>
-          <h1 className="text-3xl font-display font-bold tracking-tight text-gold">SB Digital</h1>
-          <p className="text-muted-foreground">Connectez-vous pour accéder à votre dashboard.</p>
+          <h1 className="text-4xl font-bold tracking-tight text-white">SB Digital</h1>
+          <p className="text-muted-foreground/80 text-lg">Connectez-vous à votre espace luxe.</p>
         </div>
 
-        <Card className="glass-card premium-border">
-          <CardHeader>
-            <CardTitle className="text-gold">Connexion</CardTitle>
-            <CardDescription className="text-muted-foreground">Entrez vos identifiants Supabase</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-muted-foreground">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="admin@agency.com" 
-                  className="bg-black/50 border-gold/30 text-white"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-muted-foreground">Mot de passe</Label>
-                </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  className="bg-black/50 border-gold/30 text-white"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full bg-gold text-black hover:bg-gold/90 gold-glow" disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Se connecter"}
-              </Button>
-            </form>
-          </CardContent>
+        <Card className="glass-card p-8 border-none">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">Connexion</h2>
+            <p className="text-sm text-muted-foreground">Entrez vos identifiants pour continuer.</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="admin@agency.com" 
+                className="bg-white/[0.03] border-white/[0.08] text-white h-12 rounded-xl focus:ring-gold/30"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Mot de passe</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                className="bg-white/[0.03] border-white/[0.08] text-white h-12 rounded-xl focus:ring-gold/30"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full luxury-button h-12" disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Accéder au Dashboard"}
+            </Button>
+          </form>
         </Card>
       </div>
     </div>

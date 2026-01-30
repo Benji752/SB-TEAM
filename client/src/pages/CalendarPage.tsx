@@ -10,59 +10,59 @@ export default function CalendarPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <h1 className="text-3xl font-display font-bold text-gold">Calendrier</h1>
-            <p className="text-muted-foreground">Gérez les shootings et événements.</p>
+            <h1 className="text-4xl font-bold text-white mb-2">Calendrier</h1>
+            <p className="text-muted-foreground text-lg">Gérez les shootings et événements.</p>
           </div>
-          <Button className="bg-gold text-black hover:bg-gold/90 gold-glow"><Plus className="mr-2 h-4 w-4" /> Nouvel Événement</Button>
+          <Button className="luxury-button px-8 h-12"><Plus className="mr-2 h-5 w-5" /> Nouvel Événement</Button>
         </div>
 
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-gold/10">
-            <div className="flex items-center gap-4">
-              <CardTitle className="text-xl text-gold">Janvier 2026</CardTitle>
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-8 w-8 border-gold/20 text-gold hover:bg-gold/10"><ChevronLeft size={16} /></Button>
-                <Button variant="outline" size="icon" className="h-8 w-8 border-gold/20 text-gold hover:bg-gold/10"><ChevronRight size={16} /></Button>
+        <Card className="glass-card p-0 border-none overflow-hidden">
+          <div className="p-8 border-b border-white/[0.05] flex flex-row items-center justify-between">
+            <div className="flex items-center gap-6">
+              <h2 className="text-2xl font-bold text-white">Janvier 2026</h2>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="h-10 w-10 border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] rounded-xl"><ChevronLeft size={20} /></Button>
+                <Button variant="outline" size="icon" className="h-10 w-10 border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] rounded-xl"><ChevronRight size={20} /></Button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="border-gold/30 text-gold bg-gold/10">Mois</Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold">Semaine</Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-gold">Jour</Button>
+            <div className="flex gap-2 bg-white/[0.03] p-1 rounded-xl border border-white/[0.05]">
+              <Button variant="ghost" size="sm" className="text-gold bg-white/[0.05] rounded-lg px-4">Mois</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white rounded-lg px-4">Semaine</Button>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-white rounded-lg px-4">Jour</Button>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="grid grid-cols-7 gap-px bg-gold/10 overflow-hidden">
+          </div>
+          <div className="p-0">
+            <div className="grid grid-cols-7 gap-px bg-white/[0.05]">
               {weekdays.map((d) => (
-                <div key={d} className="bg-black/40 p-4 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                <div key={d} className="bg-[#0A0A0A] p-6 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
                   {d}
                 </div>
               ))}
               {days.map((day, i) => (
-                <div key={i} className="bg-black/20 min-h-[120px] p-2 hover:bg-white/5 transition-colors group relative border-r border-b border-gold/5">
+                <div key={i} className="bg-[#050505] min-h-[140px] p-4 hover:bg-white/[0.02] transition-colors group relative border-white/[0.03]">
                   <span className={cn(
-                    "text-sm font-medium",
-                    day === 30 ? "bg-gold text-black h-6 w-6 flex items-center justify-center rounded-full shadow-lg shadow-gold/20" : "text-muted-foreground"
+                    "text-sm font-semibold",
+                    day === 30 ? "bg-gold text-black h-8 w-8 flex items-center justify-center rounded-xl shadow-xl shadow-gold/20" : "text-muted-foreground/40"
                   )}>
                     {day > 0 && day <= 31 ? day : ""}
                   </span>
                   
                   {day === 12 && (
-                    <div className="mt-2 p-1.5 bg-blue-500/10 text-blue-400 text-[10px] font-bold rounded border-l-2 border-blue-500 glass-card">
+                    <div className="mt-4 p-3 bg-white/[0.03] text-gold text-[11px] font-semibold rounded-xl border border-white/[0.05] backdrop-blur-md">
                       Shoot Alice V. - 14h
                     </div>
                   )}
                   {day === 24 && (
-                    <div className="mt-2 p-1.5 bg-gold/10 text-gold text-[10px] font-bold rounded border-l-2 border-gold glass-card">
+                    <div className="mt-4 p-3 bg-white/[0.03] text-white/80 text-[11px] font-semibold rounded-xl border border-white/[0.05] backdrop-blur-md">
                       Réunion Staff
                     </div>
                   )}
                 </div>
               ))}
             </div>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </DashboardLayout>
