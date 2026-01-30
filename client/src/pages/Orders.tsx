@@ -46,17 +46,36 @@ export default function Orders() {
 
   const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Tentative de création...");
+    
     try {
-      await createOrder.mutateAsync({
-        client_name: formData.client_name,
+      // 1. On prépare les données simples
+      const newOrder = {
+        client_name: formData.client_name, // Vérifie bien les noms de tes variables d'état
         service: formData.service,
-        price: parseInt(formData.price),
+        price: parseInt(formData.price), // On envoie en texte pour éviter les bugs de format
         notes: formData.notes,
-      });
+        status: 'pending_payment'
+      };
+      console.log("Envoi de :", newOrder);
+      // 2. L'envoi Supabase
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([newOrder])
+        .select();
+      // 3. Gestion d'erreur EXPLICITE
+      if (error) {
+        console.error("Erreur Supabase:", error);
+        alert("ERREUR SUPABASE : " + error.message + " | Détails: " + JSON.stringify(error.details));
+        return;
+      }
+      alert("SUCCÈS ! Commande créée.");
       setIsDialogOpen(false);
       setFormData({ client_name: "", service: "", price: "", notes: "" });
-    } catch (err) {
-      console.error("Error creating order:", err);
+      // Recharger la liste ici est géré par Realtime et React Query
+    } catch (err: any) { 
+      console.error("Crash JS:", err); 
+      alert("CRASH JS : " + err.message); 
     }
   };
 
