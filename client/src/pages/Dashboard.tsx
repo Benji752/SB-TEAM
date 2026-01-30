@@ -94,13 +94,13 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-display font-bold tracking-tight">Bonjour, {user?.firstName || 'Admin'} ! 👋</h1>
+          <h1 className="text-3xl font-display font-bold tracking-tight text-gold">Bonjour, {user?.firstName || 'Admin'} ! 👋</h1>
           <p className="text-muted-foreground">Voici l'état actuel de votre agence.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => (
-            <Card key={stat.title}>
+            <Card key={stat.title} className="glass-card gold-glow">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
@@ -108,7 +108,7 @@ export default function Dashboard() {
                 <stat.icon className={stat.color} size={20} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-2xl font-bold text-white">{stat.value}</div>
                 <div className="flex items-center text-xs mt-1">
                   {stat.trend === "up" ? (
                     <span className="text-green-500 flex items-center">
@@ -127,9 +127,9 @@ export default function Dashboard() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
+          <Card className="col-span-4 glass-card">
             <CardHeader>
-              <CardTitle>Aperçu des Revenus</CardTitle>
+              <CardTitle className="text-gold">Aperçu des Revenus</CardTitle>
               <CardDescription>Suivi de la performance financière.</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
@@ -138,20 +138,20 @@ export default function Dashboard() {
                   <AreaChart data={stats}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                     <XAxis 
                       dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="#B5B5B5"
                       fontSize={12}
                       tickLine={false}
                       axisLine={false}
                     />
                     <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="#B5B5B5"
                       fontSize={12}
                       tickLine={false}
                       axisLine={false}
@@ -159,16 +159,16 @@ export default function Dashboard() {
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: "hsl(var(--card))", 
-                        borderColor: "hsl(var(--border))",
-                        borderRadius: "var(--radius)",
-                        color: "hsl(var(--foreground))"
+                        backgroundColor: "#1A1A1A", 
+                        borderColor: "rgba(158, 124, 47, 0.3)",
+                        borderRadius: "8px",
+                        color: "#F5F5F5"
                       }}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="revenue" 
-                      stroke="hsl(var(--primary))" 
+                      stroke="#C9A24D" 
                       fillOpacity={1} 
                       fill="url(#colorRevenue)" 
                       strokeWidth={2}
@@ -179,9 +179,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="col-span-3">
+          <Card className="col-span-3 glass-card">
             <CardHeader>
-              <CardTitle>Activités Récentes</CardTitle>
+              <CardTitle className="text-gold">Activités Récentes</CardTitle>
               <CardDescription>Flux opérationnel en temps réel.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -192,12 +192,12 @@ export default function Dashboard() {
                   { user: "Prospect", action: "nouveau message", time: "5h", icon: MessageSquare },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-4">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
+                    <div className="h-9 w-9 rounded-full bg-gold/10 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-gold" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        <span className="font-bold">{item.user}</span> {item.action}
+                      <p className="text-sm font-medium leading-none text-white">
+                        <span className="font-bold text-gold">{item.user}</span> {item.action}
                       </p>
                       <p className="text-xs text-muted-foreground">{item.time}</p>
                     </div>

@@ -31,12 +31,12 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="hidden md:flex flex-col w-64 bg-card border-r fixed h-screen overflow-y-auto">
+    <div className="hidden md:flex flex-col w-64 glass-card border-r fixed h-screen overflow-y-auto z-40">
       <div className="p-6 flex items-center gap-3">
-        <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-          <LayoutDashboard className="h-5 w-5 text-primary-foreground" />
+        <div className="h-8 w-8 bg-gold rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+          <LayoutDashboard className="h-5 w-5 text-black" />
         </div>
-        <span className="font-display font-bold text-xl tracking-tight">SB Digital</span>
+        <span className="font-display font-bold text-xl tracking-tight text-gold">SB Digital</span>
       </div>
 
       <nav className="flex-1 px-4 space-y-1">
