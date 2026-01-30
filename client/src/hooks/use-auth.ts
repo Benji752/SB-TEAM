@@ -1,42 +1,35 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
 
 export function useAuth() {
-  const queryClient = useQueryClient();
-
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const res = await fetch("/api/user");
-      if (!res.ok) return null;
-      return res.json();
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return null;
+      
+      // Fetch profile associated with user
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      return { ...user, ...profile };
     },
     retry: false,
+    staleTime: 1000 * 60 * 5,
   });
 
-  const loginMutation = useMutation({
-    mutationFn: async (role: string) => {
-      const res = await apiRequest("POST", "/api/login-demo", { role });
-      return res.json();
-    },
-    onSuccess: (user) => {
-      queryClient.setQueryData(["/api/user"], user);
-    },
-  });
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
-    },
-  });
+  const logout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   return {
     user,
     isLoading,
-    login: loginMutation.mutate,
-    logout: logoutMutation.mutate,
+    logout,
+    error
   };
 }
