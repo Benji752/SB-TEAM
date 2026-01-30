@@ -36,7 +36,7 @@ export function Sidebar() {
         <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
           <LayoutDashboard className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="font-display font-bold text-xl tracking-tight">AgencyFlow</span>
+        <span className="font-display font-bold text-xl tracking-tight">SB Digital</span>
       </div>
 
       <nav className="flex-1 px-4 space-y-1">

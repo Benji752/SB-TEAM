@@ -86,6 +86,16 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const driveAssets = pgTable("drive_assets", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  size: integer("size"),
+  type: text("type"),
+  ownerId: text("owner_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const driveFiles = pgTable("drive_files", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),

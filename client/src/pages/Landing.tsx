@@ -50,7 +50,7 @@ export default function Landing() {
           <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center mx-auto shadow-lg shadow-primary/20 mb-4">
             <LayoutDashboard className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-display font-bold tracking-tight">AgencyFlow</h1>
+          <h1 className="text-3xl font-display font-bold tracking-tight">SB Digital</h1>
           <p className="text-muted-foreground">Connectez-vous pour accéder à votre dashboard.</p>
         </div>
 
