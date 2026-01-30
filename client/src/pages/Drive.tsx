@@ -40,12 +40,23 @@ export default function Drive() {
   const { data: files, isLoading } = useQuery({
     queryKey: ["drive-files"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get the list of files from the storage bucket
+      const { data: storageFiles, error: storageError } = await supabase.storage
+        .from('sb-drive')
+        .list();
+
+      if (storageError) throw storageError;
+
+      // Then, get the metadata from the drive_assets table
+      const { data: assets, error: assetsError } = await supabase
         .from('drive_assets')
         .select('*')
         .order('createdAt', { ascending: false });
-      if (error) throw error;
-      return data;
+      
+      if (assetsError) throw assetsError;
+
+      // Return assets that exist in storage
+      return assets;
     }
   });
 
