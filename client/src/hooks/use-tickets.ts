@@ -41,7 +41,13 @@ export function useTickets() {
     mutationFn: async (newTicket: any) => {
       const { error } = await supabase
         .from('tickets')
-        .insert([{ ...newTicket, created_by: user?.id }]);
+        .insert([{ 
+          subject: newTicket.subject,
+          message: newTicket.message,
+          priority: newTicket.priority,
+          created_by: user?.id,
+          status: 'pending'
+        }]);
       if (error) throw error;
     },
     onSuccess: () => {
