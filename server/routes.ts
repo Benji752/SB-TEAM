@@ -12,27 +12,28 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   app.get("/api/monitor/wildgirl", async (req, res) => {
     try {
       const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
       
       let isOnline = false;
       let currentPrice = 60;
       let stripScore = 0;
       let favorites = 0;
+      let success = false;
 
       try {
-        const response = await axios.get(proxyUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          },
-          timeout: 5000
-        });
-
-        isOnline = response.data?.cam?.isLive || false;
-        currentPrice = response.data?.cam?.viewPrivatePrice || 60;
-        stripScore = response.data?.model?.stripScore || 0;
-        favorites = response.data?.model?.favoritesCount || 0;
+        const response = await axios.get(proxyUrl, { timeout: 8000 });
+        if (response.data && response.data.contents) {
+          const realData = JSON.parse(response.data.contents);
+          if (realData.cam) {
+            isOnline = realData.cam.isLive || false;
+            currentPrice = realData.cam.viewPrivatePrice || 60;
+            stripScore = realData.model?.stripScore || 0;
+            favorites = realData.model?.favoritesCount || 0;
+            success = true;
+          }
+        }
       } catch (e) {
-        console.error("API Fetch failed, using last known data");
+        console.error("AllOrigins Fetch failed:", e.message);
       }
 
       // Get last recorded stats for fallback/private data
@@ -43,10 +44,13 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       const subscribers = lastStats[0]?.subscribers || 0;
       const hourlyRevenue = lastStats[0]?.hourlyRevenue || 0;
       
-      // If API failed or returned zeros, use last known values for score/favorites/online
+      // PERSISTANCE INTELLIGENTE: If API failed or returned zeros, use last known values
       if (stripScore === 0) stripScore = lastStats[0]?.stripScore || 0;
       if (favorites === 0) favorites = lastStats[0]?.favorites || 0;
-      if (!isOnline && lastStats[0]) isOnline = lastStats[0].isOnline;
+      if (!success && lastStats[0]) {
+        isOnline = lastStats[0].isOnline;
+        currentPrice = lastStats[0].currentPrice;
+      }
 
       const [newStat] = await db.insert(modelStats).values({
         isOnline,

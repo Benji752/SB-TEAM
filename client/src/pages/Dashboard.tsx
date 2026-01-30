@@ -34,7 +34,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export default function Dashboard() {
@@ -48,9 +48,20 @@ export default function Dashboard() {
     isOnline: "false"
   });
 
-  const { data: modelStats, isLoading: modelStatsLoading } = useQuery({
+  const { data: modelStats, isLoading: modelStatsLoading, refetch: refetchMonitor } = useQuery({
     queryKey: ["/api/model-stats"],
   });
+
+  // AUTO-REFRESH: Loop every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Trigger backend monitor refresh which also updates the DB
+      apiRequest("GET", "/api/monitor/wildgirl").then(() => {
+        refetchMonitor();
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [refetchMonitor]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
