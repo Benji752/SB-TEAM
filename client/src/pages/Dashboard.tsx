@@ -77,6 +77,9 @@ export default function Dashboard() {
 
   const latestModelStat = Array.isArray(modelStats) ? modelStats[modelStats.length - 1] : null;
 
+  // PRIORITY LOGIC: API Status OR Manual DB Status
+  const isOnline = latestModelStat?.isOnline === true;
+
   const chartData = Array.isArray(modelStats) ? modelStats.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
     revenue: s.hourlyRevenue
@@ -247,9 +250,9 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground">Données hybrides (API publique + Saisie manuelle)</p>
               </div>
               <div className="flex items-center gap-3 bg-white/[0.03] p-2 rounded-xl border border-white/[0.05]">
-                <div className={`h-2.5 w-2.5 rounded-full ${latestModelStat?.isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
+                <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
                 <span className="text-sm font-bold text-white uppercase tracking-wider">
-                  {latestModelStat?.isOnline ? 'Live' : 'Offline'}
+                  {isOnline ? 'Live' : 'Offline'}
                 </span>
               </div>
             </div>

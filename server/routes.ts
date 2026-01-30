@@ -14,54 +14,62 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
       const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
       
-      let isOnline = false;
-      let currentPrice = 60;
-      let stripScore = 0;
-      let favorites = 0;
-      let success = false;
+      // 1. Always get last recorded stats first as baseline
+      const lastStatsArr = await db.select().from(modelStats)
+        .orderBy(desc(modelStats.createdAt))
+        .limit(1);
+      
+      const lastStats = lastStatsArr[0];
 
+      let isOnline = lastStats?.isOnline || false;
+      let currentPrice = lastStats?.currentPrice || 60;
+      let stripScore = lastStats?.stripScore || 0;
+      let favorites = lastStats?.favorites || 0;
+      const subscribers = lastStats?.subscribers || 0;
+      const hourlyRevenue = lastStats?.hourlyRevenue || 0;
+
+      // 2. Silent Background Update
       try {
         const response = await axios.get(proxyUrl, { timeout: 8000 });
         if (response.data && response.data.contents) {
           const realData = JSON.parse(response.data.contents);
           if (realData.cam) {
+            // ONLY update if we got real data
             isOnline = realData.cam.isLive || false;
             currentPrice = realData.cam.viewPrivatePrice || 60;
-            stripScore = realData.model?.stripScore || 0;
-            favorites = realData.model?.favoritesCount || 0;
-            success = true;
+            stripScore = realData.model?.stripScore || stripScore;
+            favorites = realData.model?.favoritesCount || favorites;
+            
+            // Success: persist to DB
+            await db.insert(modelStats).values({
+              isOnline,
+              currentPrice,
+              stripScore,
+              favorites,
+              subscribers,
+              hourlyRevenue,
+            });
           }
         }
-      } catch (e) {
-        console.error("AllOrigins Fetch failed:", e.message);
+      } catch (e: any) {
+        console.error("AllOrigins Fetch failed, keeping existing data:", e.message);
+        // On failure, we don't insert a new record with zeros, 
+        // we just return the last known good record
       }
 
-      // Get last recorded stats for fallback/private data
-      const lastStats = await db.select().from(modelStats)
+      // 3. Return latest data (either newly fetched or last known)
+      const latestStats = await db.select().from(modelStats)
         .orderBy(desc(modelStats.createdAt))
         .limit(1);
-
-      const subscribers = lastStats[0]?.subscribers || 0;
-      const hourlyRevenue = lastStats[0]?.hourlyRevenue || 0;
-      
-      // PERSISTANCE INTELLIGENTE: If API failed or returned zeros, use last known values
-      if (stripScore === 0) stripScore = lastStats[0]?.stripScore || 0;
-      if (favorites === 0) favorites = lastStats[0]?.favorites || 0;
-      if (!success && lastStats[0]) {
-        isOnline = lastStats[0].isOnline;
-        currentPrice = lastStats[0].currentPrice;
-      }
-
-      const [newStat] = await db.insert(modelStats).values({
-        isOnline,
-        currentPrice,
-        stripScore,
-        favorites,
-        subscribers,
-        hourlyRevenue,
-      }).returning();
-
-      res.json(newStat);
+        
+      res.json(latestStats[0] || { 
+        isOnline: false, 
+        currentPrice: 60, 
+        stripScore: 0, 
+        favorites: 0, 
+        subscribers: 0, 
+        hourlyRevenue: 0 
+      });
     } catch (error: any) {
       console.error("Monitor error:", error.message);
       res.status(500).json({ error: error.message });
