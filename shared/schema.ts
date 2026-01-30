@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -122,6 +122,10 @@ export const modelStats = pgTable("model_stats", {
   id: serial("id").primaryKey(),
   isOnline: boolean("is_online").notNull(),
   currentPrice: integer("current_price").notNull(),
+  stripScore: integer("strip_score").default(0),
+  favorites: integer("favorites").default(0),
+  subscribers: integer("subscribers").default(0),
+  hourlyRevenue: doublePrecision("hourly_revenue").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

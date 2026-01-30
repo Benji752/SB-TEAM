@@ -18,17 +18,61 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       });
 
       const isOnline = response.data?.cam?.isLive || false;
-      // Tentative de récupération du prix. Souvent dans cam.viewPrivatePrice ou cam.price
-      const currentPrice = response.data?.cam?.viewPrivatePrice || 60; // Valeur par défaut si non trouvé
+      const currentPrice = response.data?.cam?.viewPrivatePrice || 60;
+      const stripScore = response.data?.model?.stripScore || 0;
+      const favorites = response.data?.model?.favoritesCount || 0;
 
-      await db.insert(modelStats).values({
+      // Get last recorded private stats
+      const lastStats = await db.select().from(modelStats)
+        .orderBy(desc(modelStats.createdAt))
+        .limit(1);
+
+      const subscribers = lastStats[0]?.subscribers || 0;
+      const hourlyRevenue = lastStats[0]?.hourlyRevenue || 0;
+
+      const [newStat] = await db.insert(modelStats).values({
         isOnline,
         currentPrice,
-      });
+        stripScore,
+        favorites,
+        subscribers,
+        hourlyRevenue,
+      }).returning();
 
-      res.json({ success: true, isOnline, currentPrice });
+      res.json(newStat);
     } catch (error: any) {
       console.error("Monitor error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/model-stats", async (req, res) => {
+    try {
+      const { hourlyRevenue, subscribers } = req.body;
+      
+      // Fetch current public stats to include in the record
+      const response = await axios.get("https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam", {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+
+      const isOnline = response.data?.cam?.isLive || false;
+      const currentPrice = response.data?.cam?.viewPrivatePrice || 60;
+      const stripScore = response.data?.model?.stripScore || 0;
+      const favorites = response.data?.model?.favoritesCount || 0;
+
+      const [newStat] = await db.insert(modelStats).values({
+        isOnline,
+        currentPrice,
+        stripScore,
+        favorites,
+        subscribers: Number(subscribers),
+        hourlyRevenue: Number(hourlyRevenue),
+      }).returning();
+
+      res.json(newStat);
+    } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
