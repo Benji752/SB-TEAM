@@ -120,7 +120,6 @@ export default function Drive() {
   };
 
   const deleteFile = async (file: any) => {
-    if (!confirm('Supprimer ce fichier ?')) return;
     try {
       const { error: storageError } = await supabase.storage
         .from('sb-drive')
