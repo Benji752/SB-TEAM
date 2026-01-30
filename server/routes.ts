@@ -11,7 +11,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   // Monitoring WildgirlShow
   app.get("/api/monitor/wildgirl", async (req, res) => {
     try {
-      const response = await axios.get("https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam", {
+      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      
+      const response = await axios.get(proxyUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
@@ -50,8 +53,11 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     try {
       const { hourlyRevenue, subscribers } = req.body;
       
-      // Fetch current public stats to include in the record
-      const response = await axios.get("https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam", {
+      // Fetch current public stats to include in the record using proxy
+      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      
+      const response = await axios.get(proxyUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
