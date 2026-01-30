@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useOrders } from "@/hooks/use-orders";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { supabase } from "@/lib/supabaseClient";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
