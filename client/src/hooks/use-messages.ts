@@ -7,17 +7,36 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fetch all profiles (excluding current user)
+  // Fetch all profiles (excluding current user) with unread counts
   const { data: contacts, isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, avatar_url, role')
         .neq('id', user?.id)
         .order('username', { ascending: true });
-      if (error) throw error;
-      return data;
+      
+      if (profilesError) throw profilesError;
+
+      // Fetch unread counts for each contact
+      const { data: unreadData, error: unreadError } = await supabase
+        .from('messages')
+        .select('sender_id')
+        .eq('receiver_id', user?.id)
+        .eq('is_read', false);
+
+      if (unreadError) throw unreadError;
+
+      const unreadMap: Record<string, number> = {};
+      unreadData?.forEach((m: any) => {
+        unreadMap[m.sender_id] = (unreadMap[m.sender_id] || 0) + 1;
+      });
+
+      return profiles.map((p: any) => ({
+        ...p,
+        unreadCount: unreadMap[p.id] || 0
+      }));
     },
     enabled: !!user?.id,
   });
@@ -57,11 +76,9 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
         query = query.eq('channel_id', channelId);
       } else if (recipientId) {
         if (isSupervision) {
-          // Supervision mode: see specific conversation between two other people
-          const [id1, id2] = recipientId.split('-'); // Format used for supervision pairs
+          const [id1, id2] = recipientId.split('-');
           query = query.or(`and(sender_id.eq.${id1},receiver_id.eq.${id2}),and(sender_id.eq.${id2},receiver_id.eq.${id1})`);
         } else {
-          // Normal mode: my conversation with recipient
           query = query.or(`and(sender_id.eq.${user?.id},receiver_id.eq.${recipientId}),and(sender_id.eq.${recipientId},receiver_id.eq.${user?.id})`);
         }
       } else {
@@ -85,9 +102,9 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         () => {
-          // Invalidate messages to trigger re-fetch and unread count
           queryClient.invalidateQueries({ queryKey: ["messages"] });
           queryClient.invalidateQueries({ queryKey: ["unread-count"] });
+          queryClient.invalidateQueries({ queryKey: ["contacts"] });
         }
       )
       .subscribe();
@@ -129,6 +146,7 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
     }
   });
 

@@ -227,7 +227,14 @@ export default function Messages() {
                   <div className="flex-1 overflow-hidden">
                     <div className="flex justify-between items-baseline mb-1">
                       <span className="font-bold text-base text-white">{contact.username}</span>
-                      <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded bg-white/5 ${contact.role === 'admin' ? 'text-red-400' : 'text-muted-foreground'}`}>{contact.role}</span>
+                      <div className="flex items-center gap-2">
+                        {contact.unreadCount > 0 && (
+                          <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-lg shadow-red-500/20">
+                            {contact.unreadCount}
+                          </div>
+                        )}
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded bg-white/5 ${contact.role === 'admin' ? 'text-red-400' : 'text-muted-foreground'}`}>{contact.role}</span>
+                      </div>
                     </div>
                     <p className="text-sm text-muted-foreground/60 truncate font-medium">Cliquer pour discuter</p>
                   </div>
