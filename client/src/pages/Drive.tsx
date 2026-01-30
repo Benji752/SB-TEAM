@@ -119,6 +119,28 @@ export default function Drive() {
     window.open(data.publicUrl, '_blank');
   };
 
+  const deleteFile = async (file: any) => {
+    if (!confirm('Supprimer ce fichier ?')) return;
+    try {
+      const { error: storageError } = await supabase.storage
+        .from('sb-drive')
+        .remove([file.name]);
+      
+      if (storageError) throw storageError;
+
+      // Also remove from DB
+      await supabase
+        .from('drive_assets')
+        .delete()
+        .eq('name', file.name);
+
+      queryClient.invalidateQueries({ queryKey: ["drive-files"] });
+      toast({ title: "Succès", description: "Fichier supprimé." });
+    } catch (err: any) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -165,22 +187,50 @@ export default function Drive() {
             {files?.map((file: any) => (
               <Card 
                 key={file.id} 
-                className="glass-card p-6 border-none group cursor-pointer transition-all duration-300 hover:bg-white/[0.06]" 
-                onClick={() => openFile(file)}
+                className="glass-card p-6 border-none group transition-all duration-300 hover:bg-white/[0.06] relative" 
               >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="h-14 w-14 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] group-hover:border-gold/30 group-hover:bg-gold/5 transition-all">
-                    {getIcon(file.metadata)}
+                <div 
+                  className="cursor-pointer"
+                  onClick={() => openFile(file)}
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="h-14 w-14 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] group-hover:border-gold/30 group-hover:bg-gold/5 transition-all">
+                      {getIcon(file.metadata)}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 pr-12">
+                      <p className="font-bold text-white truncate text-base">{file.name}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground/60 font-medium tracking-wide uppercase">
+                      {(file.metadata?.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-white truncate text-base">{file.name}</p>
-                    <Download className="w-3.5 h-3.5 text-white/30 group-hover:text-gold transition-colors" />
-                  </div>
-                  <p className="text-xs text-muted-foreground/60 font-medium tracking-wide uppercase">
-                    {(file.metadata?.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.created_at).toLocaleDateString()}
-                  </p>
+
+                <div className="absolute top-6 right-6 flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openFile(file);
+                    }}
+                    className="h-8 w-8 text-white/30 hover:text-gold transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteFile(file);
+                    }}
+                    className="h-8 w-8 text-white/10 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </Card>
             ))}
