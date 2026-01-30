@@ -15,6 +15,7 @@ import Prospects from "@/pages/Prospects";
 import Messages from "@/pages/Messages";
 import CalendarPage from "@/pages/CalendarPage";
 import Drive from "@/pages/Drive";
+import Orders from "@/pages/Orders";
 import NotFound from "@/pages/NotFound";
 
 function Router() {
@@ -47,6 +48,9 @@ function Router() {
       </Route>
       <Route path="/tasks">
         {user ? <Tasks /> : <Landing />}
+      </Route>
+      <Route path="/orders">
+        {user ? <Orders /> : <Landing />}
       </Route>
       <Route path="/drive">
         {user ? <Drive /> : <Landing />}

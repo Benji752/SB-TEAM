@@ -107,3 +107,21 @@ export const driveFiles = pgTable("drive_files", {
   ownerId: integer("owner_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  clientName: text("client_name").notNull(),
+  service: text("service").notNull(),
+  price: integer("price").notNull(),
+  status: text("status").notNull().default("pending_payment"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOrderSchema = createInsertSchema(orders).omit({ 
+  id: true,
+  createdAt: true 
+});
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;

@@ -30,6 +30,7 @@ export function Sidebar() {
     { name: "Calendrier", href: "/calendar", icon: Calendar },
     { name: "Modèles", href: "/models", icon: UserCircle },
     { name: "Tâches", href: "/tasks", icon: CheckSquare },
+    { name: "Commandes", href: "/orders", icon: LayoutDashboard },
     { name: "Drive", href: "/drive", icon: HardDrive },
   ];
 
