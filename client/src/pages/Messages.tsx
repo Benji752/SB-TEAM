@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Plus, Send, Loader2, CheckCheck, Users, ShieldAlert, MessageSquare } from "lucide-react";
 import { useMessages } from "@/hooks/use-messages";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Messages() {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ export default function Messages() {
   const [isSupervision, setIsSupervision] = useState(false);
   const [search, setSearch] = useState("");
   const [messageText, setMessageText] = useState("");
+  const [messages, setMessages] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const { 
@@ -32,23 +34,79 @@ export default function Messages() {
     isSupervision
   );
 
+  // Sync initial messages from react-query to local state
   useEffect(() => {
-    if (selectedContactId && !isSupervision && chatMessages) {
+    if (chatMessages) {
+      setMessages(chatMessages);
+    }
+  }, [chatMessages]);
+
+  // Supabase Realtime Subscription for Instant UI Updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('chat-room')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          console.log('Nouveau message reçu:', payload);
+          const newMsg = payload.new;
+          
+          // Logic to determine if message belongs to current view
+          const isCurrentChannel = selectedChannelId && newMsg.channel_id === selectedChannelId;
+          const isCurrentDirect = selectedContactId && !isSupervision && (
+            (newMsg.sender_id === user?.id && newMsg.receiver_id === selectedContactId) ||
+            (newMsg.sender_id === selectedContactId && newMsg.receiver_id === user?.id)
+          );
+          const isCurrentSupervision = isSupervision && selectedContactId && (
+            (() => {
+              const [id1, id2] = selectedContactId.split('-');
+              return (newMsg.sender_id === id1 && newMsg.receiver_id === id2) ||
+                     (newMsg.sender_id === id2 && newMsg.receiver_id === id1);
+            })()
+          );
+
+          if (isCurrentChannel || isCurrentDirect || isCurrentSupervision) {
+            setMessages((prev) => {
+              // Avoid duplicates
+              if (prev.find(m => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedContactId, selectedChannelId, isSupervision, user?.id]);
+
+  useEffect(() => {
+    if (selectedContactId && !isSupervision && messages.length > 0) {
       markAsRead.mutate();
     }
-  }, [selectedContactId, chatMessages, isSupervision]);
+  }, [selectedContactId, messages.length, isSupervision]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [chatMessages]);
+  }, [messages]);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim() || (!selectedContactId && !selectedChannelId) || isSupervision) return;
-    sendMessage.mutate(messageText);
-    setMessageText("");
+
+    try {
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      if (authError || !authUser) throw new Error("Erreur d'authentification : " + authError?.message);
+
+      await sendMessage.mutateAsync(messageText);
+      setMessageText("");
+    } catch (err: any) {
+      alert("Erreur lors de l'envoi : " + err.message);
+    }
   };
 
   const filteredContacts = contacts?.filter((c: any) => 
@@ -200,9 +258,9 @@ export default function Messages() {
             </div>
             
             <div ref={scrollRef} className="flex-1 p-10 flex flex-col gap-6 overflow-y-auto">
-              {isLoadingMessages ? (
+              {(isLoadingMessages && messages.length === 0) ? (
                 <div className="flex justify-center"><Loader2 className="animate-spin text-gold" /></div>
-              ) : chatMessages?.map((msg: any) => (
+              ) : messages?.map((msg: any) => (
                 <div 
                   key={msg.id} 
                   className={`max-w-[70%] px-6 py-4 rounded-[24px] text-sm font-semibold shadow-2xl ${
@@ -217,7 +275,7 @@ export default function Messages() {
                   {msg.content}
                   {!isSupervision && msg.sender_id === user?.id && (
                     <div className="flex justify-end mt-1 opacity-50">
-                      {msg.isRead ? <CheckCheck size={14} className="text-black" /> : <div className="text-[10px]">Envoyé</div>}
+                      {msg.is_read ? <CheckCheck size={14} className="text-black" /> : <div className="text-[10px]">Envoyé</div>}
                     </div>
                   )}
                 </div>
