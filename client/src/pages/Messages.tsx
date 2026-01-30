@@ -214,15 +214,17 @@ export default function Messages() {
                   <div className="flex -space-x-3">
                     <Avatar className="h-10 w-10 border-2 border-black">
                       <AvatarImage src={getAvatar(conv.id1)} />
-                      <AvatarFallback>{getUsername(conv.id1)[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-white/[0.03] text-gold">{getUsername(conv.id1)[0]}</AvatarFallback>
                     </Avatar>
                     <Avatar className="h-10 w-10 border-2 border-black">
                       <AvatarImage src={getAvatar(conv.id2)} />
-                      <AvatarFallback>{getUsername(conv.id2)[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-white/[0.03] text-gold">{getUsername(conv.id2)[0]}</AvatarFallback>
                     </Avatar>
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-sm text-white">{getUsername(conv.id1)} ↔ {getUsername(conv.id2)}</div>
+                    <div className="font-bold text-sm text-white">
+                      {getUsername(conv.id1)} ↔ {getUsername(conv.id2)}
+                    </div>
                     <div className="text-[10px] text-muted-foreground uppercase font-black">Conversation privée</div>
                   </div>
                 </div>

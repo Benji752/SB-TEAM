@@ -53,7 +53,7 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
       
       const uniquePairs = new Set();
       data.forEach(m => {
-        if (m.sender_id && m.receiver_id) {
+        if (m.sender_id && m.receiver_id && !m.channel_id) {
           const ids = [m.sender_id, m.receiver_id].sort();
           uniquePairs.add(ids.join('-'));
         }
