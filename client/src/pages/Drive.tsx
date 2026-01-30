@@ -12,7 +12,8 @@ import {
   MoreVertical,
   Download,
   Trash2,
-  Loader2
+  Loader2,
+  RotateCcw
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -37,7 +38,7 @@ export default function Drive() {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>(null);
 
-  const { data: files, isLoading } = useQuery({
+  const { data: files, isLoading, refetch } = useQuery({
     queryKey: ["drive-files"],
     queryFn: async () => {
       // First, get the list of files from the storage bucket
@@ -46,6 +47,7 @@ export default function Drive() {
         .list();
 
       if (storageError) throw storageError;
+      console.log('Fichiers trouvés dans storage:', storageFiles);
 
       // Then, get the metadata from the drive_assets table
       const { data: assets, error: assetsError } = await supabase
@@ -54,6 +56,7 @@ export default function Drive() {
         .order('createdAt', { ascending: false });
       
       if (assetsError) throw assetsError;
+      console.log('Assets trouvés dans DB:', assets);
 
       // Return assets that exist in storage
       return assets;
@@ -126,6 +129,14 @@ export default function Drive() {
             <p className="text-muted-foreground text-lg">Stockage sécurisé SB Digital.</p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => refetch()}
+              className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-12 px-6 rounded-xl"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Actualiser
+            </Button>
             <label className="cursor-pointer">
               <Button asChild disabled={uploading} className="luxury-button px-8 h-12">
                 <span>
