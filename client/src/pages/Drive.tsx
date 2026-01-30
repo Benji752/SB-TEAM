@@ -95,9 +95,14 @@ export default function Drive() {
       if (dbError) throw dbError;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["drive-files"] });
-      toast({ title: "Succès", description: "Fichier téléversé avec succès." });
-      setUploading(false);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["drive-files"] });
+        toast({ title: "Succès", description: "Fichier téléversé avec succès." });
+        setUploading(false);
+        // Reset file input
+        const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+        if (input) input.value = "";
+      }, 1000);
     },
     onError: (error: any) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -157,16 +162,20 @@ export default function Drive() {
             <Button 
               variant="outline"
               onClick={() => refetch()}
+              disabled={uploading}
               className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-12 px-6 rounded-xl"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className={cn("w-4 h-4", isLoading && "animate-spin")} />
               Actualiser
             </Button>
-            <label className="cursor-pointer">
+            <label className={cn("cursor-pointer", uploading && "opacity-50 cursor-not-allowed")}>
               <Button asChild disabled={uploading} className="luxury-button px-8 h-12">
                 <span>
-                  {uploading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Upload className="mr-2 h-5 w-5" />}
-                  Téléverser
+                  {uploading ? (
+                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Envoi en cours...</>
+                  ) : (
+                    <><Upload className="mr-2 h-5 w-5" /> Téléverser</>
+                  )}
                 </span>
               </Button>
               <input type="file" className="hidden" onChange={onFileChange} disabled={uploading} />
