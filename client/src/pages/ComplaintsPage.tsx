@@ -154,7 +154,7 @@ export default function ComplaintsPage() {
                         <div className="flex items-center gap-4 text-xs text-white/30">
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
-                            {format(new Date(ticket.createdAt), "d MMMM yyyy HH:mm", { locale: fr })}
+                            {ticket.createdAt ? format(new Date(ticket.createdAt), "d MMMM yyyy 'à' HH:mm", { locale: fr }) : "Date inconnue"}
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" />
