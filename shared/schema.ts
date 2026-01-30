@@ -118,6 +118,18 @@ export const orders = pgTable("client_requests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const resources = pgTable("resources", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertResourceSchema = createInsertSchema(resources).omit({ id: true, createdAt: true });
+export type Resource = typeof resources.$inferSelect;
+export type InsertResource = z.infer<typeof insertResourceSchema>;
+
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
