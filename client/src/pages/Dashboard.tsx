@@ -253,7 +253,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-          <Card className="col-span-3 glass-card p-8 border-none">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-7 glass-card p-8 border-none">
             <div className="mb-8">
               <h3 className="text-xl font-bold text-white mb-1">Activités Récentes</h3>
               <p className="text-sm text-muted-foreground">Flux opérationnel en temps réel.</p>

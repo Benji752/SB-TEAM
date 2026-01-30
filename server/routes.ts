@@ -1,6 +1,5 @@
 import { Express } from "express";
 import { setupAuth } from "./auth";
-import { supabase } from "./lib/supabase"; // Assuming this is where it should be or I'll use common pattern
 import axios from "axios";
 import { modelStats } from "@shared/schema";
 import { db } from "./db";
