@@ -12,26 +12,41 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   app.get("/api/monitor/wildgirl", async (req, res) => {
     try {
       const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
       
-      const response = await axios.get(proxyUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
+      let isOnline = false;
+      let currentPrice = 60;
+      let stripScore = 0;
+      let favorites = 0;
 
-      const isOnline = response.data?.cam?.isLive || false;
-      const currentPrice = response.data?.cam?.viewPrivatePrice || 60;
-      const stripScore = response.data?.model?.stripScore || 0;
-      const favorites = response.data?.model?.favoritesCount || 0;
+      try {
+        const response = await axios.get(proxyUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          },
+          timeout: 5000
+        });
 
-      // Get last recorded private stats
+        isOnline = response.data?.cam?.isLive || false;
+        currentPrice = response.data?.cam?.viewPrivatePrice || 60;
+        stripScore = response.data?.model?.stripScore || 0;
+        favorites = response.data?.model?.favoritesCount || 0;
+      } catch (e) {
+        console.error("API Fetch failed, using last known data");
+      }
+
+      // Get last recorded stats for fallback/private data
       const lastStats = await db.select().from(modelStats)
         .orderBy(desc(modelStats.createdAt))
         .limit(1);
 
       const subscribers = lastStats[0]?.subscribers || 0;
       const hourlyRevenue = lastStats[0]?.hourlyRevenue || 0;
+      
+      // If API failed or returned zeros, use last known values for score/favorites/online
+      if (stripScore === 0) stripScore = lastStats[0]?.stripScore || 0;
+      if (favorites === 0) favorites = lastStats[0]?.favorites || 0;
+      if (!isOnline && lastStats[0]) isOnline = lastStats[0].isOnline;
 
       const [newStat] = await db.insert(modelStats).values({
         isOnline,
@@ -51,28 +66,39 @@ export async function registerRoutes(_httpServer: any, app: Express) {
 
   app.post("/api/model-stats", async (req, res) => {
     try {
-      const { hourlyRevenue, subscribers } = req.body;
+      const { hourlyRevenue, subscribers, stripScore, favorites, isOnline } = req.body;
       
-      // Fetch current public stats to include in the record using proxy
       const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
       
-      const response = await axios.get(proxyUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-      });
+      let apiIsOnline = isOnline === 'true' || isOnline === true;
+      let apiPrice = 60;
+      let apiScore = Number(stripScore) || 0;
+      let apiFavs = Number(favorites) || 0;
 
-      const isOnline = response.data?.cam?.isLive || false;
-      const currentPrice = response.data?.cam?.viewPrivatePrice || 60;
-      const stripScore = response.data?.model?.stripScore || 0;
-      const favorites = response.data?.model?.favoritesCount || 0;
+      try {
+        const response = await axios.get(proxyUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          },
+          timeout: 5000
+        });
+
+        if (response.data?.cam) {
+           apiIsOnline = response.data.cam.isLive;
+           apiPrice = response.data.cam.viewPrivatePrice || 60;
+           apiScore = response.data.model?.stripScore || apiScore;
+           apiFavs = response.data.model?.favoritesCount || apiFavs;
+        }
+      } catch (e) {
+        console.error("Manual update API fetch failed");
+      }
 
       const [newStat] = await db.insert(modelStats).values({
-        isOnline,
-        currentPrice,
-        stripScore,
-        favorites,
+        isOnline: apiIsOnline,
+        currentPrice: apiPrice,
+        stripScore: apiScore,
+        favorites: apiFavs,
         subscribers: Number(subscribers),
         hourlyRevenue: Number(hourlyRevenue),
       }).returning();

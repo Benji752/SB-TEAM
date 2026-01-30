@@ -33,13 +33,20 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [updateData, setUpdateData] = useState({ hourlyRevenue: "", subscribers: "" });
+  const [updateData, setUpdateData] = useState({ 
+    hourlyRevenue: "", 
+    subscribers: "",
+    stripScore: "",
+    favorites: "",
+    isOnline: "false"
+  });
 
   const { data: modelStats, isLoading: modelStatsLoading } = useQuery({
     queryKey: ["/api/model-stats"],
@@ -53,7 +60,7 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/model-stats"] });
       setIsUpdateModalOpen(false);
-      setUpdateData({ hourlyRevenue: "", subscribers: "" });
+      setUpdateData({ hourlyRevenue: "", subscribers: "", stripScore: "", favorites: "", isOnline: "false" });
     }
   });
 
@@ -120,31 +127,70 @@ export default function Dashboard() {
                 <Edit2 size={16} /> Actualiser Stripchat
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white">
+            <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white overflow-y-auto max-h-[90vh]">
               <DialogHeader>
-                <DialogTitle>Actualiser les données privées</DialogTitle>
+                <DialogTitle>Actualiser les données du modèle</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Nouveau Revenu Horaire ($)</Label>
-                  <Input 
-                    type="number" 
-                    step="0.01"
-                    value={updateData.hourlyRevenue}
-                    onChange={e => setUpdateData({...updateData, hourlyRevenue: e.target.value})}
-                    className="bg-white/[0.03] border-white/[0.1] text-white"
-                    placeholder="ex: 22.3"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Revenu Horaire ($)</Label>
+                    <Input 
+                      type="number" 
+                      step="0.01"
+                      value={updateData.hourlyRevenue}
+                      onChange={e => setUpdateData({...updateData, hourlyRevenue: e.target.value})}
+                      className="bg-white/[0.03] border-white/[0.1] text-white"
+                      placeholder="ex: 22.3"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Abonnés Fan-club</Label>
+                    <Input 
+                      type="number"
+                      value={updateData.subscribers}
+                      onChange={e => setUpdateData({...updateData, subscribers: e.target.value})}
+                      className="bg-white/[0.03] border-white/[0.1] text-white"
+                      placeholder="ex: 150"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>StripScore</Label>
+                    <Input 
+                      type="number"
+                      value={updateData.stripScore}
+                      onChange={e => setUpdateData({...updateData, stripScore: e.target.value})}
+                      className="bg-white/[0.03] border-white/[0.1] text-white"
+                      placeholder="ex: 645"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Favoris</Label>
+                    <Input 
+                      type="number"
+                      value={updateData.favorites}
+                      onChange={e => setUpdateData({...updateData, favorites: e.target.value})}
+                      className="bg-white/[0.03] border-white/[0.1] text-white"
+                      placeholder="ex: 5000"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Nouveaux Abonnés (Fan-club)</Label>
-                  <Input 
-                    type="number"
-                    value={updateData.subscribers}
-                    onChange={e => setUpdateData({...updateData, subscribers: e.target.value})}
-                    className="bg-white/[0.03] border-white/[0.1] text-white"
-                    placeholder="ex: 150"
-                  />
+                  <Label>Statut</Label>
+                  <Select 
+                    value={updateData.isOnline} 
+                    onValueChange={(v) => setUpdateData({...updateData, isOnline: v})}
+                  >
+                    <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white">
+                      <SelectItem value="true">En ligne 🟢</SelectItem>
+                      <SelectItem value="false">Hors ligne ⚪</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button 
                   onClick={() => updateMutation.mutate(updateData)}
