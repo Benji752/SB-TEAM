@@ -41,10 +41,12 @@ export default function Drive() {
   const { data: files, isLoading, refetch } = useQuery({
     queryKey: ["drive-files"],
     queryFn: async () => {
-      // First, get the list of files from the storage bucket
+      // First, get the list of files from the storage bucket root
       const { data: storageFiles, error: storageError } = await supabase.storage
         .from('sb-drive')
-        .list();
+        .list('', { 
+          sortBy: { column: 'created_at', order: 'desc' } 
+        });
 
       if (storageError) throw storageError;
       console.log('Fichiers trouvés dans storage:', storageFiles);
@@ -58,7 +60,6 @@ export default function Drive() {
       if (assetsError) throw assetsError;
       console.log('Assets trouvés dans DB:', assets);
 
-      // Return assets that exist in storage
       return assets;
     }
   });
@@ -67,8 +68,8 @@ export default function Drive() {
     mutationFn: async (file: File) => {
       setUploading(true);
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${user?.id}/${fileName}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = fileName; // Upload directly to root
 
       const { error: uploadError } = await supabase.storage
         .from('sb-drive')
