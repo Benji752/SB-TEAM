@@ -52,16 +52,16 @@ export default function Orders() {
     try {
       // 1. On prépare les données simples
       const newOrder = {
-        client_name: formData.client_name, // Vérifie bien les noms de tes variables d'état
-        service: formData.service,
-        price: parseInt(formData.price), // On envoie en texte pour éviter les bugs de format
+        client_name: formData.client_name, 
+        service_type: formData.service,
+        price: parseInt(formData.price),
         notes: formData.notes,
         status: 'pending_payment'
       };
       console.log("Envoi de :", newOrder);
       // 2. L'envoi Supabase
       const { data, error } = await supabase
-        .from('orders')
+        .from('client_requests')
         .insert([newOrder])
         .select();
       // 3. Gestion d'erreur EXPLICITE
@@ -73,7 +73,6 @@ export default function Orders() {
       alert("SUCCÈS ! Commande créée.");
       setIsDialogOpen(false);
       setFormData({ client_name: "", service: "", price: "", notes: "" });
-      // Recharger la liste ici est géré par Realtime et React Query
     } catch (err: any) { 
       console.error("Crash JS:", err); 
       alert("CRASH JS : " + err.message); 
@@ -187,7 +186,7 @@ export default function Orders() {
                       {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
                     </td>
                     <td className="p-6 font-bold text-white">{order.client_name}</td>
-                    <td className="p-6 text-white/80">{order.service}</td>
+                    <td className="p-6 text-white/80">{order.service_type}</td>
                     <td className="p-6 font-bold text-gold">{order.price} €</td>
                     <td className="p-6">
                       <Select

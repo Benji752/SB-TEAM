@@ -9,7 +9,7 @@ export function useOrders() {
     queryKey: ["orders"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('orders')
+        .from('client_requests')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -23,7 +23,7 @@ export function useOrders() {
       .channel('orders-realtime')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
+        { event: '*', schema: 'public', table: 'client_requests' },
         () => {
           queryClient.invalidateQueries({ queryKey: ["orders"] });
         }
@@ -38,7 +38,7 @@ export function useOrders() {
   const updateOrderStatus = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       const { error } = await supabase
-        .from('orders')
+        .from('client_requests')
         .update({ status })
         .eq('id', id);
       
@@ -52,7 +52,7 @@ export function useOrders() {
   const updateOrderNotes = useMutation({
     mutationFn: async ({ id, notes }: { id: number; notes: string }) => {
       const { error } = await supabase
-        .from('orders')
+        .from('client_requests')
         .update({ notes })
         .eq('id', id);
       

@@ -108,10 +108,10 @@ export const driveFiles = pgTable("drive_files", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const orders = pgTable("orders", {
+export const orders = pgTable("client_requests", {
   id: serial("id").primaryKey(),
   clientName: text("client_name").notNull(),
-  service: text("service").notNull(),
+  serviceType: text("service_type").notNull(),
   price: integer("price").notNull(),
   status: text("status").notNull().default("pending_payment"),
   notes: text("notes"),
