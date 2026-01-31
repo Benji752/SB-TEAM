@@ -117,51 +117,52 @@ export default function App() {
     );
   }
 
-  // PROTECTION DE L'AFFICHAGE : Si pas de session, on force le login
-  if (!session) {
-    return <Landing />;
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <InactivityHandler />
-        <Switch>
-          <Route path="/">
-            <Dashboard />
-          </Route>
-          <Route path="/orders">
-            <Orders />
-          </Route>
-          <Route path="/calendar">
-            <CalendarPage />
-          </Route>
-          <Route path="/tasks">
-            <Tasks />
-          </Route>
-          <Route path="/drive">
-            <Drive />
-          </Route>
-          <Route path="/resources">
-            <ResourcesPage />
-          </Route>
-          <Route path="/complaints">
-            <ComplaintsPage />
-          </Route>
-          <Route path="/profile">
-            <ProfilePage />
-          </Route>
-          <Route path="/messages">
-            <Messages />
-          </Route>
-          <Route path="/models">
-            <Models />
-          </Route>
-          <Route path="/logs">
-            <LogsPage />
-          </Route>
-          <Route component={NotFound} />
-        </Switch>
+        {!session ? (
+          <Landing />
+        ) : (
+          <>
+            <InactivityHandler />
+            <Switch>
+              <Route path="/">
+                <Dashboard />
+              </Route>
+              <Route path="/orders">
+                <Orders />
+              </Route>
+              <Route path="/calendar">
+                <CalendarPage />
+              </Route>
+              <Route path="/tasks">
+                <Tasks />
+              </Route>
+              <Route path="/drive">
+                <Drive />
+              </Route>
+              <Route path="/resources">
+                <ResourcesPage />
+              </Route>
+              <Route path="/complaints">
+                <ComplaintsPage />
+              </Route>
+              <Route path="/profile">
+                <ProfilePage />
+              </Route>
+              <Route path="/messages">
+                <Messages />
+              </Route>
+              <Route path="/models">
+                <Models />
+              </Route>
+              <Route path="/logs">
+                <LogsPage />
+              </Route>
+              <Route component={NotFound} />
+            </Switch>
+          </>
+        )}
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
