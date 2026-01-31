@@ -147,7 +147,7 @@ export default function Dashboard() {
   ];
 
   const stripStats = [
-    { label: "Revenu Horaire", value: `$${displayHourlyRevenue}`, icon: DollarSign },
+    { label: "Revenu Horaire", value: `${displayHourlyRevenue} €`, icon: DollarSign },
     { label: "Abonnés (Fan)", value: displaySubscribers, icon: Users },
     { label: "Favoris", value: displayFavorites, icon: Heart },
     { label: "StripScore", value: displayStripScore, icon: Activity },
@@ -202,7 +202,7 @@ export default function Dashboard() {
                 <div className="space-y-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire ($)</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire (€)</Label>
                       <Input 
                         type="number" 
                         step="0.01"
@@ -286,7 +286,7 @@ export default function Dashboard() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
               <span className="text-3xl font-black text-white tracking-tighter">
-                {i === 0 ? `$${stat.value}` : stat.value}
+                {stat.value}
               </span>
             </Card>
           ))}
@@ -300,7 +300,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
-                <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire ($)</p>
+                <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire (€)</p>
               </div>
             </div>
             
@@ -315,7 +315,7 @@ export default function Dashboard() {
                   </defs>
                   <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
                   <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
-                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: "rgba(10, 10, 10, 0.95)", 
@@ -327,6 +327,7 @@ export default function Dashboard() {
                       color: "#fff"
                     }} 
                     itemStyle={{ color: "#C9A24D" }}
+                    formatter={(value: any) => [`${value} €`, "Revenu"]}
                   />
                   <Area 
                     type="monotone" 
