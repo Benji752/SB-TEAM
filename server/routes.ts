@@ -19,6 +19,15 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     }
   });
 
+  app.get("/api/activities/orders", async (req, res) => {
+    try {
+      const recentOrders = await storage.getRecentOrders(5);
+      res.json(recentOrders);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/activities/tasks", async (req, res) => {
     try {
       const recentTasks = await storage.getRecentTasks(5);

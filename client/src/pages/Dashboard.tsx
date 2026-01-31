@@ -57,7 +57,8 @@ export default function Dashboard() {
   });
 
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/activities/orders"],
+    queryKey: ["/api/orders"], // Changed from /api/activities/orders to match the new API
+    select: (data: any) => data.slice(0, 5) // Take only first 5
   });
 
   const { data: recentTasks, isLoading: tasksLoading } = useQuery({
@@ -472,15 +473,24 @@ export default function Dashboard() {
                 recentOrders.map((order: any) => (
                   <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
                     <div className="space-y-1">
-                      <div className="text-sm font-bold text-white uppercase tracking-tight">{order.clientName}</div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-bold text-white uppercase tracking-tight">{order.clientName}</div>
+                        <Badge variant="outline" className="border-white/[0.1] text-white/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
+                          {order.serviceType}
+                        </Badge>
+                      </div>
                       <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                        {format(new Date(order.createdAt), "dd MMM yyyy", { locale: fr })}
+                        {order.createdAt ? format(new Date(order.createdAt), "dd MMM yyyy", { locale: fr }) : "-"}
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-lg font-black text-white">{order.amount} €</div>
-                      <Badge className={`${order.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'} text-[8px] font-black uppercase tracking-widest px-2 py-1`}>
-                        {order.status === 'paid' ? 'Payé' : 'En attente'}
+                      <Badge className={`${
+                        order.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                        order.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 
+                        'bg-red-500/10 text-red-500 border-red-500/20'
+                      } text-[8px] font-black uppercase tracking-widest px-2 py-1`}>
+                        {order.status === 'paid' ? 'Payé' : order.status === 'pending' ? 'En attente' : 'Annulé'}
                       </Badge>
                     </div>
                   </div>
