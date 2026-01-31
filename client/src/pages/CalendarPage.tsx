@@ -1,207 +1,164 @@
-import { useState } from "react";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { useEvents } from "@/hooks/use-events";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
+import { Calendar as CalendarIcon, Settings, Loader2, Save } from "lucide-react";
 
 export default function CalendarPage() {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [formData, setFormData] = useState({
-    title: "",
-    time: "",
-    description: ""
-  });
+  const [calendarSrc, setCalendarSrc] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showConfig, setShowConfig] = useState(false);
+  const [newSrc, setNewSrc] = useState("");
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const { events, isLoading, createEvent } = useEvents();
-
-  const days = eachDayOfInterval({
-    start: startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 }),
-    end: endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 }),
-  });
-
-  const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedDate) return;
-
+  const fetchProfile = async () => {
     try {
-      await createEvent.mutateAsync({
-        title: formData.title,
-        date: selectedDate.toISOString(),
-        time: formData.time || null,
-        description: formData.description || null
-      });
-      setIsDialogOpen(false);
-      setFormData({ title: "", time: "", description: "" });
-    } catch (err: any) {
-      alert("Erreur lors de l'ajout : " + err.message);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('google_calendar_src')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      setCalendarSrc(data?.google_calendar_src || null);
+      if (data?.google_calendar_src) setNewSrc(data.google_calendar_src);
+    } catch (error: any) {
+      console.error("Error fetching calendar:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <DashboardLayout>
-      <div className="p-8 space-y-8 bg-[#050505] min-h-screen">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Planning Général</h1>
-            <p className="text-white/60">Gestion partagée des événements et rendez-vous.</p>
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    if (!newSrc.trim()) return;
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ google_calendar_src: newSrc })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setCalendarSrc(newSrc);
+      setShowConfig(false);
+      toast({ title: "Succès", description: "Agenda mis à jour" });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-[#050505]">
+        <Loader2 className="h-8 w-8 animate-spin text-gold" />
+      </div>
+    );
+  }
+
+  if (!calendarSrc || showConfig) {
+    return (
+      <div className="h-full flex items-center justify-center p-6 animate-in fade-in duration-500">
+        <Card className="w-full max-w-xl bg-[#0A0A0A] border-white/10 rounded-3xl p-10 space-y-8 shadow-2xl relative">
+          {calendarSrc && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setShowConfig(false)}
+              className="absolute top-4 right-4 text-white/40 hover:text-white"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          )}
+          
+          <div className="text-center space-y-4">
+            <div className="h-20 w-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20">
+              <CalendarIcon className="h-10 w-10 text-gold" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-white tracking-tight">Connecter votre Planning Google</h2>
+              <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                Collez l'URL d'intégration (src) de votre Google Agenda Public pour l'afficher ici.
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center bg-white/[0.03] border border-white/[0.08] rounded-lg overflow-hidden">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                className="hover:bg-white/[0.05] text-white/70"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <div className="px-4 py-2 text-white font-medium min-w-[140px] text-center border-x border-white/[0.08]">
-                {format(currentMonth, "MMMM yyyy", { locale: fr })}
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                className="hover:bg-white/[0.05] text-white/70"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-white/40 ml-1">Lien d'intégration (iframe src)</label>
+              <Input 
+                value={newSrc}
+                onChange={(e) => setNewSrc(e.target.value)}
+                placeholder="https://calendar.google.com/calendar/embed?src=..."
+                className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:border-gold/50"
+              />
             </div>
             <Button 
-              onClick={() => {
-                setSelectedDate(new Date());
-                setIsDialogOpen(true);
-              }}
-              className="bg-gold hover:bg-gold/90 text-black font-bold gap-2 px-6 h-11"
+              onClick={handleSave}
+              disabled={saving || !newSrc}
+              className="w-full h-14 bg-gold hover:bg-gold/90 text-black font-bold uppercase tracking-widest text-sm rounded-2xl transition-all shadow-[0_0_20px_rgba(201,162,77,0.3)]"
             >
-              <Plus className="w-5 h-5" />
-              Nouveau RDV
+              {saving ? <Loader2 className="animate-spin h-5 w-5" /> : (
+                <><Save className="mr-2 h-4 w-4" /> Sauvegarder la configuration</>
+              )}
             </Button>
           </div>
-        </div>
 
-        <Card className="bg-[#0A0A0A]/40 border-white/[0.08] backdrop-blur-xl overflow-hidden">
-          <div className="grid grid-cols-7 border-b border-white/[0.08]">
-            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day) => (
-              <div key={day} className="py-4 text-center text-xs font-bold text-white/40 uppercase tracking-widest">
-                {day}
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7">
-            {days.map((day, idx) => {
-              const dayEvents = events?.filter(event => isSameDay(new Date(event.date), day)) || [];
-              const isCurrentMonth = isSameMonth(day, currentMonth);
-              const isToday = isSameDay(day, new Date());
-
-              return (
-                <div 
-                  key={idx}
-                  onClick={() => handleDateClick(day)}
-                  className={`min-h-[140px] p-2 border-r border-b border-white/[0.05] transition-colors cursor-pointer group hover:bg-white/[0.02] ${
-                    !isCurrentMonth ? 'opacity-20' : ''
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full transition-colors ${
-                      isToday ? 'bg-gold text-black font-bold' : 'text-white/60 group-hover:text-white'
-                    }`}>
-                      {format(day, "d")}
-                    </span>
-                  </div>
-                  <div className="space-y-1 overflow-y-auto max-h-[100px] scrollbar-hide">
-                    {dayEvents.map((event) => (
-                      <div 
-                        key={event.id}
-                        className="px-2 py-1 bg-gold/10 border border-gold/20 rounded text-[10px] text-gold font-medium truncate"
-                        title={event.title}
-                      >
-                        {event.time && <span className="mr-1 opacity-70">{event.time}</span>}
-                        {event.title}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="pt-4 border-t border-white/5">
+            <p className="text-[10px] text-white/30 text-center leading-relaxed italic">
+              Note : Assurez-vous que votre agenda est configuré comme "Public" dans les paramètres Google Agenda pour que l'intégration fonctionne.
+            </p>
           </div>
         </Card>
       </div>
+    );
+  }
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Ajouter au planning
-              {selectedDate && <span className="block text-sm font-normal text-white/50 mt-1">
-                {format(selectedDate, "eeee d MMMM", { locale: fr })}
-              </span>}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-white/70">Titre du rendez-vous</Label>
-              <Input
-                id="title"
-                placeholder="Ex: RDV Nico"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="bg-white/[0.03] border-white/[0.1] focus:border-gold/50 h-11 text-white"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="time" className="text-white/70">Heure (Optionnel)</Label>
-              <Input
-                id="time"
-                type="time"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="bg-white/[0.03] border-white/[0.1] focus:border-gold/50 h-11 text-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-white/70">Note / Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Détails du rendez-vous..."
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-white/[0.03] border-white/[0.1] focus:border-gold/50 min-h-[100px] text-white resize-none"
-              />
-            </div>
-            <DialogFooter className="pt-4">
-              <Button 
-                type="submit" 
-                className="w-full bg-gold hover:bg-gold/90 text-black font-bold h-12"
-                disabled={createEvent.isPending}
-              >
-                {createEvent.isPending ? "Ajout..." : "Ajouter au planning"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </DashboardLayout>
+  return (
+    <div className="h-screen w-full relative bg-[#050505] animate-in fade-in duration-700">
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        onClick={() => setShowConfig(true)}
+        className="absolute top-4 right-4 z-50 bg-black/60 backdrop-blur-md text-white/60 hover:text-white border border-white/10 hover:border-gold/50 rounded-full h-10 w-10 transition-all shadow-xl"
+        title="Configuration"
+      >
+        <Settings className="h-5 w-5" />
+      </Button>
+      
+      <div className="h-full w-full pt-16 pb-4 px-4 lg:px-8">
+        <div className="h-full w-full rounded-3xl border border-white/10 overflow-hidden bg-black shadow-inner relative group">
+          <iframe 
+            src={calendarSrc} 
+            style={{ border: 0 }} 
+            width="100%" 
+            height="100%" 
+            frameBorder="0" 
+            scrolling="no"
+            className="opacity-90 grayscale-[20%] invert-[5%] contrast-[105%]"
+          />
+          <div className="absolute inset-0 pointer-events-none border-[12px] border-black/20 rounded-3xl" />
+        </div>
+      </div>
+    </div>
   );
 }
