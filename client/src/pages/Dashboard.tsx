@@ -122,6 +122,16 @@ export default function Dashboard() {
     }
   });
 
+  const updateTaskStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/tasks/${id}/status`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/activities/tasks"] });
+    },
+  });
+
   // DISPLAY LOGIC (THE "BEST OF")
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
   const displaySubscribers = manualData?.subscribers || 0;
@@ -530,10 +540,30 @@ export default function Dashboard() {
                       <div className={`h-2 w-2 rounded-full ${task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
                       <div className="text-sm font-bold text-white uppercase tracking-tight">{task.title}</div>
                     </div>
-                    <Avatar className="h-8 w-8 border border-white/10">
-                      <AvatarImage src="" />
-                      <AvatarFallback className="bg-white/5 text-[10px] font-black text-white/40">STAFF</AvatarFallback>
-                    </Avatar>
+                    <div className="flex items-center gap-4">
+                      <Select
+                        defaultValue={task.status}
+                        onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
+                        disabled={updateTaskStatusMutation.isPending}
+                      >
+                        <SelectTrigger className={`h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest ${
+                          task.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : 
+                          task.status === 'in_progress' ? 'bg-amber-500/10 text-amber-500' : 
+                          'bg-red-500/10 text-red-500'
+                        }`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
+                          <SelectItem value="todo">À faire</SelectItem>
+                          <SelectItem value="in_progress">En cours</SelectItem>
+                          <SelectItem value="completed">Terminé</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Avatar className="h-8 w-8 border border-white/10">
+                        <AvatarImage src="" />
+                        <AvatarFallback className="bg-white/5 text-[10px] font-black text-white/40">STAFF</AvatarFallback>
+                      </Avatar>
+                    </div>
                   </div>
                 ))
               ) : (

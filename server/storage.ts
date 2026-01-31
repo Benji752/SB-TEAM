@@ -4,7 +4,7 @@ import {
   type Profile, type User,
   type Model,
   type Task, type InsertTask,
-  type AgencyStats, type Order
+  type AgencyStats, type Order, type InsertOrder
 } from "@shared/schema";
 import { eq, desc, ne } from "drizzle-orm";
 
@@ -25,7 +25,8 @@ export interface IStorage {
   getTasks(): Promise<Task[]>;
   getRecentTasks(limit: number): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
-  updateTask(id: number, updates: Partial<InsertTask>): Promise<Task>;
+  updateTask(id: number, updates: any): Promise<Task>;
+  updateTaskStatus(id: number, status: string): Promise<Task>;
   deleteTask(id: number): Promise<void>;
 
   // Stats
@@ -95,9 +96,25 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentTasks(limit: number): Promise<Task[]> {
     return await db.select().from(tasks)
-      .where(ne(tasks.isDone, true))
+      .where(ne(tasks.status, "completed"))
       .orderBy(desc(tasks.createdAt))
       .limit(limit);
+  }
+
+  async updateTaskStatus(id: number, status: string): Promise<Task> {
+    const [updatedTask] = await db.update(tasks)
+      .set({ status: status as any })
+      .where(eq(tasks.id, id))
+      .returning();
+    return updatedTask;
+  }
+
+  async updateTaskStatus(id: number, status: string): Promise<Task> {
+    const [updatedTask] = await db.update(tasks)
+      .set({ status: status as any })
+      .where(eq(tasks.id, id))
+      .returning();
+    return updatedTask;
   }
 
   async createTask(task: InsertTask): Promise<Task> {

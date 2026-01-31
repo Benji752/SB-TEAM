@@ -65,6 +65,16 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     }
   });
 
+  app.patch("/api/tasks/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      const task = await storage.updateTaskStatus(parseInt(req.params.id), status);
+      res.json(task);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.delete("/api/orders/:id", async (req, res) => {
     try {
       await storage.deleteOrder(parseInt(req.params.id));
