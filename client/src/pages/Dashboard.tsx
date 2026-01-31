@@ -62,7 +62,8 @@ export default function Dashboard() {
   });
 
   const { data: recentTasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["/api/activities/tasks"],
+    queryKey: ["/api/tasks"], // Changed from /api/activities/tasks to share the same cache/source
+    select: (data: any) => data.filter((t: any) => !t.isDone).slice(0, 5) // Filter non-completed and take 5
   });
 
   // Separate states for Manual (Supabase) and API (Stripchat)
@@ -128,7 +129,7 @@ export default function Dashboard() {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/activities/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
     },
   });
 
@@ -542,12 +543,12 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                       <Select
-                        defaultValue={task.status}
+                        value={task.isDone ? 'completed' : (task.status || 'todo')}
                         onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
                         disabled={updateTaskStatusMutation.isPending}
                       >
                         <SelectTrigger className={`h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest ${
-                          task.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : 
+                          task.isDone ? 'bg-emerald-500/10 text-emerald-500' : 
                           task.status === 'in_progress' ? 'bg-amber-500/10 text-amber-500' : 
                           'bg-red-500/10 text-red-500'
                         }`}>
