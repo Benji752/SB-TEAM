@@ -24,29 +24,39 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { logout, user } = useAuth();
 
-  const handleLogout = () => {
-    // Nettoyage brutal et immédiat pour débloquer l'utilisateur
-    console.log("Exécution Hard Logout...");
+  const handleLogout = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     
-    // 1. Vider le stockage local
-    localStorage.clear();
-    sessionStorage.clear();
+    console.log("NUCLEAR LOGOUT INITIATED");
     
-    // 2. Tuer les cookies
-    document.cookie.split(";").forEach((c) => { 
-      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-    });
+    // 1. Vider TOUT immédiatement
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Tuer les cookies de manière exhaustive
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+      }
+    } catch (err) {
+      console.error("Cleanup error:", err);
+    }
 
-    // 3. Tentative silencieuse de déconnexion Supabase
-    supabase.auth.signOut().finally(() => {
-      // 4. Redirection forcée vers l'accueil/login
-      window.location.replace('/');
-    });
-
-    // Sécurité au cas où signOut prendrait trop de temps
+    // 2. Redirection brutale sans attendre
+    window.location.replace('/');
+    
+    // 3. Backup de redirection au cas où replace échouerait (rare)
     setTimeout(() => {
-      window.location.replace('/');
-    }, 500);
+      window.location.href = '/';
+    }, 50);
   };
 
   const forceLogout = () => {
@@ -142,8 +152,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           
           <Button 
             variant="ghost" 
-            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 h-11 px-4 rounded-xl font-bold uppercase tracking-widest text-xs"
-            onClick={handleLogout}
+            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 h-11 px-4 rounded-xl font-bold uppercase tracking-widest text-xs z-[9999]"
+            onClick={(e) => handleLogout(e)}
           >
             <LogOut size={18} />
             Déconnexion
