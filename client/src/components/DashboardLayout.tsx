@@ -91,7 +91,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: "Ressources", icon: FileText, href: "/resources" },
     { label: "Messages", icon: MessageSquare, href: "/messages" },
     { label: "Calendrier", icon: Calendar, href: "/calendar" },
-    { label: "Modèles", icon: Users, href: "/models" },
+    { label: "Équipe", icon: Users, href: "/models" },
     { label: "Tâches", icon: CheckSquare, href: "/tasks" },
     { label: "Drive", icon: HardDrive, href: "/drive" },
     { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
