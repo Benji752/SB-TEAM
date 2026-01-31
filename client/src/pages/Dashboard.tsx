@@ -458,7 +458,7 @@ export default function Dashboard() {
                   <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Flux de revenus récents</p>
                 </div>
               </div>
-              <Link href="/projects">
+              <Link href="/orders">
                 <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
                   Voir tout <ArrowRight size={12} />
                 </Button>
