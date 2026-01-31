@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { 
   Users, 
   TrendingUp, 
@@ -344,5 +345,4 @@ export default function Dashboard() {
       </div>
     </DashboardLayout>
   );
-}
 }
