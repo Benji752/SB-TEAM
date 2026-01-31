@@ -116,6 +116,24 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <div style={{position: 'fixed', top: 0, left: 0, zIndex: 99999, width: '100%', background: 'red', padding: '20px', textAlign: 'center'}}>
+          <button 
+            onClick={() => {
+              // 1. Nettoyage
+              localStorage.clear();
+              sessionStorage.clear();
+              // 2. Suppression Cookies (Bourrin)
+              document.cookie.split(";").forEach((c) => { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+              });
+              // 3. Force Reload du Navigateur
+              window.location.href = window.location.origin;
+            }} 
+            style={{background: 'white', color: 'red', fontWeight: 'bold', padding: '10px 20px', border: 'none', cursor: 'pointer', fontSize: '18px'}}
+          >
+            ☢️ CLIQUER ICI POUR TOUT RÉINITIALISER ☢️
+          </button>
+        </div>
         <InactivityHandler />
         <Router />
         <Toaster />
