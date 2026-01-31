@@ -98,14 +98,14 @@ function Router() {
       <Route path="/profile">
         <ProfilePage />
       </Route>
-      <Route path="/logs">
-        <LogsPage />
-      </Route>
       <Route path="/messages">
         <Messages />
       </Route>
       <Route path="/models">
         <Models />
+      </Route>
+      <Route path="/logs">
+        <LogsPage />
       </Route>
       <Route component={NotFound} />
     </Switch>

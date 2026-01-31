@@ -39,12 +39,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: "Tableau de bord", icon: LayoutDashboard, href: "/" },
     { label: "Commandes", icon: ShoppingCart, href: "/orders" },
     { label: "Ressources", icon: FileText, href: "/resources" },
-    { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
     { label: "Messages", icon: MessageSquare, href: "/messages" },
     { label: "Calendrier", icon: Calendar, href: "/calendar" },
     { label: "Modèles", icon: Users, href: "/models" },
     { label: "Tâches", icon: CheckSquare, href: "/tasks" },
     { label: "Drive", icon: HardDrive, href: "/drive" },
+    { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
   ];
 
   const isAdmin = user?.role === "admin";
