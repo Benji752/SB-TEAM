@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2, Send, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Loader2, Send } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function Messages() {
@@ -17,7 +17,6 @@ export default function Messages() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Initial load: current user and profiles
   useEffect(() => {
     async function init() {
       try {
@@ -25,14 +24,19 @@ export default function Messages() {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
 
-        const { data: profs, error } = await supabase
+        // Simple query as requested
+        const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .neq('id', user?.id)
           .order('username', { ascending: true });
         
         if (error) throw error;
-        setProfiles(profs || []);
+        
+        console.log('Profiles data:', data);
+        
+        // Local filtering in JS
+        const filtered = (data || []).filter(p => p.id !== user?.id);
+        setProfiles(filtered);
       } catch (err) {
         console.error("Initialization error:", err);
       } finally {
@@ -42,14 +46,12 @@ export default function Messages() {
     init();
   }, []);
 
-  // Fetch messages when selected user changes
   useEffect(() => {
     if (selectedUser && currentUser) {
       fetchMessages(selectedUser.id);
     }
   }, [selectedUser, currentUser]);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -92,7 +94,6 @@ export default function Messages() {
       if (error) throw error;
       
       setMessageText("");
-      // Manual refresh
       await fetchMessages(selectedUser.id);
     } catch (err: any) {
       console.error("Error sending message:", err);
@@ -103,7 +104,6 @@ export default function Messages() {
   return (
     <DashboardLayout>
       <div className="h-[calc(100vh-12rem)] flex gap-6">
-        {/* Chat List */}
         <Card className="w-96 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
           <div className="p-8 border-b border-white/[0.05]">
             <h2 className="text-2xl font-bold text-white">Messages</h2>
@@ -141,11 +141,9 @@ export default function Messages() {
           </div>
         </Card>
 
-        {/* Chat Area */}
         <Card className="flex-1 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
           {selectedUser ? (
             <>
-              {/* Header */}
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
                 <Avatar className="h-10 w-10 border border-white/10">
                   <AvatarImage src={selectedUser.avatar_url || ""} />
@@ -159,7 +157,6 @@ export default function Messages() {
                 </div>
               </div>
 
-              {/* Messages List */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 flex flex-col gap-4 custom-scrollbar">
                 {isLoadingMessages && messages.length === 0 ? (
                   <div className="flex justify-center p-8"><Loader2 className="animate-spin text-gold" /></div>
@@ -187,7 +184,6 @@ export default function Messages() {
                 )}
               </div>
 
-              {/* Input Area */}
               <form onSubmit={handleSend} className="p-6 border-t border-white/[0.05] flex gap-3 bg-white/[0.01]">
                 <Input 
                   value={messageText}
@@ -200,7 +196,7 @@ export default function Messages() {
                   disabled={!messageText.trim() || isLoadingMessages}
                   className="luxury-button h-12 px-6 rounded-xl flex gap-2 font-bold uppercase text-[10px] tracking-widest"
                 >
-                  <Send size={16} /> Envoyer
+                  Envoyer
                 </Button>
               </form>
             </>
