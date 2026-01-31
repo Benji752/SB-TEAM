@@ -23,20 +23,7 @@ export default function Messages() {
         setIsLoadingProfiles(true);
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
-
-        // Simple query as requested
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('username', { ascending: true });
-        
-        if (error) throw error;
-        
-        console.log('Profiles data:', data);
-        
-        // Local filtering in JS
-        const filtered = (data || []).filter(p => p.id !== user?.id);
-        setProfiles(filtered);
+        await fetchProfiles(user?.id);
       } catch (err) {
         console.error("Initialization error:", err);
       } finally {
@@ -44,7 +31,38 @@ export default function Messages() {
       }
     }
     init();
-  }, []);
+
+    // Auto-refresh profiles every 10 seconds for online status
+    const interval = setInterval(() => {
+      if (currentUser) {
+        fetchProfiles(currentUser.id);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [currentUser?.id]);
+
+  async function fetchProfiles(currentUserId: string | undefined) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('username', { ascending: true });
+      
+      if (error) throw error;
+      
+      const filtered = (data || []).filter(p => p.id !== currentUserId);
+      setProfiles(filtered);
+
+      // Refresh selected user data if active
+      if (selectedUser) {
+        const updatedSelected = data?.find(p => p.id === selectedUser.id);
+        if (updatedSelected) setSelectedUser(updatedSelected);
+      }
+    } catch (err) {
+      console.error("Error fetching profiles:", err);
+    }
+  }
 
   useEffect(() => {
     if (selectedUser && currentUser) {
@@ -145,7 +163,7 @@ export default function Messages() {
                     selectedUser?.id === profile.id ? 'bg-gold/10 border-gold/20' : 'hover:bg-white/[0.03]'
                   }`}
                 >
-                  <div className="relative">
+                  <div className="relative z-0">
                     <Avatar className="h-12 w-12 border border-white/10 overflow-hidden">
                       <AvatarImage 
                         src={profile.avatar_url || profile.avatarUrl || ""} 
@@ -156,7 +174,7 @@ export default function Messages() {
                       </AvatarFallback>
                     </Avatar>
                     {profile.is_online && (
-                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg" />
+                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg z-10" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -173,7 +191,7 @@ export default function Messages() {
           {selectedUser ? (
             <>
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
-                <div className="relative">
+                <div className="relative z-0">
                   <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
                     <AvatarImage 
                       src={selectedUser.avatar_url || selectedUser.avatarUrl || ""} 
@@ -184,12 +202,17 @@ export default function Messages() {
                     </AvatarFallback>
                   </Avatar>
                   {selectedUser.is_online && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg" />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg z-10" />
                   )}
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
-                  <p className="text-[10px] text-gold uppercase tracking-widest font-black">Conversation privée</p>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full ${selectedUser.is_online ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
+                    <p className={`text-[10px] uppercase tracking-widest font-bold ${selectedUser.is_online ? 'text-[#10B981]' : 'text-gray-500'}`}>
+                      {selectedUser.is_online ? 'En ligne' : 'Hors ligne'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
