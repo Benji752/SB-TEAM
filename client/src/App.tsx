@@ -236,22 +236,34 @@ export default function App() {
                 <ResourcesPage />
               </Route>
               <Route path="/complaints">
-                <ComplaintsPage />
+                <DashboardLayout>
+                  <ComplaintsPage />
+                </DashboardLayout>
               </Route>
               <Route path="/projects">
-                <Projects />
+                <DashboardLayout>
+                  <Projects />
+                </DashboardLayout>
               </Route>
               <Route path="/profile">
-                <ProfilePage />
+                <DashboardLayout>
+                  <ProfilePage />
+                </DashboardLayout>
               </Route>
               <Route path="/messages">
-                <Messages />
+                <DashboardLayout>
+                  <Messages />
+                </DashboardLayout>
               </Route>
               <Route path="/models">
-                <Models />
+                <DashboardLayout>
+                  <Models />
+                </DashboardLayout>
               </Route>
               <Route path="/logs">
-                <LogsPage />
+                <DashboardLayout>
+                  <LogsPage />
+                </DashboardLayout>
               </Route>
               <Route component={NotFound} />
             </Switch>

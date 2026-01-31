@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, CheckCircle, Loader2 } from "lucide-react";
+import { Plus, Trash2, CheckCircle, Loader2, AlertTriangle } from "lucide-react";
 
 interface Project {
   id: string;
@@ -26,6 +26,7 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newProject, setNewProject] = useState({ title: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
@@ -106,16 +107,18 @@ export default function Projects() {
     }
   };
 
-  const handleDeleteProject = async (id: string) => {
-    if (!confirm("Voulez-vous vraiment supprimer ce projet ?")) return;
+  const handleDeleteProject = async () => {
+    if (!deleteId) return;
     try {
       const { error } = await supabase
         .from('projects')
         .delete()
-        .eq('id', id);
+        .eq('id', deleteId);
 
       if (error) throw error;
+      setDeleteId(null);
       fetchProjects();
+      toast({ title: "Supprimé", description: "Le projet a été supprimé." });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -127,6 +130,35 @@ export default function Projects() {
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-500">
+      {/* Modal de suppression premium */}
+      <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <DialogContent className="bg-[#0A0A0A] border-white/10 text-white max-w-sm rounded-3xl p-8">
+          <div className="text-center space-y-6">
+            <div className="h-16 w-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto border border-red-500/20">
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold tracking-tight">Supprimer le projet ?</h3>
+              <p className="text-sm text-muted-foreground">Cette action est irréversible. Toutes les données seront perdues.</p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => setDeleteId(null)}
+                className="flex-1 rounded-xl h-12 text-white hover:bg-white/5 font-bold"
+              >
+                Annuler
+              </Button>
+              <Button 
+                onClick={handleDeleteProject}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white rounded-xl h-12 font-bold"
+              >
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Projets</h1>
@@ -224,7 +256,7 @@ export default function Projects() {
                   <Button 
                     size="icon" 
                     variant="ghost" 
-                    onClick={() => handleDeleteProject(project.id)}
+                    onClick={() => setDeleteId(project.id)}
                     className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full"
                   >
                     <Trash2 className="h-4 w-4" />
