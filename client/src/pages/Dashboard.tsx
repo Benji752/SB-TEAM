@@ -24,7 +24,9 @@ import {
   Loader2,
   Activity,
   Heart,
-  Edit2
+  Edit2,
+  Eye,
+  Video
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
@@ -113,6 +115,9 @@ export default function Dashboard() {
   const displayFavorites = (apiData?.model?.favoritesCount > 0) ? apiData.model.favoritesCount : (manualData?.favorites || 0);
   const viewersCount = apiData?.model?.viewersCount || 0;
   const isOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true || manualData?.isOnline === true;
+  const snapshotUrl = apiData?.model?.snapshotUrl || apiData?.model?.previewUrl;
+  const avatarUrl = apiData?.model?.avatarUrl;
+  const roomTitle = apiData?.model?.topic || "Aucun sujet défini";
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -170,12 +175,6 @@ export default function Dashboard() {
             <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-xs">Monitoring Stripchat : WildgirlShow</p>
           </div>
           <div className="flex gap-4">
-            <div className="flex items-center gap-3 bg-white/[0.03] px-6 py-2 rounded-2xl border border-white/[0.05]">
-              <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
-              <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                {isOnline ? 'EN LIGNE' : 'HORS LIGNE'}
-              </span>
-            </div>
             <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
               setIsUpdateModalOpen(open);
               if (open && manualData) {
@@ -271,23 +270,104 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          {stripStats.map((stat, i) => (
-            <Card key={i} className="bg-[#0A0A0A] border-white/[0.05] p-6 rounded-3xl flex flex-col gap-2 hover:border-gold/30 transition-all hover-elevate">
-              <div className="flex items-center justify-between mb-2">
-                <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05]">
-                  <stat.icon size={18} className="text-gold" />
+        <div className="grid gap-6 lg:grid-cols-12">
+          {/* Now Playing Style Live Monitoring Card */}
+          <Card className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
+            <div className="relative h-full flex flex-col md:flex-row">
+              {/* Camera Section */}
+              <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
+                {isOnline && snapshotUrl ? (
+                  <>
+                    <img 
+                      src={snapshotUrl} 
+                      alt="Live Snapshot" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                  </>
+                ) : (
+                  <div className="relative w-full h-full flex items-center justify-center bg-[#050505]">
+                    {avatarUrl ? (
+                      <img 
+                        src={avatarUrl} 
+                        alt="Profile" 
+                        className="w-48 h-48 rounded-full object-cover grayscale opacity-20 blur-sm" 
+                      />
+                    ) : (
+                      <Video size={80} className="text-white/5" />
+                    )}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                      <div className="h-16 w-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center">
+                        <Video size={24} className="text-white/20" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Caméra inactive</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Overlay Badge */}
+                <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                  <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.8)]' : 'bg-gray-500'}`} />
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                    {isOnline ? 'EN LIGNE' : 'HORS LIGNE'}
+                  </span>
                 </div>
-                {i === 0 && (
-                  <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[8px] font-black uppercase tracking-widest">Calcul manuel</Badge>
+
+                {/* Viewers Counter on Image */}
+                {isOnline && (
+                  <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                    <Eye size={14} className="text-gold" />
+                    <span className="text-xs font-black text-white">{viewersCount} <span className="text-white/40 font-bold ml-1">VIEWERS</span></span>
+                  </div>
                 )}
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
-              <span className="text-3xl font-black text-white tracking-tighter">
-                {stat.value}
-              </span>
-            </Card>
-          ))}
+
+              {/* Info Section */}
+              <div className="md:w-2/5 p-10 flex flex-col justify-between bg-white/[0.01]">
+                <div className="space-y-6">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold mb-4 block">NOW STREAMING</span>
+                    <h2 className="text-2xl font-black text-white leading-tight tracking-tighter italic uppercase mb-2">
+                      {isOnline ? roomTitle : "WildgirlShow"}
+                    </h2>
+                    <p className="text-white/40 text-sm font-medium">WildgirlShow sur Stripchat</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/[0.05]">
+                    <div className="space-y-1">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">REVENU HORAIRE</span>
+                      <div className="text-xl font-black text-white">{displayHourlyRevenue} €</div>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">STRIPSCORE</span>
+                      <div className="text-xl font-black text-gold">{displayStripScore}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8">
+                  <Button variant="outline" className="w-full border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white font-black uppercase tracking-widest text-[9px] h-12 rounded-xl">
+                    Ouvrir la plateforme
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Side Stats */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
+            {stripStats.slice(0, 2).map((stat, i) => (
+              <Card key={i} className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
+                <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
+                  <stat.icon size={18} className="text-gold" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
+                <span className="text-3xl font-black text-white tracking-tighter italic">
+                  {stat.value}
+                </span>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <Card className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]">
