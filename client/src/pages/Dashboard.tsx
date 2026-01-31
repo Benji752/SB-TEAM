@@ -62,8 +62,8 @@ export default function Dashboard() {
   });
 
   const { data: recentTasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["/api/tasks"], // Changed from /api/activities/tasks to share the same cache/source
-    select: (data: any) => data.filter((t: any) => !t.isDone).slice(0, 5) // Filter non-completed and take 5
+    queryKey: ["tasks"], // Match useTasks queryKey
+    select: (data: any) => data.filter((t: any) => !t.is_done).slice(0, 5) 
   });
 
   // Separate states for Manual (Supabase) and API (Stripchat)
@@ -125,11 +125,15 @@ export default function Dashboard() {
 
   const updateTaskStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
-      const res = await apiRequest("PATCH", `/api/tasks/${id}/status`, { status });
-      return res.json();
+      const is_done = status === 'completed';
+      const { error } = await supabase
+        .from('tasks')
+        .update({ is_done })
+        .eq('id', id);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 
@@ -543,20 +547,18 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                       <Select
-                        value={task.isDone ? 'completed' : (task.status || 'todo')}
+                        value={task.is_done ? 'completed' : 'todo'}
                         onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
                         disabled={updateTaskStatusMutation.isPending}
                       >
                         <SelectTrigger className={`h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest ${
-                          task.isDone ? 'bg-emerald-500/10 text-emerald-500' : 
-                          task.status === 'in_progress' ? 'bg-amber-500/10 text-amber-500' : 
+                          task.is_done ? 'bg-emerald-500/10 text-emerald-500' : 
                           'bg-red-500/10 text-red-500'
                         }`}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
                           <SelectItem value="todo">À faire</SelectItem>
-                          <SelectItem value="in_progress">En cours</SelectItem>
                           <SelectItem value="completed">Terminé</SelectItem>
                         </SelectContent>
                       </Select>
