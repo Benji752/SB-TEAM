@@ -23,26 +23,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { logout, user } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      // Ignore log errors
-      await apiRequest("POST", "/api/auth-logs", { 
-        eventType: "LOGOUT", 
-        reason: "MANUEL" 
-      }).catch(e => console.error("Logging failed", e));
-      
-      // Force local cleanup
-      localStorage.clear();
-      
-      // Force Supabase cleanup
-      await supabase.auth.signOut().catch(() => {});
-      
-    } catch (e) {
-      console.error("Force logout error", e);
-    } finally {
-      // Nuclear redirection
-      window.location.href = '/';
-    }
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/';
   };
 
   const menuItems = [
@@ -57,7 +40,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
   ];
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
+  console.log('User Role:', user?.role);
 
   return (
     <div className="flex min-h-screen bg-[#050505]">
@@ -101,8 +85,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-6 border-t border-white/[0.08] space-y-4 bg-white/[0.01]">
-          <Link href="/profile">
-            <a className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.03] transition-colors">
+          <div className="px-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
+            <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border border-white/10">
                 <AvatarImage src={user?.avatarUrl} />
                 <AvatarFallback className="bg-[#0A0A0A] text-gold uppercase">
@@ -111,10 +95,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </Avatar>
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold text-white truncate">{user?.username}</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{user?.role}</span>
+                <span className="text-[10px] text-gold font-black uppercase tracking-widest">{user?.role}</span>
               </div>
+            </div>
+          </div>
+          
+          <Link href="/profile">
+            <a className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.03] transition-colors">
+              <div className="h-10 w-10 flex items-center justify-center text-white/40 group-hover:text-white">
+                <User size={20} />
+              </div>
+              <span className="text-sm font-bold text-white uppercase tracking-widest">Profil</span>
             </a>
           </Link>
+          
           <Button 
             variant="ghost" 
             className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 h-11 px-4 rounded-xl font-bold uppercase tracking-widest text-xs"
