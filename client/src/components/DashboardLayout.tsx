@@ -25,15 +25,28 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuth();
 
   const handleLogout = () => {
-    // 1. Nettoyage brutal du navigateur
+    // Nettoyage brutal et immédiat pour débloquer l'utilisateur
+    console.log("Exécution Hard Logout...");
+    
+    // 1. Vider le stockage local
     localStorage.clear();
     sessionStorage.clear();
+    
+    // 2. Tuer les cookies
+    document.cookie.split(";").forEach((c) => { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
 
-    // 2. Tentative de déconnexion serveur (en arrière-plan, on n'attend pas)
-    supabase.auth.signOut().catch(() => {});
+    // 3. Tentative silencieuse de déconnexion Supabase
+    supabase.auth.signOut().finally(() => {
+      // 4. Redirection forcée vers l'accueil/login
+      window.location.replace('/');
+    });
 
-    // 3. Redirection IMMÉDIATE et FORCÉE
-    window.location.replace('/');
+    // Sécurité au cas où signOut prendrait trop de temps
+    setTimeout(() => {
+      window.location.replace('/');
+    }, 500);
   };
 
   const forceLogout = () => {
