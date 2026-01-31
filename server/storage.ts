@@ -1,12 +1,12 @@
 import { db } from "./db";
 import {
-  profiles, models, tasks, agencyStats,
+  profiles, models, tasks, agencyStats, orders,
   type Profile, type InsertProfile,
   type Model, type InsertModel,
   type Task, type InsertTask,
-  type AgencyStats
+  type AgencyStats, type Order, type InsertOrder
 } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc, ne } from "drizzle-orm";
 
 export interface IStorage {
   // Profiles
@@ -23,12 +23,16 @@ export interface IStorage {
 
   // Tasks
   getTasks(): Promise<Task[]>;
+  getRecentTasks(limit: number): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, updates: Partial<InsertTask>): Promise<Task>;
   deleteTask(id: number): Promise<void>;
 
   // Stats
   getAgencyStats(): Promise<AgencyStats[]>;
+
+  // Orders
+  getRecentOrders(limit: number): Promise<Order[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -85,6 +89,13 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(tasks);
   }
 
+  async getRecentTasks(limit: number): Promise<Task[]> {
+    return await db.select().from(tasks)
+      .where(ne(tasks.isDone, true))
+      .orderBy(desc(tasks.createdAt))
+      .limit(limit);
+  }
+
   async createTask(task: InsertTask): Promise<Task> {
     const [newTask] = await db.insert(tasks).values(task).returning();
     return newTask;
@@ -106,6 +117,13 @@ export class DatabaseStorage implements IStorage {
   // Stats
   async getAgencyStats(): Promise<AgencyStats[]> {
     return await db.select().from(agencyStats);
+  }
+
+  // Orders
+  async getRecentOrders(limit: number): Promise<Order[]> {
+    return await db.select().from(orders)
+      .orderBy(desc(orders.createdAt))
+      .limit(limit);
   }
 }
 

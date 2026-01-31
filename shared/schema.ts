@@ -121,7 +121,7 @@ export const driveFiles = pgTable("drive_files", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const orders = pgTable("client_requests", {
+export const clientRequests = pgTable("client_requests", {
   id: serial("id").primaryKey(),
   clientName: text("client_name").notNull(),
   serviceType: text("service_type").notNull(),
@@ -130,6 +130,18 @@ export const orders = pgTable("client_requests", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  clientName: text("client_name").notNull(),
+  amount: integer("amount").notNull(),
+  status: text("status", { enum: ["paid", "pending"] }).notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
 
 export const modelStats = pgTable("model_stats", {
   id: serial("id").primaryKey(),

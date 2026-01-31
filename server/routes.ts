@@ -1,12 +1,32 @@
 import { Express } from "express";
 import { setupAuth } from "./auth";
 import axios from "axios";
-import { modelStats, authLogs, users, profiles } from "@shared/schema";
+import { modelStats, authLogs, users, profiles, tasks, orders } from "@shared/schema";
 import { db } from "./db";
-import { desc, gte, eq } from "drizzle-orm";
+import { desc, gte, eq, ne } from "drizzle-orm";
+import { storage } from "./storage";
 
 export async function registerRoutes(_httpServer: any, app: Express) {
   setupAuth(app);
+
+  // Recent Activities
+  app.get("/api/activities/orders", async (req, res) => {
+    try {
+      const recentOrders = await storage.getRecentOrders(5);
+      res.json(recentOrders);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/activities/tasks", async (req, res) => {
+    try {
+      const recentTasks = await storage.getRecentTasks(5);
+      res.json(recentTasks);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   // Monitoring WildgirlShow - API Proxy only
   app.get("/api/monitor/wildgirl", async (req, res) => {

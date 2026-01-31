@@ -26,12 +26,15 @@ import {
   Heart,
   Edit2,
   Eye,
-  Video
+  Video,
+  Clock,
+  ArrowRight
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -39,6 +42,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -49,6 +54,14 @@ export default function Dashboard() {
     stripScore: "",
     favorites: "",
     isOnline: "false"
+  });
+
+  const { data: recentOrders, isLoading: ordersLoading } = useQuery({
+    queryKey: ["/api/activities/orders"],
+  });
+
+  const { data: recentTasks, isLoading: tasksLoading } = useQuery({
+    queryKey: ["/api/activities/tasks"],
   });
 
   // Separate states for Manual (Supabase) and API (Stripchat)
@@ -364,73 +377,96 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          {/* Side Stats */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
-            {stripStats.slice(0, 2).map((stat, i) => (
-              <Card key={i} className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
-                <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
-                  <stat.icon size={18} className="text-gold" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
-                <span className="text-3xl font-black text-white tracking-tighter italic">
-                  {stat.value}
-                </span>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <Card className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]">
-          <div className="space-y-8">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
-                <TrendingUp size={18} className="text-gold" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
-                <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire (€)</p>
-              </div>
-            </div>
-            
-            <div className="h-[400px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                  <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
-                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "rgba(10, 10, 10, 0.95)", 
-                      border: "1px solid rgba(255, 255, 255, 0.08)", 
-                      borderRadius: "16px", 
-                      backdropFilter: "blur(10px)",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: "#fff"
-                    }} 
-                    itemStyle={{ color: "#C9A24D" }}
-                    formatter={(value: any) => [`${value} €`, "Revenu"]}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#C9A24D" 
-                    fillOpacity={1} 
-                    fill="url(#colorRevenueDashboard)" 
-                    strokeWidth={4} 
-                    activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
           </div>
         </Card>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Recent Orders Column */}
+          <Card className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+                  <DollarSign size={18} className="text-emerald-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Dernières Commandes</h3>
+                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Flux de revenus récents</p>
+                </div>
+              </div>
+              <Link href="/projects">
+                <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
+                  Voir tout <ArrowRight size={12} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              {ordersLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
+              ) : recentOrders && recentOrders.length > 0 ? (
+                recentOrders.map((order: any) => (
+                  <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
+                    <div className="space-y-1">
+                      <div className="text-sm font-bold text-white uppercase tracking-tight">{order.clientName}</div>
+                      <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
+                        {format(new Date(order.createdAt), "dd MMM yyyy", { locale: fr })}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-lg font-black text-white">{order.amount} €</div>
+                      <Badge className={`${order.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'} text-[8px] font-black uppercase tracking-widest px-2 py-1`}>
+                        {order.status === 'paid' ? 'Payé' : 'En attente'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-white/20 text-[10px] font-black uppercase tracking-widest">Aucune commande récente</div>
+              )}
+            </div>
+          </Card>
+
+          {/* Urgent Tasks Column */}
+          <Card className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
+                  <CheckSquare size={18} className="text-amber-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Tâches Urgentes</h3>
+                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Actions requises</p>
+                </div>
+              </div>
+              <Link href="/tasks">
+                <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
+                  Voir tout <ArrowRight size={12} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              {tasksLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
+              ) : recentTasks && recentTasks.length > 0 ? (
+                recentTasks.map((task: any) => (
+                  <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className={`h-2 w-2 rounded-full ${task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                      <div className="text-sm font-bold text-white uppercase tracking-tight">{task.title}</div>
+                    </div>
+                    <Avatar className="h-8 w-8 border border-white/10">
+                      <AvatarImage src="" />
+                      <AvatarFallback className="bg-white/5 text-[10px] font-black text-white/40">STAFF</AvatarFallback>
+                    </Avatar>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-white/20 text-[10px] font-black uppercase tracking-widest">Tout est à jour !</div>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
