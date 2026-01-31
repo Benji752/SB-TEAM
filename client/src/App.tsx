@@ -23,6 +23,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 function InactivityHandler() {
   const [user, setUser] = useState<any>(null);
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -39,40 +40,20 @@ function InactivityHandler() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || showTimeoutModal) return;
 
     let timeout: NodeJS.Timeout;
-    const INACTIVITY_LIMIT = 1 * 60 * 1000; // 1 minute pour le test (sera 15 min après)
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes pour la prod
 
-    const handleLogout = async () => {
-      try {
-        // 1. Log l'activité
-        await supabase.from('activity_logs').insert({
-          user_id: user.id,
-          action: 'LOGOUT',
-          details: 'Déconnexion automatique (inactivité)'
-        });
-
-        // 2. Mettre is_online à false
-        await supabase.from('profiles').update({ is_online: false }).eq('id', user.id);
-
-        // 3. Nettoyer session et déconnecter
-        sessionStorage.removeItem('login_logged');
-        localStorage.clear();
-        sessionStorage.clear();
-        await supabase.auth.signOut();
-        
-        alert("Vous avez été déconnecté pour inactivité.");
-        window.location.replace('/');
-      } catch (err) {
-        console.error("Auto logout error:", err);
-        window.location.replace('/');
-      }
+    const triggerTimeout = () => {
+      setShowTimeoutModal(true);
     };
 
     const resetTimer = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(handleLogout, INACTIVITY_LIMIT);
+      if (!showTimeoutModal) {
+        clearTimeout(timeout);
+        timeout = setTimeout(triggerTimeout, INACTIVITY_LIMIT);
+      }
     };
 
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
@@ -84,7 +65,56 @@ function InactivityHandler() {
       events.forEach(event => window.removeEventListener(event, resetTimer));
       clearTimeout(timeout);
     };
-  }, [user]);
+  }, [user, showTimeoutModal]);
+
+  const handleFinalLogout = async () => {
+    try {
+      if (user) {
+        // 1. Log l'activité
+        await supabase.from('activity_logs').insert({
+          user_id: user.id,
+          action: 'LOGOUT',
+          details: 'Déconnexion automatique (inactivité)'
+        });
+
+        // 2. Mettre is_online à false
+        await supabase.from('profiles').update({ is_online: false }).eq('id', user.id);
+      }
+
+      // 3. Nettoyer session et déconnecter
+      sessionStorage.removeItem('login_logged');
+      localStorage.clear();
+      sessionStorage.clear();
+      await supabase.auth.signOut();
+      
+      window.location.replace('/');
+    } catch (err) {
+      console.error("Auto logout error:", err);
+      window.location.replace('/');
+    }
+  };
+
+  if (showTimeoutModal) {
+    return (
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 shadow-2xl text-center space-y-6">
+          <div className="h-20 w-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-gold/20">
+            <Loader2 className="h-10 w-10 text-gold" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-white tracking-tight">Session Expirée</h2>
+            <p className="text-muted-foreground text-sm">Par mesure de sécurité, vous avez été déconnecté après une période d'inactivité.</p>
+          </div>
+          <button 
+            onClick={handleFinalLogout}
+            className="w-full h-12 bg-gold hover:bg-gold/90 text-black font-bold uppercase tracking-widest text-xs rounded-xl transition-all shadow-[0_0_20px_rgba(201,162,77,0.3)]"
+          >
+            Se reconnecter
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return null;
 }
