@@ -71,17 +71,14 @@ export default function Dashboard() {
   // Fetch API data via proxy
   const fetchApiData = async () => {
     try {
-      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+      const targetUrl = "https://fr.stripchat.com/api/front/v2/models/username/wildgirlshow";
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
       
       const res = await fetch(proxyUrl);
       if (res.ok) {
-        const wrapper = await res.json();
-        if (wrapper.contents) {
-          const realData = JSON.parse(wrapper.contents);
-          if (realData) {
-            setApiData(realData);
-          }
+        const realData = await res.json();
+        if (realData) {
+          setApiData(realData);
         }
       }
     } catch (e) {
@@ -114,7 +111,8 @@ export default function Dashboard() {
   const displaySubscribers = manualData?.subscribers || 0;
   const displayStripScore = (apiData?.model?.stripScore > 0) ? apiData.model.stripScore : (manualData?.stripScore || 0);
   const displayFavorites = (apiData?.model?.favoritesCount > 0) ? apiData.model.favoritesCount : (manualData?.favorites || 0);
-  const isOnline = apiData?.cam?.isLive === true || manualData?.isOnline === true;
+  const viewersCount = apiData?.model?.viewersCount || 0;
+  const isOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true || manualData?.isOnline === true;
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -149,7 +147,7 @@ export default function Dashboard() {
   const stripStats = [
     { label: "Revenu Horaire", value: `${displayHourlyRevenue} €`, icon: DollarSign },
     { label: "Abonnés (Fan)", value: displaySubscribers, icon: Users },
-    { label: "Favoris", value: displayFavorites, icon: Heart },
+    { label: "Viewers", value: viewersCount, icon: Users },
     { label: "StripScore", value: displayStripScore, icon: Activity },
   ];
 
@@ -175,7 +173,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-3 bg-white/[0.03] px-6 py-2 rounded-2xl border border-white/[0.05]">
               <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
               <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                {isOnline ? 'Live' : 'Offline'}
+                {isOnline ? 'EN LIGNE' : 'HORS LIGNE'}
               </span>
             </div>
             <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
