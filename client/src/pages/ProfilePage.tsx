@@ -29,16 +29,31 @@ export default function ProfilePage() {
       const filePath = `avatars/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('sb-drive') // Using existing bucket for simplicity
+        .from('avatars')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('sb-drive')
-        .getPublicUrl(filePath);
-
-      await apiRequest("POST", "/api/profiles/avatar", { avatarUrl: publicUrl });
+      if (uploadError) {
+        if (uploadError.message?.includes("Bucket not found")) {
+          // Attempt to create bucket if it doesn't exist (though client-side create is often restricted)
+          // Fallback to sb-drive if avatars bucket is truly missing and we can't create it
+          const { error: fallbackError } = await supabase.storage
+            .from('sb-drive')
+            .upload(filePath, file);
+          if (fallbackError) throw fallbackError;
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from('sb-drive')
+            .getPublicUrl(filePath);
+          await apiRequest("POST", "/api/profiles/avatar", { avatarUrl: publicUrl });
+        } else {
+          throw uploadError;
+        }
+      } else {
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+        await apiRequest("POST", "/api/profiles/avatar", { avatarUrl: publicUrl });
+      }
       
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       

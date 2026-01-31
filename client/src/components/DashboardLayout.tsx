@@ -124,7 +124,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div className="px-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border border-white/10">
-                <AvatarImage src={user?.avatarUrl} />
+                <AvatarImage src={user?.avatarUrl || user?.avatar_url} />
                 <AvatarFallback className="bg-[#0A0A0A] text-gold uppercase">
                   {user?.username?.substring(0, 2)}
                 </AvatarFallback>
