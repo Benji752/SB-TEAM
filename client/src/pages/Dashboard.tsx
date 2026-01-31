@@ -167,217 +167,182 @@ export default function Dashboard() {
       <div className="space-y-10 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Bonjour, {user?.firstName || 'Admin'} !</h1>
-            <p className="text-muted-foreground text-lg">Voici l'état actuel de votre agence.</p>
+            <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-2">SB <span className="text-gold">Dashboard</span></h1>
+            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-xs">Monitoring Stripchat : WildgirlShow</p>
           </div>
-          <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
-            setIsUpdateModalOpen(open);
-            if (open && manualData) {
-              setUpdateData({
-                hourlyRevenue: manualData.hourlyRevenue?.toString() || "",
-                subscribers: manualData.subscribers?.toString() || "",
-                stripScore: manualData.stripScore?.toString() || "",
-                favorites: manualData.favorites?.toString() || "",
-                isOnline: manualData.isOnline?.toString() || "false"
-              });
-            }
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gold hover:bg-gold/90 text-black font-bold h-11 gap-2">
-                <Edit2 size={16} /> Actualiser Stripchat
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white overflow-y-auto max-h-[90vh]">
-              <DialogHeader>
-                <DialogTitle>Actualiser les données du modèle</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Revenu Horaire ($)</Label>
-                    <Input 
-                      type="number" 
-                      step="0.01"
-                      value={updateData.hourlyRevenue}
-                      onChange={e => setUpdateData({...updateData, hourlyRevenue: e.target.value})}
-                      className="bg-white/[0.03] border-white/[0.1] text-white"
-                      placeholder="ex: 22.3"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Abonnés Fan-club</Label>
-                    <Input 
-                      type="number"
-                      value={updateData.subscribers}
-                      onChange={e => setUpdateData({...updateData, subscribers: e.target.value})}
-                      className="bg-white/[0.03] border-white/[0.1] text-white"
-                      placeholder="ex: 150"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>StripScore</Label>
-                    <Input 
-                      type="number"
-                      value={updateData.stripScore}
-                      onChange={e => setUpdateData({...updateData, stripScore: e.target.value})}
-                      className="bg-white/[0.03] border-white/[0.1] text-white"
-                      placeholder="ex: 645"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Favoris</Label>
-                    <Input 
-                      type="number"
-                      value={updateData.favorites}
-                      onChange={e => setUpdateData({...updateData, favorites: e.target.value})}
-                      className="bg-white/[0.03] border-white/[0.1] text-white"
-                      placeholder="ex: 5000"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Statut</Label>
-                  <Select 
-                    value={updateData.isOnline} 
-                    onValueChange={(v) => setUpdateData({...updateData, isOnline: v})}
-                  >
-                    <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white">
-                      <SelectItem value="true">En ligne 🟢</SelectItem>
-                      <SelectItem value="false">Hors ligne ⚪</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button 
-                  onClick={() => updateMutation.mutate(updateData)}
-                  disabled={updateMutation.isPending}
-                  className="w-full bg-gold text-black font-bold"
-                >
-                  {updateMutation.isPending ? <Loader2 className="animate-spin" /> : "Sauvegarder"}
+          <div className="flex gap-4">
+            <div className="flex items-center gap-3 bg-white/[0.03] px-6 py-2 rounded-2xl border border-white/[0.05]">
+              <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
+              <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                {isOnline ? 'Live' : 'Offline'}
+              </span>
+            </div>
+            <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
+              setIsUpdateModalOpen(open);
+              if (open && manualData) {
+                setUpdateData({
+                  hourlyRevenue: manualData.hourlyRevenue?.toString() || "",
+                  subscribers: manualData.subscribers?.toString() || "",
+                  stripScore: manualData.stripScore?.toString() || "",
+                  favorites: manualData.favorites?.toString() || "",
+                  isOnline: manualData.isOnline?.toString() || "false"
+                });
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
+                  <Edit2 size={14} /> Actualiser
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white overflow-y-auto max-h-[90vh] rounded-[2rem]">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">Mise à jour Stripchat</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire ($)</Label>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        value={updateData.hourlyRevenue}
+                        onChange={e => setUpdateData({...updateData, hourlyRevenue: e.target.value})}
+                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
+                        placeholder="ex: 22.3"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Abonnés Fan-club</Label>
+                      <Input 
+                        type="number"
+                        value={updateData.subscribers}
+                        onChange={e => setUpdateData({...updateData, subscribers: e.target.value})}
+                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
+                        placeholder="ex: 150"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">StripScore</Label>
+                      <Input 
+                        type="number"
+                        value={updateData.stripScore}
+                        onChange={e => setUpdateData({...updateData, stripScore: e.target.value})}
+                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
+                        placeholder="ex: 645"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Favoris</Label>
+                      <Input 
+                        type="number"
+                        value={updateData.favorites}
+                        onChange={e => setUpdateData({...updateData, favorites: e.target.value})}
+                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
+                        placeholder="ex: 5000"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Statut</Label>
+                    <Select 
+                      value={updateData.isOnline} 
+                      onValueChange={(v) => setUpdateData({...updateData, isOnline: v})}
+                    >
+                      <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
+                        <SelectItem value="true">En ligne 🟢</SelectItem>
+                        <SelectItem value="false">Hors ligne ⚪</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    onClick={() => updateMutation.mutate(updateData)}
+                    disabled={updateMutation.isPending}
+                    className="w-full bg-gold text-black font-black uppercase tracking-widest text-[10px] h-12 rounded-xl mt-4"
+                  >
+                    {updateMutation.isPending ? <Loader2 className="animate-spin" /> : "Sauvegarder les modifications"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {statCards.map((stat) => (
-            <Card key={stat.title} className="glass-card p-6 border-none">
-              <div className="flex flex-row items-center justify-between pb-4">
-                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{stat.title}</span>
+        <div className="grid gap-4 md:grid-cols-4">
+          {stripStats.map((stat, i) => (
+            <Card key={i} className="bg-[#0A0A0A] border-white/[0.05] p-6 rounded-3xl flex flex-col gap-2 hover:border-gold/30 transition-all hover-elevate">
+              <div className="flex items-center justify-between mb-2">
                 <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05]">
-                  <stat.icon className="text-gold" size={20} />
+                  <stat.icon size={18} className="text-gold" />
                 </div>
+                {i === 0 && (
+                  <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[8px] font-black uppercase tracking-widest">Calcul manuel</Badge>
+                )}
               </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-gold">{stat.value}</div>
-                <div className="flex items-center text-xs">
-                  {stat.trend === "up" ? (
-                    <span className="text-green-400 font-medium flex items-center"><ArrowUpRight size={14} className="mr-1" /> {stat.change}</span>
-                  ) : (
-                    <span className="text-red-400 font-medium flex items-center"><ArrowDownRight size={14} className="mr-1" /> {stat.change}</span>
-                  )}
-                  <span className="text-muted-foreground/60 ml-2">vs mois dernier</span>
-                </div>
-              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
+              <span className="text-3xl font-black text-white tracking-tighter">
+                {i === 0 ? `$${stat.value}` : stat.value}
+              </span>
             </Card>
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-7">
-          <Card className="lg:col-span-7 glass-card p-8 border-none space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <Card className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]">
+          <div className="space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
+                <TrendingUp size={18} className="text-gold" />
+              </div>
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">Monitoring Stripchat : WildgirlShow</h3>
-                <p className="text-sm text-muted-foreground">Données hybrides (API publique + Saisie manuelle)</p>
-              </div>
-              <div className="flex items-center gap-3 bg-white/[0.03] p-2 rounded-xl border border-white/[0.05]">
-                <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
-                <span className="text-sm font-bold text-white uppercase tracking-wider">
-                  {isOnline ? 'Live' : 'Offline'}
-                </span>
+                <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
+                <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire ($)</p>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {stripStats.map((stat, i) => (
-                <div key={i} className="bg-white/[0.02] border border-white/[0.05] p-6 rounded-2xl flex flex-col items-center justify-center text-center gap-2">
-                  <stat.icon size={20} className="text-gold mb-1" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">{stat.label}</span>
-                  <span className="text-2xl font-bold text-white">{stat.value}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-2">
-                <Activity size={16} className="text-gold" />
-                <h4 className="text-sm font-bold text-white uppercase tracking-widest">Évolution Revenu Horaire ($)</h4>
-              </div>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                    <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
-                    <Tooltip contentStyle={{ backgroundColor: "rgba(20, 20, 20, 0.95)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "12px", backdropFilter: "blur(10px)" }} />
-                    <Line type="monotone" dataKey="revenue" stroke="#C9A24D" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: "#C9A24D", stroke: "#000", strokeWidth: 2 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-7">
-          <Card className="lg:col-span-4 glass-card p-8 border-none">
-            <h3 className="text-xl font-bold text-white mb-6">Aperçu des Revenus Agence</h3>
-            <div className="h-[300px]">
+            
+            <div className="h-[400px] w-full mt-4">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats}>
+                <AreaChart data={chartData}>
                   <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/><stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
+                    <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                  <XAxis dataKey="month" stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}€`} />
-                  <Tooltip contentStyle={{ backgroundColor: "rgba(20, 20, 20, 0.95)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "12px", backdropFilter: "blur(10px)" }} />
-                  <Area type="monotone" dataKey="revenue" stroke="#C9A24D" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
+                  <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "rgba(10, 10, 10, 0.95)", 
+                      border: "1px solid rgba(255, 255, 255, 0.08)", 
+                      borderRadius: "16px", 
+                      backdropFilter: "blur(10px)",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: "#fff"
+                    }} 
+                    itemStyle={{ color: "#C9A24D" }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke="#C9A24D" 
+                    fillOpacity={1} 
+                    fill="url(#colorRevenueDashboard)" 
+                    strokeWidth={4} 
+                    activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </Card>
-
-          <Card className="lg:col-span-3 glass-card p-8 border-none">
-            <h3 className="text-xl font-bold text-white mb-6">Activités Récentes</h3>
-            <div className="space-y-8">
-              {[
-                { user: "Alice V.", action: "média téléversé", time: "2h", icon: HardDrive },
-                { user: "Admin", action: "contrat validé", time: "4h", icon: CheckSquare },
-                { user: "Prospect", action: "nouveau message", time: "5h", icon: MessageSquare },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-5">
-                  <div className="h-12 w-12 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05]">
-                    <item.icon className="h-5 w-5 text-gold" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium leading-none text-white/90">
-                      <span className="font-bold text-white">{item.user}</span> {item.action}
-                    </p>
-                    <p className="text-xs text-muted-foreground/60">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
       </div>
     </DashboardLayout>
   );
+}
 }
