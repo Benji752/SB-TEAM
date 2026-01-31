@@ -1,9 +1,9 @@
 import { Express } from "express";
 import { setupAuth } from "./auth";
 import axios from "axios";
-import { modelStats } from "@shared/schema";
+import { modelStats, authLogs, users, profiles } from "@shared/schema";
 import { db } from "./db";
-import { desc, gte } from "drizzle-orm";
+import { desc, gte, eq } from "drizzle-orm";
 
 export async function registerRoutes(_httpServer: any, app: Express) {
   setupAuth(app);
@@ -56,6 +56,51 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     }
   });
 
+  // Auth Logs
+  app.get("/api/auth-logs", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send("Not authenticated");
+    
+    const logs = await db.select().from(authLogs)
+      .orderBy(desc(authLogs.createdAt))
+      .limit(100);
+    
+    // Join with user names manually since it's a simple app
+    const allUsers = await db.select().from(users);
+    const logsWithUser = logs.map(log => {
+      const user = allUsers.find(u => u.id === log.userId);
+      return {
+        ...log,
+        username: user ? user.username : "Unknown"
+      };
+    });
+    
+    res.json(logsWithUser);
+  });
+
+  app.post("/api/auth-logs", async (req, res) => {
+    const { eventType, reason } = req.body;
+    if (!req.user) return res.status(401).send("Not authenticated");
+    
+    const [log] = await db.insert(authLogs).values({
+      userId: (req.user as any).id,
+      eventType,
+      reason
+    }).returning();
+    
+    res.json(log);
+  });
+
+  app.post("/api/profiles/avatar", async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send("Not authenticated");
+    const { avatarUrl } = req.body;
+    
+    await db.update(profiles)
+      .set({ avatarUrl })
+      .where(eq(profiles.userId, (req.user as any).id));
+      
+    res.json({ success: true });
+  });
+
   // Get last recorded manual stats
   app.get("/api/model-stats/latest", async (req, res) => {
     try {
@@ -71,10 +116,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   // History for charts
   app.get("/api/model-stats", async (req, res) => {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const stats = await db.select().from(modelStats)
+    const statsArr = await db.select().from(modelStats)
       .where(gte(modelStats.createdAt, twentyFourHoursAgo))
       .orderBy(modelStats.createdAt);
-    res.json(stats);
+    res.json(statsArr);
   });
 
   // Stats

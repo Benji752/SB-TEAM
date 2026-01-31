@@ -10,14 +10,27 @@ export const users = pgTable("users", {
   role: text("role", { enum: ["admin", "staff", "model"] }).default("model").notNull(),
 });
 
+export const authLogs = pgTable("auth_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  eventType: text("event_type").notNull(), // LOGIN, LOGOUT
+  reason: text("reason").notNull(), // MANUEL, AUTO_TIMEOUT
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   username: text("username").notNull(),
   role: text("role", { enum: ["admin", "staff", "model"] }).default("model").notNull(),
   bio: text("bio"),
+  avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const insertAuthLogSchema = createInsertSchema(authLogs);
+export type AuthLog = typeof authLogs.$inferSelect;
+export type InsertAuthLog = z.infer<typeof insertAuthLogSchema>;
 
 export const insertProfileSchema = createInsertSchema(profiles);
 export type Profile = typeof profiles.$inferSelect;

@@ -1,72 +1,105 @@
-import { Sidebar } from "./Sidebar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { 
+  LayoutDashboard, 
+  ShoppingCart, 
+  Calendar, 
+  CheckSquare, 
+  HardDrive, 
+  FileText, 
+  AlertCircle,
+  LogOut,
+  User,
+  History
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useProfile } from "@/hooks/use-profile";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { apiRequest } from "@/lib/queryClient";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const { logout } = useAuth();
-  
-  // Navigation items duplicate for mobile menu - ideal to refactor into const
-  const navigation = [
-    { name: "Dashboard", href: "/" },
-    { name: "Models", href: "/models" },
-    { name: "Tasks", href: "/tasks" },
-    { name: "Settings", href: "/settings" },
+  const { logout, user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("POST", "/api/auth-logs", { 
+        eventType: "LOGOUT", 
+        reason: "MANUEL" 
+      });
+    } catch (e) {
+      console.error("Failed to log manual logout", e);
+    }
+    await logout();
+  };
+
+  const menuItems = [
+    { label: "Dashboard", icon: LayoutDashboard, href: "/" },
+    { label: "Commandes", icon: ShoppingCart, href: "/orders" },
+    { label: "Calendrier", icon: Calendar, href: "/calendar" },
+    { label: "Tasks", icon: CheckSquare, href: "/tasks" },
+    { label: "Drive", icon: HardDrive, href: "/drive" },
+    { label: "Ressources", icon: FileText, href: "/resources" },
+    { label: "Plaintes", icon: AlertCircle, href: "/complaints" },
+    { label: "Logs", icon: History, href: "/logs" },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar />
-      
-      {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-        <span className="font-display font-bold text-lg">AgencyFlow</span>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <div className="p-6">
-              <span className="font-display font-bold text-xl block mb-8">
-                AgencyFlow
-              </span>
-              <div className="space-y-2">
-                {navigation.map((item) => (
-                  <Link key={item.name} href={item.href}>
-                    <div
-                      className={cn(
-                        "px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors",
-                        location === item.href
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted"
-                      )}
-                    >
-                      {item.name}
-                    </div>
-                  </Link>
-                ))}
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-destructive mt-4"
-                  onClick={() => logout()}
-                >
-                  Sign Out
-                </Button>
-              </div>
+    <div className="flex min-h-screen bg-[#050505]">
+      {/* Sidebar */}
+      <aside className="w-64 border-r border-white/[0.08] flex flex-col fixed inset-y-0 bg-[#050505] z-50">
+        <div className="p-8">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
+              <span className="text-black font-black text-xl italic">S</span>
             </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+            <span className="text-xl font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
+          </div>
+        </div>
 
-      <main className="md:pl-64 min-h-screen">
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+          {menuItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <a className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+                location === item.href 
+                  ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                  : "text-white/40 hover:text-white hover:bg-white/[0.03]"
+              }`}>
+                <item.icon size={20} className={location === item.href ? "text-black" : "group-hover:text-gold"} />
+                <span className="text-sm font-bold uppercase tracking-widest">{item.label}</span>
+              </a>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="p-6 border-t border-white/[0.08] space-y-4 bg-white/[0.01]">
+          <Link href="/profile">
+            <a className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.03] transition-colors">
+              <Avatar className="h-10 w-10 border border-white/10">
+                <AvatarImage src={user?.avatarUrl} />
+                <AvatarFallback className="bg-[#0A0A0A] text-gold uppercase">
+                  {user?.username?.substring(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-bold text-white truncate">{user?.username}</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{user?.role}</span>
+              </div>
+            </a>
+          </Link>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 h-11 px-4 rounded-xl font-bold uppercase tracking-widest text-xs"
+            onClick={handleLogout}
+          >
+            <LogOut size={18} />
+            Déconnexion
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 ml-64 min-h-screen">
+        <div className="max-w-[1600px] mx-auto p-10">
           {children}
         </div>
       </main>

@@ -1,31 +1,70 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
-
-import Landing from "@/pages/Landing";
+import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
-import Models from "@/pages/Models";
-import Tasks from "@/pages/Tasks";
+import Orders from "@/pages/Orders";
 import CalendarPage from "@/pages/CalendarPage";
+import Tasks from "@/pages/Tasks";
+import Drive from "@/pages/Drive";
 import ResourcesPage from "@/pages/ResourcesPage";
 import ComplaintsPage from "@/pages/ComplaintsPage";
-import Settings from "@/pages/Settings";
-import Orders from "@/pages/Orders";
-import Messages from "@/pages/Messages";
-import Drive from "@/pages/Drive";
-import NotFound from "@/pages/NotFound";
+import ProfilePage from "@/pages/ProfilePage";
+import LogsPage from "@/pages/LogsPage";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
+import { apiRequest } from "./lib/queryClient";
+import { Loader2 } from "lucide-react";
+
+function InactivityHandler() {
+  const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!user) return;
+
+    let timeout: NodeJS.Timeout;
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes
+
+    const resetTimer = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(async () => {
+        try {
+          await apiRequest("POST", "/api/auth-logs", { 
+            eventType: "LOGOUT", 
+            reason: "AUTO_TIMEOUT" 
+          });
+        } catch (e) {
+          console.error("Failed to log auto-logout", e);
+        }
+        await logout();
+        setLocation("/");
+      }, INACTIVITY_LIMIT);
+    };
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+    
+    resetTimer();
+
+    return () => {
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+      clearTimeout(timeout);
+    };
+  }, [user, logout, setLocation]);
+
+  return null;
+}
 
 function Router() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="h-screen w-full flex items-center justify-center bg-[#050505]">
+        <Loader2 className="h-8 w-8 animate-spin text-gold" />
       </div>
     );
   }
@@ -33,49 +72,45 @@ function Router() {
   return (
     <Switch>
       <Route path="/">
-        {user ? <Dashboard /> : <Landing />}
-      </Route>
-      <Route path="/messages">
-        {user ? <Messages /> : <Landing />}
-      </Route>
-      <Route path="/calendar">
-        {user ? <CalendarPage /> : <Landing />}
-      </Route>
-      <Route path="/resources">
-        {user ? <ResourcesPage /> : <Landing />}
-      </Route>
-      <Route path="/complaints">
-        {user ? <ComplaintsPage /> : <Landing />}
-      </Route>
-      <Route path="/models">
-        {user ? <Models /> : <Landing />}
-      </Route>
-      <Route path="/tasks">
-        {user ? <Tasks /> : <Landing />}
+        <Dashboard />
       </Route>
       <Route path="/orders">
-        {user ? <Orders /> : <Landing />}
+        <Orders />
+      </Route>
+      <Route path="/calendar">
+        <CalendarPage />
+      </Route>
+      <Route path="/tasks">
+        <Tasks />
       </Route>
       <Route path="/drive">
-        {user ? <Drive /> : <Landing />}
+        <Drive />
       </Route>
-      <Route path="/settings">
-        {user ? <Settings /> : <Landing />}
+      <Route path="/resources">
+        <ResourcesPage />
+      </Route>
+      <Route path="/complaints">
+        <ComplaintsPage />
+      </Route>
+      <Route path="/profile">
+        <ProfilePage />
+      </Route>
+      <Route path="/logs">
+        <LogsPage />
       </Route>
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <InactivityHandler />
         <Router />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;
