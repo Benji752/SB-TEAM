@@ -34,6 +34,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     
     try {
       if (user?.id) {
+        // Enregistrement du LOGOUT
+        await supabase.from('activity_logs').insert({
+          user_id: user.id,
+          action: 'LOGOUT',
+          details: 'Déconnexion manuelle'
+        });
+
         // MISE À JOUR CRUCIALE DU STATUT AVANT DÉCONNEXION
         await supabase
           .from('profiles')

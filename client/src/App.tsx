@@ -98,6 +98,15 @@ export default function App() {
             .then(({ error }) => {
               if (error) console.error("Error setting online status:", error);
             });
+            
+          // Enregistrement du LOGIN
+          supabase.from('activity_logs').insert({
+            user_id: session.user.id,
+            action: 'LOGIN',
+            details: 'Connexion réussie'
+          }).then(({ error }) => {
+            if (error) console.error("Error logging login:", error);
+          });
         }
       } catch (err) {
         console.error("Session init error:", err);
