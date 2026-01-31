@@ -346,8 +346,18 @@ export default function Dashboard() {
                 </div>
 
                 <div className="pt-8">
-                  <Button variant="outline" className="w-full border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white font-black uppercase tracking-widest text-[9px] h-12 rounded-xl">
-                    Ouvrir la plateforme
+                  <Button 
+                    asChild
+                    variant="outline" 
+                    className="w-full border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white font-black uppercase tracking-widest text-[9px] h-12 rounded-xl"
+                  >
+                    <a 
+                      href={`https://stripchat.com/wildgirlshow`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      Ouvrir la plateforme
+                    </a>
                   </Button>
                 </div>
               </div>
