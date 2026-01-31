@@ -17,7 +17,7 @@ interface Project {
   status: string;
   user_id: string;
   profiles: {
-    full_name: string;
+    username: string;
     avatar_url: string;
   };
 }
@@ -34,7 +34,7 @@ export default function Projects() {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .select('*, profiles(full_name, avatar_url)')
+        .select('*, profiles(username, avatar_url)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -207,10 +207,10 @@ export default function Projects() {
                   <Avatar className="h-8 w-8 border border-white/10">
                     <AvatarImage src={project.profiles?.avatar_url} className="object-cover" />
                     <AvatarFallback className="bg-white/5 text-[10px]">
-                      {project.profiles?.full_name?.charAt(0)}
+                      {project.profiles?.username?.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-xs font-medium text-white/60">{project.profiles?.full_name}</span>
+                  <span className="text-xs font-medium text-white/60">{project.profiles?.username}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button 
