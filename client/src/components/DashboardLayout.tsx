@@ -9,7 +9,7 @@ import {
   AlertCircle,
   LogOut,
   User,
-  History,
+  Clock,
   MessageSquare,
   Users
 } from "lucide-react";
@@ -128,10 +128,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Link href="/logs">
               <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
                 location === "/logs" 
-                  ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                  ? "bg-gold text-black shadow-[0_0_20_rgba(201,162,77,0.2)]" 
                   : "text-white/40 hover:text-white hover:bg-white/[0.03]"
               }`}>
-                <History size={20} className={location === "/logs" ? "text-black" : "group-hover:text-gold"} />
+                <Clock size={20} className={location === "/logs" ? "text-black" : "group-hover:text-gold"} />
                 <span className="text-sm font-bold uppercase tracking-widest">Logs</span>
               </div>
             </Link>
