@@ -564,7 +564,7 @@ export default function Dashboard() {
                       </Select>
                       <Avatar className="h-8 w-8 border border-white/10">
                         <AvatarImage src="" />
-                        <AvatarFallback className="bg-white/5 text-[10px] font-black text-white/40">STAFF</AvatarFallback>
+                        <AvatarFallback className="bg-white/5 text-[10px] font-black text-white/40">USER</AvatarFallback>
                       </Avatar>
                     </div>
                   </div>

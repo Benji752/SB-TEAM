@@ -37,7 +37,7 @@ Preferred communication style: Simple, everyday language.
 - **Demo Mode**: Simple session-based role switching for development/demo purposes
 - **Production Ready**: Replit Auth integration available in `server/replit_integrations/auth/`
 - **Session Management**: Express-session with PostgreSQL store
-- **User Roles**: Three-tier role system (admin, staff, model)
+- **User Roles**: Two-tier role system (admin, model)
 
 ### Data Models
 - **Profiles**: User profiles with role assignment
