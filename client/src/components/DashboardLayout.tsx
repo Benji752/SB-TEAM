@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  console.log('Sidebar loaded');
   const [location] = useLocation();
   const { logout, user } = useAuth();
 
@@ -33,6 +34,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
     // 3. Redirection IMMÉDIATE et FORCÉE
     window.location.replace('/');
+  };
+
+  const forceLogout = () => {
+    console.log("Force Logout clicked");
+    localStorage.clear();
+    sessionStorage.clear();
+    document.cookie.split(";").forEach((c) => { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    window.location.href = '/';
   };
 
   const menuItems = [
@@ -54,6 +65,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-[#050505]">
       {/* Sidebar */}
       <aside className="w-64 border-r border-white/[0.08] flex flex-col fixed inset-y-0 bg-[#050505] z-50">
+        <button 
+          onClick={forceLogout} 
+          style={{backgroundColor: 'red', color: 'white', width: '100%', padding: '10px', fontWeight: 'bold'}}
+        >
+          🚨 RESET SESSION
+        </button>
         <div className="p-8">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
