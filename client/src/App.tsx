@@ -99,14 +99,20 @@ export default function App() {
               if (error) console.error("Error setting online status:", error);
             });
             
-          // Enregistrement du LOGIN
-          supabase.from('activity_logs').insert({
-            user_id: session.user.id,
-            action: 'LOGIN',
-            details: 'Connexion réussie'
-          }).then(({ error }) => {
-            if (error) console.error("Error logging login:", error);
-          });
+          // Enregistrement du LOGIN (avec protection contre les doublons)
+          if (!sessionStorage.getItem('login_logged')) {
+            sessionStorage.setItem('login_logged', 'true');
+            supabase.from('activity_logs').insert({
+              user_id: session.user.id,
+              action: 'LOGIN',
+              details: 'Connexion réussie'
+            }).then(({ error }) => {
+              if (error) {
+                console.error("Error logging login:", error);
+                sessionStorage.removeItem('login_logged'); // Réessayer au prochain check si erreur
+              }
+            });
+          }
         }
       } catch (err) {
         console.error("Session init error:", err);

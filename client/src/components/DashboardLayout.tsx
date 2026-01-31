@@ -49,6 +49,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       }
 
       // 1. Nettoyage brutal
+      sessionStorage.removeItem('login_logged');
       localStorage.clear();
       sessionStorage.clear();
       
