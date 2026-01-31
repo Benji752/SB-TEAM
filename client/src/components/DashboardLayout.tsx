@@ -94,6 +94,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: "Équipe", icon: Users, href: "/models" },
     { label: "Tâches", icon: CheckSquare, href: "/tasks" },
     { label: "Drive", icon: HardDrive, href: "/drive" },
+  ];
+
+  const adminMenuItems = [
     { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
   ];
 
@@ -115,6 +118,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => (
+            <Link key={item.href} href={item.href}>
+              <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
+                location === item.href 
+                  ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                  : "text-white/40 hover:text-white hover:bg-white/[0.03]"
+              }`}>
+                <item.icon size={20} className={location === item.href ? "text-black" : "group-hover:text-gold"} />
+                <span className="text-sm font-bold uppercase tracking-widest">{item.label}</span>
+              </div>
+            </Link>
+          ))}
+          
+          {isAdmin && adminMenuItems.map((item) => (
             <Link key={item.href} href={item.href}>
               <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
                 location === item.href 

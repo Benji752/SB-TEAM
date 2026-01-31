@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useTickets } from "@/hooks/use-tickets";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,15 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ComplaintsPage() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
+  const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
+
+  useEffect(() => {
+    if (user && !isAdmin) {
+      setLocation("/");
+    }
+  }, [user, isAdmin, setLocation]);
+
   const { toast } = useToast();
   const { tickets, isLoading, createTicket, resolveTicket, deleteTicket } = useTickets();
   
@@ -25,6 +35,8 @@ export default function ComplaintsPage() {
     message: "",
     priority: "normal" as "normal" | "urgent"
   });
+
+  if (!isAdmin) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
