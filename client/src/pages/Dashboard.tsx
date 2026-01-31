@@ -144,9 +144,25 @@ export default function Dashboard() {
   const displayFavorites = (apiData?.model?.favoritesCount > 0) ? apiData.model.favoritesCount : (manualData?.favorites || 0);
   const viewersCount = apiData?.model?.viewersCount || 0;
   const isOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true || manualData?.isOnline === true;
-  const snapshotUrl = apiData?.model?.snapshotUrl || apiData?.model?.previewUrl;
+  const rawSnapshotUrl = apiData?.model?.snapshotUrl || apiData?.model?.previewUrl;
   const avatarUrl = apiData?.model?.avatarUrl;
   const roomTitle = apiData?.model?.topic || "Aucun sujet défini";
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
+
+  useEffect(() => {
+    if (rawSnapshotUrl) {
+      setPreviewImage(rawSnapshotUrl);
+    }
+  }, [rawSnapshotUrl]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setImageTimestamp(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -305,31 +321,41 @@ export default function Dashboard() {
             <div className="relative h-full flex flex-col md:flex-row">
               {/* Camera Section */}
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
-                {isOnline && snapshotUrl ? (
+                {isOnline && previewImage ? (
                   <>
                     <img 
-                      src={snapshotUrl} 
+                      src={`${previewImage}${previewImage.includes('?') ? '&' : '?'}t=${imageTimestamp}`} 
                       alt="Live Snapshot" 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                      onError={() => setPreviewImage(null)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                   </>
                 ) : (
                   <div className="relative w-full h-full flex items-center justify-center bg-[#050505]">
                     {avatarUrl ? (
-                      <img 
-                        src={avatarUrl} 
-                        alt="Profile" 
-                        className="w-48 h-48 rounded-full object-cover grayscale opacity-20 blur-sm" 
-                      />
+                      <div className="relative w-full h-full">
+                        <img 
+                          src={avatarUrl} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover blur-xl opacity-30 scale-110" 
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <img 
+                            src={avatarUrl} 
+                            alt="Profile Avatar" 
+                            className="w-32 h-32 rounded-full object-cover border-4 border-white/10 shadow-2xl" 
+                          />
+                        </div>
+                      </div>
                     ) : (
                       <Video size={80} className="text-white/5" />
                     )}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                      <div className="h-16 w-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40">
+                      <div className="h-16 w-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center backdrop-blur-sm">
                         <Video size={24} className="text-white/20" />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Caméra inactive</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Caméra inactive</span>
                     </div>
                   </div>
                 )}
