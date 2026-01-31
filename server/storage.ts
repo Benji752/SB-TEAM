@@ -33,6 +33,9 @@ export interface IStorage {
 
   // Orders
   getRecentOrders(limit: number): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  deleteOrder(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -124,6 +127,19 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders)
       .orderBy(desc(orders.createdAt))
       .limit(limit);
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+
+  async deleteOrder(id: number): Promise<void> {
+    await db.delete(orders).where(eq(orders.id, id));
   }
 }
 

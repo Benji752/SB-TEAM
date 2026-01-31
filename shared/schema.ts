@@ -135,8 +135,9 @@ export const clientRequests = pgTable("client_requests", {
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   clientName: text("client_name").notNull(),
+  serviceType: text("service_type").notNull().default("Custom"),
   amount: integer("amount").notNull(),
-  status: text("status", { enum: ["paid", "pending"] }).notNull().default("pending"),
+  status: text("status", { enum: ["paid", "pending", "cancelled"] }).notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

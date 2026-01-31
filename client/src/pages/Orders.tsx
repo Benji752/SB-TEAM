@@ -1,84 +1,104 @@
-import { useState } from "react";
-import { useOrders } from "@/hooks/use-orders";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { supabase } from "@/lib/supabaseClient";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
+import { 
+  Plus, 
+  Trash2, 
+  Loader2, 
+  ShoppingBag,
+  Calendar as CalendarIcon,
+  User,
+  Euro,
+  MoreVertical
+} from "lucide-react";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus } from "lucide-react";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertOrderSchema, type Order } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-const STATUS_OPTIONS = [
-  { value: "pending_payment", label: "En attente paiement", color: "bg-red-500/10 text-red-500 border-red-500/20" },
-  { value: "paid_to_do", label: "Payé / À faire", color: "bg-blue-500/20 text-blue-400 border-blue-500/30 font-bold" },
-  { value: "in_progress", label: "En cours", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" },
-  { value: "delivered", label: "Livré / Terminé", color: "bg-green-500/10 text-green-500 border-green-500/20" },
-  { value: "cancelled", label: "Annulé", color: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20" },
-];
+import { useState } from "react";
 
 export default function Orders() {
-  const { orders, isLoading, updateOrderStatus, updateOrderNotes, createOrder } = useOrders();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    client_name: "",
-    service: "",
-    price: "",
-    notes: ""
+  const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data: orders, isLoading } = useQuery<Order[]>({
+    queryKey: ["/api/orders"],
   });
 
-  const handleCreateOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const newOrder = {
-        client_name: formData.client_name, 
-        service_type: formData.service,
-        price: parseInt(formData.price),
-        notes: formData.notes,
-        status: 'pending_payment'
-      };
+  const form = useForm({
+    resolver: zodResolver(insertOrderSchema),
+    defaultValues: {
+      clientName: "",
+      serviceType: "Vidéo",
+      amount: 0,
+      status: "paid",
+    },
+  });
 
-      const { error } = await supabase
-        .from('client_requests')
-        .insert([newOrder])
-        .select();
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest("POST", "/api/orders", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({ title: "Succès", description: "Commande ajoutée avec succès." });
+      setIsModalOpen(false);
+      form.reset();
+    },
+  });
 
-      if (error) {
-        alert("ERREUR SUPABASE : " + error.message);
-        return;
-      }
-
-      setIsDialogOpen(false);
-      setFormData({ client_name: "", service: "", price: "", notes: "" });
-    } catch (err: any) { 
-      alert("CRASH JS : " + err.message); 
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/orders/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({ title: "Succès", description: "Commande supprimée." });
+    },
+  });
 
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-10 w-10 animate-spin text-gold" />
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-gold" />
         </div>
       </DashboardLayout>
     );
@@ -86,141 +106,182 @@ export default function Orders() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Clients / Commandes</h1>
-          <p className="text-muted-foreground text-lg">Suivi collaboratif des prestations et paiements.</p>
-        </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="luxury-button flex gap-2">
-              <Plus size={20} />
-              Nouvelle Commande
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="glass-card border-white/[0.1] bg-black text-white">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Créer une commande</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreateOrder} className="space-y-6 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="client">Nom Client</Label>
-                <Input
-                  id="client"
-                  required
-                  value={formData.client_name}
-                  onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                  className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="service">Type de Prestation</Label>
-                <Input
-                  id="service"
-                  required
-                  value={formData.service}
-                  onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                  className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="price">Prix (€)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  required
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="bg-white/[0.03] border-white/[0.08] rounded-xl min-h-[100px]"
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="luxury-button w-full h-12" disabled={createOrder.isPending}>
-                  {createOrder.isPending ? <Loader2 className="animate-spin" /> : "Créer la commande"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <div className="space-y-8 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-2">
+              Gestion des <span className="text-gold">Commandes</span>
+            </h1>
+            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-xs">
+              Suivi du chiffre d'affaires et des prestations
+            </p>
+          </div>
 
-      <Card className="glass-card border-none overflow-hidden rounded-3xl">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-white/[0.05] bg-white/[0.02]">
-                <th className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Date</th>
-                <th className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Client</th>
-                <th className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Prestation</th>
-                <th className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Prix</th>
-                <th className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Statut</th>
-                <th className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!orders || orders.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-20 text-center text-muted-foreground italic">
-                    Aucune commande pour le moment.
-                  </td>
-                </tr>
-              ) : (
-                orders.map((order: any) => (
-                  <tr key={order.id} className="border-b border-white/[0.03] hover:bg-white/[0.01] transition-colors">
-                    <td className="p-6 text-sm text-white/70">
-                      {format(new Date(order.created_at), "dd MMM yyyy", { locale: fr })}
-                    </td>
-                    <td className="p-6 font-bold text-white">{order.client_name}</td>
-                    <td className="p-6 text-white/80">{order.service_type}</td>
-                    <td className="p-6 font-bold text-gold">{order.price} €</td>
-                    <td className="p-6">
-                      <Select
-                        defaultValue={order.status}
-                        onValueChange={(value) => updateOrderStatus.mutate({ id: order.id, status: value })}
-                      >
-                        <SelectTrigger className="w-[180px] bg-white/[0.03] border-white/[0.08] text-white h-9 rounded-xl">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="glass-card border-white/[0.1] bg-black">
-                          {STATUS_OPTIONS.map((opt) => (
-                            <SelectItem key={opt.value} value={opt.value} className="focus:bg-white/10 focus:text-white cursor-pointer">
-                              <Badge className={`border ${opt.color} pointer-events-none`}>
-                                {opt.label}
-                              </Badge>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="p-6 min-w-[200px]">
-                      <Input
-                        defaultValue={order.notes || ""}
-                        onBlur={(e) => {
-                          if (e.target.value !== order.notes) {
-                            updateOrderNotes.mutate({ id: order.id, notes: e.target.value });
-                          }
-                        }}
-                        className="bg-transparent border-white/[0.05] focus:border-gold/50 text-sm text-white/60 placeholder:text-white/20"
-                        placeholder="Détails..."
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
+                <Plus size={16} /> Nouvelle Commande
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-[2rem]">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">
+                  Ajouter une commande
+                </DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit((data) => createMutation.mutate(data))} className="space-y-4 py-4">
+                  <FormField
+                    control={form.control}
+                    name="clientName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-white/40">Client</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12" placeholder="Nom ou Pseudo" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="serviceType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-white/40">Type de Service</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12">
+                              <SelectValue placeholder="Sélectionner un type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
+                            <SelectItem value="Vidéo">Vidéo</SelectItem>
+                            <SelectItem value="Photo">Photo</SelectItem>
+                            <SelectItem value="Sexting">Sexting</SelectItem>
+                            <SelectItem value="Custom">Custom</SelectItem>
+                            <SelectItem value="Appel">Appel</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-white/40">Montant (€)</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-white/40">Statut</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12">
+                              <SelectValue placeholder="Statut du paiement" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
+                            <SelectItem value="paid">Payé</SelectItem>
+                            <SelectItem value="pending">En attente</SelectItem>
+                            <SelectItem value="cancelled">Annulé</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" disabled={createMutation.isPending} className="w-full bg-gold text-black font-black uppercase tracking-widest text-[10px] h-12 rounded-xl mt-4">
+                    {createMutation.isPending ? <Loader2 className="animate-spin" /> : "Valider"}
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
-      </Card>
+
+        <Card className="bg-[#0A0A0A] border-white/[0.05] rounded-[2rem] overflow-hidden">
+          <Table>
+            <TableHeader className="bg-white/[0.02]">
+              <TableRow className="border-white/[0.05] hover:bg-transparent">
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/30 h-14">Date</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/30 h-14">Client</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/30 h-14">Type</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/30 h-14">Montant</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/30 h-14">Statut</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-white/30 h-14 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders?.map((order) => (
+                <TableRow key={order.id} className="border-white/[0.05] hover:bg-white/[0.01] transition-colors">
+                  <TableCell className="font-bold text-white/60 text-xs">
+                    {order.createdAt ? format(new Date(order.createdAt), "dd/MM", { locale: fr }) : "-"}
+                  </TableCell>
+                  <TableCell className="font-black text-white uppercase tracking-tight italic">
+                    {order.clientName}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="border-white/[0.1] text-white/40 text-[9px] font-black uppercase tracking-widest">
+                      {order.serviceType}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-black text-white text-lg tracking-tighter">
+                    {order.amount} €
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={`${
+                      order.status === 'paid' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
+                      order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
+                      'bg-red-500/10 text-red-500 border-red-500/20'
+                    } text-[8px] font-black uppercase tracking-widest`}>
+                      {order.status === 'paid' ? 'Payé' : order.status === 'pending' ? 'En attente' : 'Annulé'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                      onClick={() => {
+                        if (confirm("Supprimer cette commande ?")) {
+                          deleteMutation.mutate(order.id);
+                        }
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {(!orders || orders.length === 0) && (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center text-white/20 font-black uppercase tracking-widest text-[10px]">
+                    Aucune commande enregistrée
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 }
