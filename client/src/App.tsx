@@ -125,9 +125,9 @@ export default function App() {
     const handleUnload = () => {
       if (session?.user) {
         const { id } = session.user;
-        // Utilisation de fetch avec keepalive pour assurer l'envoi lors de la fermeture
-        const body = JSON.stringify({ is_online: false });
-        // Note: Supabase direct via SDK is harder in unload, but we'll try a quick update
+        // Utilisation de navigator.sendBeacon pour assurer l'envoi lors de la fermeture
+        // Note: Supabase direct via SDK is harder in unload, so we use a beacon with a custom endpoint if needed
+        // For now, we'll try a synchronous update attempt if possible, or just the standard SDK update
         supabase.from('profiles').update({ is_online: false }).eq('id', id);
       }
     };

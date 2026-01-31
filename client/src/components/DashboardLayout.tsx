@@ -24,7 +24,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { logout, user } = useAuth();
 
-  const handleLogout = (e?: React.MouseEvent) => {
+  const handleLogout = async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -34,8 +34,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     
     try {
       if (user?.id) {
-        supabase.from('profiles').update({ is_online: false }).eq('id', user.id);
+        // MISE À JOUR CRUCIALE DU STATUT AVANT DÉCONNEXION
+        await supabase
+          .from('profiles')
+          .update({ is_online: false })
+          .eq('id', user.id);
       }
+
       // 1. Nettoyage brutal
       localStorage.clear();
       sessionStorage.clear();
@@ -49,11 +54,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};`;
       }
+
+      // 3. Déconnexion Supabase
+      await supabase.auth.signOut();
     } catch (err) {
       console.error("Cleanup error:", err);
     }
 
-    // 3. Redirection forcée
+    // 4. Redirection forcée
     window.location.replace('/');
   };
 
