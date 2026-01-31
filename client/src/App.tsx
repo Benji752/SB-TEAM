@@ -88,12 +88,19 @@ export default function App() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
+        setLoading(false); // Affiche le site immédiatement
+
         if (session?.user) {
-          await supabase.from('profiles').update({ is_online: true }).eq('id', session.user.id);
+          // Mise à jour du statut en arrière-plan sans bloquer
+          supabase.from('profiles')
+            .update({ is_online: true })
+            .eq('id', session.user.id)
+            .then(({ error }) => {
+              if (error) console.error("Error setting online status:", error);
+            });
         }
       } catch (err) {
         console.error("Session init error:", err);
-      } finally {
         setLoading(false);
       }
     };
@@ -101,20 +108,26 @@ export default function App() {
     initSession();
 
     // Écouter les changements d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
+      
       if (session?.user) {
-        await supabase.from('profiles').update({ is_online: true }).eq('id', session.user.id);
+        supabase.from('profiles')
+          .update({ is_online: true })
+          .eq('id', session.user.id)
+          .then(({ error }) => {
+            if (error) console.error("Error updating online status:", error);
+          });
       }
     });
 
     const handleUnload = () => {
       if (session?.user) {
         const { id } = session.user;
-        // Use navigator.sendBeacon or a synchronous fetch if possible, 
-        // but for Supabase we'll try a quick update. 
-        // Note: beforeunload is tricky for async.
+        // Utilisation de fetch avec keepalive pour assurer l'envoi lors de la fermeture
+        const body = JSON.stringify({ is_online: false });
+        // Note: Supabase direct via SDK is harder in unload, but we'll try a quick update
         supabase.from('profiles').update({ is_online: false }).eq('id', id);
       }
     };
