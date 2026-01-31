@@ -121,6 +121,8 @@ function InactivityHandler() {
   return null;
 }
 
+import { OnboardingTutorial } from "./components/OnboardingTutorial";
+
 export default function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -216,6 +218,7 @@ export default function App() {
           <Landing />
         ) : (
           <>
+            <OnboardingTutorial />
             <InactivityHandler />
             <Switch>
               <Route path="/">

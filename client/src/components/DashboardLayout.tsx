@@ -85,16 +85,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   };
 
   const menuItems = [
-    { label: "Tableau de bord", icon: LayoutDashboard, href: "/" },
-    { label: "Projets", icon: Briefcase, href: "/projects" },
-    { label: "Commandes", icon: ShoppingCart, href: "/orders" },
-    { label: "Ressources", icon: FileText, href: "/resources" },
-    { label: "Messages", icon: MessageSquare, href: "/messages" },
-    { label: "Calendrier", icon: Calendar, href: "/calendar" },
-    { label: "Équipe", icon: Users, href: "/models" },
-    { label: "Tâches", icon: CheckSquare, href: "/tasks" },
-    { label: "Drive", icon: HardDrive, href: "/drive" },
-    { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
+    { label: "Tableau de bord", icon: LayoutDashboard, href: "/", testId: "link-dashboard" },
+    { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects" },
+    { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders" },
+    { label: "Ressources", icon: FileText, href: "/resources", testId: "link-resources" },
+    { label: "Messages", icon: MessageSquare, href: "/messages", testId: "link-messages" },
+    { label: "Calendrier", icon: Calendar, href: "/calendar", testId: "link-calendar" },
+    { label: "Équipe", icon: Users, href: "/models", testId: "link-models" },
+    { label: "Tâches", icon: CheckSquare, href: "/tasks", testId: "link-tasks" },
+    { label: "Drive", icon: HardDrive, href: "/drive", testId: "link-drive" },
+    { label: "Réclamations", icon: AlertCircle, href: "/complaints", testId: "link-complaints" },
   ];
 
   const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
@@ -116,7 +116,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <div className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
+              <div 
+                data-testid={item.testId}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
                 location === item.href 
                   ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
                   : "text-white/40 hover:text-white hover:bg-white/[0.03]"
