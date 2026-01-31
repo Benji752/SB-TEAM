@@ -17,6 +17,7 @@ import Messages from "@/pages/Messages";
 import Models from "@/pages/Models";
 import Projects from "@/pages/Projects";
 import Landing from "@/pages/Landing";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { useEffect, useState } from "react";
 import { apiRequest } from "./lib/queryClient";
 import { Loader2 } from "lucide-react";
