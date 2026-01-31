@@ -34,7 +34,7 @@ export default function Projects() {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .select('*, profiles(username, avatar_url)')
+        .select('*, profiles!user_id(username, avatar_url)')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
