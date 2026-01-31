@@ -48,39 +48,67 @@ export default function Dashboard() {
     isOnline: "false"
   });
 
-  const { data: modelStats, isLoading: modelStatsLoading, refetch: refetchMonitor } = useQuery({
+  // Separate states for Manual (Supabase) and API (Stripchat)
+  const [manualData, setManualData] = useState<any>(null);
+  const [apiData, setApiData] = useState<any>(null);
+
+  const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/model-stats"],
   });
 
-  // AUTO-REFRESH: Loop every 60 seconds
+  // Load manual data from Supabase/DB
+  const loadManualData = async () => {
+    try {
+      const res = await apiRequest("GET", "/api/model-stats/latest");
+      const data = await res.json();
+      if (data) setManualData(data);
+    } catch (e) {
+      console.error("Failed to load manual data", e);
+    }
+  };
+
+  // Fetch API data via proxy
+  const fetchApiData = async () => {
+    try {
+      const res = await apiRequest("GET", "/api/monitor/wildgirl");
+      if (res.ok) {
+        const data = await res.json();
+        setApiData(data);
+      }
+    } catch (e) {
+      console.error("API fetch failed, keeping apiData as null", e);
+      // We don't touch manualData here
+    }
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Trigger backend monitor refresh which also updates the DB
-      apiRequest("GET", "/api/monitor/wildgirl").then(() => {
-        refetchMonitor();
-      });
-    }, 60000);
+    loadManualData();
+    fetchApiData();
+    const interval = setInterval(fetchApiData, 60000);
     return () => clearInterval(interval);
-  }, [refetchMonitor]);
+  }, []);
 
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
       const res = await apiRequest("POST", "/api/model-stats", data);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/model-stats"] });
+      setManualData(data); // Immediate update of local manual state
       setIsUpdateModalOpen(false);
       setUpdateData({ hourlyRevenue: "", subscribers: "", stripScore: "", favorites: "", isOnline: "false" });
     }
   });
 
-  const latestModelStat = Array.isArray(modelStats) ? modelStats[modelStats.length - 1] : null;
+  // DISPLAY LOGIC (THE BRAIN)
+  const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
+  const displaySubscribers = manualData?.subscribers || 0;
+  const displayStripScore = apiData?.stripScore || manualData?.stripScore || 0;
+  const displayFavorites = apiData?.favorites || manualData?.favorites || 0;
+  const isOnline = manualData?.isOnline === true || apiData?.isOnline === true;
 
-  // PRIORITY LOGIC: API Status OR Manual DB Status
-  const isOnline = latestModelStat?.isOnline === true;
-
-  const chartData = Array.isArray(modelStats) ? modelStats.map((s: any) => ({
+  const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
     revenue: s.hourlyRevenue
   })) : [];
@@ -111,13 +139,13 @@ export default function Dashboard() {
   ];
 
   const stripStats = [
-    { label: "Revenu Horaire", value: `$${latestModelStat?.hourlyRevenue || 0}`, icon: DollarSign },
-    { label: "Abonnés (Fan)", value: latestModelStat?.subscribers || 0, icon: Users },
-    { label: "Favoris", value: latestModelStat?.favorites || 0, icon: Heart },
-    { label: "StripScore", value: latestModelStat?.stripScore || 0, icon: Activity },
+    { label: "Revenu Horaire", value: `$${displayHourlyRevenue}`, icon: DollarSign },
+    { label: "Abonnés (Fan)", value: displaySubscribers, icon: Users },
+    { label: "Favoris", value: displayFavorites, icon: Heart },
+    { label: "StripScore", value: displayStripScore, icon: Activity },
   ];
 
-  if (statsLoading || modelStatsLoading) {
+  if (statsLoading || historyLoading) {
     return (
       <DashboardLayout>
         <div className="h-full w-full flex items-center justify-center min-h-[400px]">
