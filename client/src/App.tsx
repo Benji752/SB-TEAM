@@ -15,14 +15,29 @@ import ProfilePage from "@/pages/ProfilePage";
 import LogsPage from "@/pages/LogsPage";
 import Messages from "@/pages/Messages";
 import Models from "@/pages/Models";
-import { useAuth } from "@/hooks/use-auth";
-import { useEffect } from "react";
+import Landing from "@/pages/Landing";
+import { useEffect, useState } from "react";
 import { apiRequest } from "./lib/queryClient";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 function InactivityHandler() {
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState<any>(null);
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -41,8 +56,10 @@ function InactivityHandler() {
         } catch (e) {
           console.error("Failed to log auto-logout", e);
         } finally {
-          await logout();
-          setLocation("/");
+          await supabase.auth.signOut();
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.href = "/";
         }
       }, INACTIVITY_LIMIT);
     };
@@ -56,68 +73,95 @@ function InactivityHandler() {
       events.forEach(event => window.removeEventListener(event, resetTimer));
       clearTimeout(timeout);
     };
-  }, [user, logout, setLocation]);
+  }, [user]);
 
   return null;
 }
 
-function Router() {
-  const { user, isLoading } = useAuth();
+export default function App() {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (isLoading) {
+  useEffect(() => {
+    // Vérification initiale de la session
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+      } catch (err) {
+        console.error("Session init error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initSession();
+
+    // Écouter les changements d'auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-[#050505]">
-        <Loader2 className="h-8 w-8 animate-spin text-gold" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-gold mx-auto" />
+          <p className="text-white/50 font-bold uppercase tracking-widest text-xs">Chargement...</p>
+        </div>
       </div>
     );
   }
 
-  return (
-    <Switch>
-      <Route path="/">
-        <Dashboard />
-      </Route>
-      <Route path="/orders">
-        <Orders />
-      </Route>
-      <Route path="/calendar">
-        <CalendarPage />
-      </Route>
-      <Route path="/tasks">
-        <Tasks />
-      </Route>
-      <Route path="/drive">
-        <Drive />
-      </Route>
-      <Route path="/resources">
-        <ResourcesPage />
-      </Route>
-      <Route path="/complaints">
-        <ComplaintsPage />
-      </Route>
-      <Route path="/profile">
-        <ProfilePage />
-      </Route>
-      <Route path="/messages">
-        <Messages />
-      </Route>
-      <Route path="/models">
-        <Models />
-      </Route>
-      <Route path="/logs">
-        <LogsPage />
-      </Route>
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+  // PROTECTION DE L'AFFICHAGE : Si pas de session, on force le login
+  if (!session) {
+    return <Landing />;
+  }
 
-export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <InactivityHandler />
-        <Router />
+        <Switch>
+          <Route path="/">
+            <Dashboard />
+          </Route>
+          <Route path="/orders">
+            <Orders />
+          </Route>
+          <Route path="/calendar">
+            <CalendarPage />
+          </Route>
+          <Route path="/tasks">
+            <Tasks />
+          </Route>
+          <Route path="/drive">
+            <Drive />
+          </Route>
+          <Route path="/resources">
+            <ResourcesPage />
+          </Route>
+          <Route path="/complaints">
+            <ComplaintsPage />
+          </Route>
+          <Route path="/profile">
+            <ProfilePage />
+          </Route>
+          <Route path="/messages">
+            <Messages />
+          </Route>
+          <Route path="/models">
+            <Models />
+          </Route>
+          <Route path="/logs">
+            <LogsPage />
+          </Route>
+          <Route component={NotFound} />
+        </Switch>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
