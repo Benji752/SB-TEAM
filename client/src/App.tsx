@@ -23,7 +23,6 @@ import { supabase } from "@/lib/supabaseClient";
 
 function InactivityHandler() {
   const [user, setUser] = useState<any>(null);
-  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -43,28 +42,40 @@ function InactivityHandler() {
     if (!user) return;
 
     let timeout: NodeJS.Timeout;
-    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes
+    const INACTIVITY_LIMIT = 1 * 60 * 1000; // 1 minute pour le test (sera 15 min après)
+
+    const handleLogout = async () => {
+      try {
+        // 1. Log l'activité
+        await supabase.from('activity_logs').insert({
+          user_id: user.id,
+          action: 'LOGOUT',
+          details: 'Déconnexion automatique (inactivité)'
+        });
+
+        // 2. Mettre is_online à false
+        await supabase.from('profiles').update({ is_online: false }).eq('id', user.id);
+
+        // 3. Nettoyer session et déconnecter
+        sessionStorage.removeItem('login_logged');
+        localStorage.clear();
+        sessionStorage.clear();
+        await supabase.auth.signOut();
+        
+        alert("Vous avez été déconnecté pour inactivité.");
+        window.location.replace('/');
+      } catch (err) {
+        console.error("Auto logout error:", err);
+        window.location.replace('/');
+      }
+    };
 
     const resetTimer = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(async () => {
-        try {
-          await apiRequest("POST", "/api/auth-logs", { 
-            eventType: "LOGOUT", 
-            reason: "AUTO_TIMEOUT" 
-          });
-        } catch (e) {
-          console.error("Failed to log auto-logout", e);
-        } finally {
-          await supabase.auth.signOut();
-          localStorage.clear();
-          sessionStorage.clear();
-          window.location.href = "/";
-        }
-      }, INACTIVITY_LIMIT);
+      timeout = setTimeout(handleLogout, INACTIVITY_LIMIT);
     };
 
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'mousemove'];
     events.forEach(event => window.addEventListener(event, resetTimer));
     
     resetTimer();
