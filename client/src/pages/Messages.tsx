@@ -81,6 +81,16 @@ export default function Messages() {
     e.preventDefault();
     if (!messageText.trim() || !selectedUser || !currentUser) return;
 
+    // Vérification radicale de la session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert("Session expirée. Veuillez vous reconnecter.");
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.replace('/');
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('messages')
@@ -91,12 +101,22 @@ export default function Messages() {
           is_read: false
         });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes("Auth session missing")) {
+          window.location.replace('/');
+          return;
+        }
+        throw error;
+      }
       
       setMessageText("");
       await fetchMessages(selectedUser.id);
     } catch (err: any) {
       console.error("Error sending message:", err);
+      if (err.message?.includes("Auth session missing")) {
+        window.location.replace('/');
+        return;
+      }
       alert("Erreur lors de l'envoi");
     }
   };

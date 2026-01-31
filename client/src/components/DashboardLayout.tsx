@@ -24,8 +24,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuth();
 
   const handleLogout = () => {
+    // 1. Nettoyage brutal du navigateur
     localStorage.clear();
-    window.location.href = '/';
+    sessionStorage.clear();
+
+    // 2. Tentative de déconnexion serveur (en arrière-plan, on n'attend pas)
+    supabase.auth.signOut().catch(() => {});
+
+    // 3. Redirection IMMÉDIATE et FORCÉE
+    window.location.replace('/');
   };
 
   const menuItems = [
