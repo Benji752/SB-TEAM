@@ -15,6 +15,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import LogsPage from "@/pages/LogsPage";
 import Messages from "@/pages/Messages";
 import Models from "@/pages/Models";
+import Projects from "@/pages/Projects";
 import Landing from "@/pages/Landing";
 import { useEffect, useState } from "react";
 import { apiRequest } from "./lib/queryClient";
@@ -236,6 +237,9 @@ export default function App() {
               </Route>
               <Route path="/complaints">
                 <ComplaintsPage />
+              </Route>
+              <Route path="/projects">
+                <Projects />
               </Route>
               <Route path="/profile">
                 <ProfilePage />

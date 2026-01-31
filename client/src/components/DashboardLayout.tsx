@@ -11,7 +11,8 @@ import {
   User,
   Clock,
   MessageSquare,
-  Users
+  Users,
+  Briefcase
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     { label: "Tableau de bord", icon: LayoutDashboard, href: "/" },
+    { label: "Projets", icon: Briefcase, href: "/projects" },
     { label: "Commandes", icon: ShoppingCart, href: "/orders" },
     { label: "Ressources", icon: FileText, href: "/resources" },
     { label: "Messages", icon: MessageSquare, href: "/messages" },
