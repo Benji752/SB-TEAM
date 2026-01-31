@@ -96,22 +96,15 @@ export class DatabaseStorage implements IStorage {
 
   async getRecentTasks(limit: number): Promise<Task[]> {
     return await db.select().from(tasks)
-      .where(ne(tasks.status, "completed"))
+      .where(ne(tasks.isDone, true))
       .orderBy(desc(tasks.createdAt))
       .limit(limit);
   }
 
   async updateTaskStatus(id: number, status: string): Promise<Task> {
+    const isDone = status === 'completed';
     const [updatedTask] = await db.update(tasks)
-      .set({ status: status as any })
-      .where(eq(tasks.id, id))
-      .returning();
-    return updatedTask;
-  }
-
-  async updateTaskStatus(id: number, status: string): Promise<Task> {
-    const [updatedTask] = await db.update(tasks)
-      .set({ status: status as any })
+      .set({ isDone } as any)
       .where(eq(tasks.id, id))
       .returning();
     return updatedTask;
