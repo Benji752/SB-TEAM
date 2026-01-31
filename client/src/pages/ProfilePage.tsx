@@ -74,8 +74,11 @@ export default function ProfilePage() {
           <CardHeader className="bg-white/[0.02] border-b border-white/[0.05] p-8">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="relative group">
-                <Avatar className="h-32 w-32 border-2 border-gold/20">
-                  <AvatarImage src={user?.avatarUrl} />
+                <Avatar className="h-32 w-32 border-2 border-gold/20 overflow-hidden">
+                  <AvatarImage 
+                    src={user?.avatarUrl || user?.avatar_url} 
+                    className="object-cover w-full h-full"
+                  />
                   <AvatarFallback className="bg-[#0A0A0A] text-gold text-4xl">
                     <User size={48} />
                   </AvatarFallback>

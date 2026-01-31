@@ -145,8 +145,11 @@ export default function Messages() {
                     selectedUser?.id === profile.id ? 'bg-gold/10 border-gold/20' : 'hover:bg-white/[0.03]'
                   }`}
                 >
-                  <Avatar className="h-12 w-12 border border-white/10">
-                    <AvatarImage src={profile.avatar_url || profile.avatarUrl || ""} />
+                  <Avatar className="h-12 w-12 border border-white/10 overflow-hidden">
+                    <AvatarImage 
+                      src={profile.avatar_url || profile.avatarUrl || ""} 
+                      className="object-cover w-full h-full"
+                    />
                     <AvatarFallback className="bg-white/[0.05] text-gold font-bold">
                       {profile.username?.[0]?.toUpperCase()}
                     </AvatarFallback>
@@ -165,8 +168,11 @@ export default function Messages() {
           {selectedUser ? (
             <>
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
-                <Avatar className="h-10 w-10 border border-white/10">
-                  <AvatarImage src={selectedUser.avatar_url || selectedUser.avatarUrl || ""} />
+                <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
+                  <AvatarImage 
+                    src={selectedUser.avatar_url || selectedUser.avatarUrl || ""} 
+                    className="object-cover w-full h-full"
+                  />
                   <AvatarFallback className="bg-white/[0.05] text-gold font-bold">
                     {selectedUser.username?.[0]?.toUpperCase()}
                   </AvatarFallback>
