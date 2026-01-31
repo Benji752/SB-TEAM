@@ -136,7 +136,7 @@ export default function TeamPage() {
                 ) : (
                   <div className="h-full w-full flex flex-col items-center justify-center space-y-4 text-white/20">
                     <CalendarIcon className="h-16 w-16 opacity-5" />
-                    <span className="text-xs font-black uppercase tracking-[0.3em]">Aucun agenda public configuré pour ce membre</span>
+                    <span className="text-xs font-black uppercase tracking-[0.3em]">Pas de planning</span>
                   </div>
                 )}
                 <div className="absolute inset-0 pointer-events-none border-[20px] border-black/10 rounded-[2rem]" />
