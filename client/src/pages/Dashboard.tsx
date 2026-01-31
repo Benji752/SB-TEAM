@@ -163,7 +163,18 @@ export default function Dashboard() {
             <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Bonjour, {user?.firstName || 'Admin'} !</h1>
             <p className="text-muted-foreground text-lg">Voici l'état actuel de votre agence.</p>
           </div>
-          <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+          <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
+            setIsUpdateModalOpen(open);
+            if (open && manualData) {
+              setUpdateData({
+                hourlyRevenue: manualData.hourlyRevenue?.toString() || "",
+                subscribers: manualData.subscribers?.toString() || "",
+                stripScore: manualData.stripScore?.toString() || "",
+                favorites: manualData.favorites?.toString() || "",
+                isOnline: manualData.isOnline?.toString() || "false"
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button className="bg-gold hover:bg-gold/90 text-black font-bold h-11 gap-2">
                 <Edit2 size={16} /> Actualiser Stripchat
