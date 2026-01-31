@@ -32,31 +32,26 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     
     console.log("NUCLEAR LOGOUT INITIATED");
     
-    // 1. Vider TOUT immédiatement
     try {
+      // 1. Nettoyage brutal
       localStorage.clear();
       sessionStorage.clear();
       
-      // Tuer les cookies de manière exhaustive
+      // 2. Tuer les cookies
       const cookies = document.cookie.split(";");
       for (let i = 0; i < cookies.length; i++) {
         const cookie = cookies[i];
         const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname};`;
       }
     } catch (err) {
       console.error("Cleanup error:", err);
     }
 
-    // 2. Redirection brutale sans attendre
+    // 3. Redirection forcée
     window.location.replace('/');
-    
-    // 3. Backup de redirection au cas où replace échouerait (rare)
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 50);
   };
 
   const forceLogout = () => {
@@ -142,7 +137,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
           
           <Link href="/profile">
-            <a className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/[0.03] transition-colors">
+            <a className={`flex items-center gap-3 px-2 py-2 rounded-xl transition-colors group ${
+              location === "/profile" ? "bg-white/[0.05]" : "hover:bg-white/[0.03]"
+            }`}>
               <div className="h-10 w-10 flex items-center justify-center text-white/40 group-hover:text-white">
                 <User size={20} />
               </div>
