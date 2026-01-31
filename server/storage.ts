@@ -35,6 +35,7 @@ export interface IStorage {
   getRecentOrders(limit: number): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
   createOrder(order: InsertOrder): Promise<Order>;
+  updateOrderStatus(id: number, status: string): Promise<Order>;
   deleteOrder(id: number): Promise<void>;
 }
 
@@ -136,6 +137,14 @@ export class DatabaseStorage implements IStorage {
   async createOrder(order: InsertOrder): Promise<Order> {
     const [newOrder] = await db.insert(orders).values(order).returning();
     return newOrder;
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<Order> {
+    const [updatedOrder] = await db.update(orders)
+      .set({ status: status as any })
+      .where(eq(orders.id, id))
+      .returning();
+    return updatedOrder;
   }
 
   async deleteOrder(id: number): Promise<void> {

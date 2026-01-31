@@ -94,6 +94,17 @@ export default function Orders() {
     },
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const res = await apiRequest("PATCH", `/api/orders/${id}/status`, { status });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({ title: "Statut mis à jour", description: "Le statut de la commande a été modifié." });
+    },
+  });
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -247,13 +258,24 @@ export default function Orders() {
                     {order.amount} €
                   </TableCell>
                   <TableCell>
-                    <Badge className={`${
-                      order.status === 'paid' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
-                      order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
-                      'bg-red-500/10 text-red-500 border-red-500/20'
-                    } text-[8px] font-black uppercase tracking-widest`}>
-                      {order.status === 'paid' ? 'Payé' : order.status === 'pending' ? 'En attente' : 'Annulé'}
-                    </Badge>
+                    <Select
+                      defaultValue={order.status}
+                      onValueChange={(value) => updateStatusMutation.mutate({ id: order.id, status: value })}
+                      disabled={updateStatusMutation.isPending}
+                    >
+                      <SelectTrigger className={`h-8 w-[130px] border-none text-[8px] font-black uppercase tracking-widest ${
+                        order.status === 'paid' ? 'bg-green-500/10 text-green-500' : 
+                        order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' : 
+                        'bg-red-500/10 text-red-500'
+                      }`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
+                        <SelectItem value="paid">Payé</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="cancelled">Annulé</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button 
