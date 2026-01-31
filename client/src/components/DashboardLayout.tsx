@@ -24,14 +24,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
+      // Ignore log errors
       await apiRequest("POST", "/api/auth-logs", { 
         eventType: "LOGOUT", 
         reason: "MANUEL" 
-      });
+      }).catch(e => console.error("Logging failed", e));
+      
+      // Force local cleanup
+      localStorage.clear();
+      
+      // Force Supabase cleanup
+      await supabase.auth.signOut().catch(() => {});
+      
     } catch (e) {
-      console.error("Failed to log manual logout", e);
+      console.error("Force logout error", e);
     } finally {
-      await logout();
+      // Nuclear redirection
+      window.location.href = '/';
     }
   };
 

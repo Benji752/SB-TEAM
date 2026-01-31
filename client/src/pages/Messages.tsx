@@ -100,13 +100,28 @@ export default function Messages() {
     }
   }, [messages]);
 
+  // Check session on load
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = '/';
+      }
+    };
+    checkSession();
+  }, []);
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageText.trim() || (!selectedContactId && !selectedChannelId) || isSupervision) return;
 
     try {
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-      if (authError || !authUser) throw new Error("Erreur d'authentification : " + authError?.message);
+      if (authError || !authUser) {
+        console.error("Auth missing during send", authError);
+        window.location.href = '/';
+        return;
+      }
 
       await sendMessage.mutateAsync(messageText);
       setMessageText("");

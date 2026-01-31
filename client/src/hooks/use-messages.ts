@@ -11,6 +11,7 @@ export function useMessages(recipientId?: string, channelId?: string, isSupervis
   const { data: contacts, isLoading: isLoadingContacts } = useQuery({
     queryKey: ["contacts", user?.id],
     queryFn: async () => {
+      // Fetch all profiles without status filter
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, avatar_url, role')
