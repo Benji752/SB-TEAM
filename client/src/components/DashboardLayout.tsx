@@ -33,6 +33,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     console.log("NUCLEAR LOGOUT INITIATED");
     
     try {
+      if (user?.id) {
+        supabase.from('profiles').update({ is_online: false }).eq('id', user.id);
+      }
       // 1. Nettoyage brutal
       localStorage.clear();
       sessionStorage.clear();
@@ -123,15 +126,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-6 border-t border-white/[0.08] space-y-4 bg-white/[0.01]">
           <div className="px-2 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05]">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
-                <AvatarImage 
-                  src={user?.avatarUrl || user?.avatar_url} 
-                  className="object-cover w-full h-full"
-                />
-                <AvatarFallback className="bg-[#0A0A0A] text-gold uppercase">
-                  {user?.username?.substring(0, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
+                  <AvatarImage 
+                    src={user?.avatarUrl || user?.avatar_url} 
+                    className="object-cover w-full h-full"
+                  />
+                  <AvatarFallback className="bg-[#0A0A0A] text-gold uppercase">
+                    {user?.username?.substring(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg" />
+              </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-bold text-white truncate">{user?.username}</span>
                 <span className="text-[10px] text-gold font-black uppercase tracking-widest">{user?.role}</span>

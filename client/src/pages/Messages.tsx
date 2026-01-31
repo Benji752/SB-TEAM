@@ -145,15 +145,20 @@ export default function Messages() {
                     selectedUser?.id === profile.id ? 'bg-gold/10 border-gold/20' : 'hover:bg-white/[0.03]'
                   }`}
                 >
-                  <Avatar className="h-12 w-12 border border-white/10 overflow-hidden">
-                    <AvatarImage 
-                      src={profile.avatar_url || profile.avatarUrl || ""} 
-                      className="object-cover w-full h-full"
-                    />
-                    <AvatarFallback className="bg-white/[0.05] text-gold font-bold">
-                      {profile.username?.[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-12 w-12 border border-white/10 overflow-hidden">
+                      <AvatarImage 
+                        src={profile.avatar_url || profile.avatarUrl || ""} 
+                        className="object-cover w-full h-full"
+                      />
+                      <AvatarFallback className="bg-white/[0.05] text-gold font-bold">
+                        {profile.username?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {profile.is_online && (
+                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-white truncate">{profile.username}</div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-widest">{profile.role}</div>
@@ -168,15 +173,20 @@ export default function Messages() {
           {selectedUser ? (
             <>
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
-                <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
-                  <AvatarImage 
-                    src={selectedUser.avatar_url || selectedUser.avatarUrl || ""} 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback className="bg-white/[0.05] text-gold font-bold">
-                    {selectedUser.username?.[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
+                    <AvatarImage 
+                      src={selectedUser.avatar_url || selectedUser.avatarUrl || ""} 
+                      className="object-cover w-full h-full"
+                    />
+                    <AvatarFallback className="bg-white/[0.05] text-gold font-bold">
+                      {selectedUser.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {selectedUser.is_online && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg" />
+                  )}
+                </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
                   <p className="text-[10px] text-gold uppercase tracking-widest font-black">Conversation privée</p>
