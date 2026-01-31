@@ -70,14 +70,21 @@ export default function Dashboard() {
   // Fetch API data via proxy
   const fetchApiData = async () => {
     try {
-      const res = await apiRequest("GET", "/api/monitor/wildgirl");
+      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+      
+      const res = await fetch(proxyUrl);
       if (res.ok) {
-        const data = await res.json();
-        setApiData(data);
+        const wrapper = await res.json();
+        if (wrapper.contents) {
+          const realData = JSON.parse(wrapper.contents);
+          if (realData) {
+            setApiData(realData);
+          }
+        }
       }
     } catch (e) {
       console.error("API fetch failed, keeping apiData as null", e);
-      // We don't touch manualData here
     }
   };
 
@@ -101,12 +108,12 @@ export default function Dashboard() {
     }
   });
 
-  // DISPLAY LOGIC (THE BRAIN)
+  // DISPLAY LOGIC (THE "BEST OF")
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
   const displaySubscribers = manualData?.subscribers || 0;
-  const displayStripScore = apiData?.stripScore || manualData?.stripScore || 0;
-  const displayFavorites = apiData?.favorites || manualData?.favorites || 0;
-  const isOnline = manualData?.isOnline === true || apiData?.isOnline === true;
+  const displayStripScore = (apiData?.model?.stripScore > 0) ? apiData.model.stripScore : (manualData?.stripScore || 0);
+  const displayFavorites = (apiData?.model?.favoritesCount > 0) ? apiData.model.favoritesCount : (manualData?.favorites || 0);
+  const isOnline = apiData?.cam?.isLive === true || manualData?.isOnline === true;
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
