@@ -1,24 +1,24 @@
 import { db } from "./db";
 import {
   profiles, models, tasks, agencyStats, orders,
-  type Profile, type InsertProfile,
-  type Model, type InsertModel,
+  type Profile, type User,
+  type Model,
   type Task, type InsertTask,
-  type AgencyStats, type Order, type InsertOrder
+  type AgencyStats, type Order
 } from "@shared/schema";
 import { eq, desc, ne } from "drizzle-orm";
 
 export interface IStorage {
   // Profiles
   getProfile(id: string): Promise<Profile | undefined>;
-  createProfile(profile: InsertProfile): Promise<Profile>;
-  updateProfile(id: string, updates: Partial<InsertProfile>): Promise<Profile>;
+  createProfile(profile: any): Promise<Profile>;
+  updateProfile(id: string, updates: any): Promise<Profile>;
   
   // Models
   getModels(): Promise<Model[]>;
   getModel(id: number): Promise<Model | undefined>;
-  createModel(model: InsertModel): Promise<Model>;
-  updateModel(id: number, updates: Partial<InsertModel>): Promise<Model>;
+  createModel(model: any): Promise<Model>;
+  updateModel(id: number, updates: any): Promise<Model>;
   deleteModel(id: number): Promise<void>;
 
   // Tasks
@@ -38,20 +38,20 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // Profiles
   async getProfile(id: string): Promise<Profile | undefined> {
-    const [profile] = await db.select().from(profiles).where(eq(profiles.id, id));
+    const [profile] = await db.select().from(profiles).where(eq(profiles.id, parseInt(id)));
     return profile;
   }
 
-  async createProfile(profile: InsertProfile): Promise<Profile> {
+  async createProfile(profile: any): Promise<Profile> {
     const [newProfile] = await db.insert(profiles).values(profile).returning();
     return newProfile;
   }
 
-  async updateProfile(id: string, updates: Partial<InsertProfile>): Promise<Profile> {
+  async updateProfile(id: string, updates: any): Promise<Profile> {
     const [updated] = await db
       .update(profiles)
       .set(updates)
-      .where(eq(profiles.id, id))
+      .where(eq(profiles.id, parseInt(id)))
       .returning();
     return updated;
   }
@@ -66,12 +66,12 @@ export class DatabaseStorage implements IStorage {
     return model;
   }
 
-  async createModel(model: InsertModel): Promise<Model> {
+  async createModel(model: any): Promise<Model> {
     const [newModel] = await db.insert(models).values(model).returning();
     return newModel;
   }
 
-  async updateModel(id: number, updates: Partial<InsertModel>): Promise<Model> {
+  async updateModel(id: number, updates: any): Promise<Model> {
     const [updated] = await db
       .update(models)
       .set(updates)

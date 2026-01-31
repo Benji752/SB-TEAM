@@ -67,6 +67,7 @@ export const tasks = pgTable("tasks", {
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true, createdAt: true });
 export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // Agency Stats
 export const agencyStats = pgTable("agency_stats", {

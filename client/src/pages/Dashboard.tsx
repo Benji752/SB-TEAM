@@ -377,6 +377,71 @@ export default function Dashboard() {
             </div>
           </Card>
 
+          {/* Side Stats */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
+            {stripStats.slice(0, 2).map((stat, i) => (
+              <Card key={i} className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
+                <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
+                  <stat.icon size={18} className="text-gold" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
+                <span className="text-3xl font-black text-white tracking-tighter italic">
+                  {stat.value}
+                </span>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <Card className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]">
+          <div className="space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
+                <TrendingUp size={18} className="text-gold" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
+                <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire (€)</p>
+              </div>
+            </div>
+            
+            <div className="h-[400px] w-full mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                  <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: "rgba(10, 10, 10, 0.95)", 
+                      border: "1px solid rgba(255, 255, 255, 0.08)", 
+                      borderRadius: "16px", 
+                      backdropFilter: "blur(10px)",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      color: "#fff"
+                    }} 
+                    itemStyle={{ color: "#C9A24D" }}
+                    formatter={(value: any) => [`${value} €`, "Revenu"]}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke="#C9A24D" 
+                    fillOpacity={1} 
+                    fill="url(#colorRevenueDashboard)" 
+                    strokeWidth={4} 
+                    activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
 
@@ -403,7 +468,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {ordersLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
-              ) : recentOrders && recentOrders.length > 0 ? (
+              ) : recentOrders && Array.isArray(recentOrders) && recentOrders.length > 0 ? (
                 recentOrders.map((order: any) => (
                   <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
                     <div className="space-y-1">
@@ -448,7 +513,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {tasksLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
-              ) : recentTasks && recentTasks.length > 0 ? (
+              ) : recentTasks && Array.isArray(recentTasks) && recentTasks.length > 0 ? (
                 recentTasks.map((task: any) => (
                   <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
                     <div className="flex items-center gap-4">
