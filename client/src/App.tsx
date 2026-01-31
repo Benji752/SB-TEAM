@@ -13,6 +13,8 @@ import ResourcesPage from "@/pages/ResourcesPage";
 import ComplaintsPage from "@/pages/ComplaintsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import LogsPage from "@/pages/LogsPage";
+import Messages from "@/pages/Messages";
+import Models from "@/pages/Models";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { apiRequest } from "./lib/queryClient";
@@ -38,9 +40,10 @@ function InactivityHandler() {
           });
         } catch (e) {
           console.error("Failed to log auto-logout", e);
+        } finally {
+          await logout();
+          setLocation("/");
         }
-        await logout();
-        setLocation("/");
       }, INACTIVITY_LIMIT);
     };
 
@@ -97,6 +100,12 @@ function Router() {
       </Route>
       <Route path="/logs">
         <LogsPage />
+      </Route>
+      <Route path="/messages">
+        <Messages />
+      </Route>
+      <Route path="/models">
+        <Models />
       </Route>
       <Route component={NotFound} />
     </Switch>

@@ -9,7 +9,9 @@ import {
   AlertCircle,
   LogOut,
   User,
-  History
+  History,
+  MessageSquare,
+  Users
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -28,20 +30,24 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       });
     } catch (e) {
       console.error("Failed to log manual logout", e);
+    } finally {
+      await logout();
     }
-    await logout();
   };
 
   const menuItems = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/" },
+    { label: "Tableau de bord", icon: LayoutDashboard, href: "/" },
     { label: "Commandes", icon: ShoppingCart, href: "/orders" },
-    { label: "Calendrier", icon: Calendar, href: "/calendar" },
-    { label: "Tasks", icon: CheckSquare, href: "/tasks" },
-    { label: "Drive", icon: HardDrive, href: "/drive" },
     { label: "Ressources", icon: FileText, href: "/resources" },
-    { label: "Plaintes", icon: AlertCircle, href: "/complaints" },
-    { label: "Logs", icon: History, href: "/logs" },
+    { label: "Réclamations", icon: AlertCircle, href: "/complaints" },
+    { label: "Messages", icon: MessageSquare, href: "/messages" },
+    { label: "Calendrier", icon: Calendar, href: "/calendar" },
+    { label: "Modèles", icon: Users, href: "/models" },
+    { label: "Tâches", icon: CheckSquare, href: "/tasks" },
+    { label: "Drive", icon: HardDrive, href: "/drive" },
   ];
+
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="flex min-h-screen bg-[#050505]">
@@ -69,6 +75,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </a>
             </Link>
           ))}
+          
+          {isAdmin && (
+            <Link href="/logs">
+              <a className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+                location === "/logs" 
+                  ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                  : "text-white/40 hover:text-white hover:bg-white/[0.03]"
+              }`}>
+                <History size={20} className={location === "/logs" ? "text-black" : "group-hover:text-gold"} />
+                <span className="text-sm font-bold uppercase tracking-widest">Logs</span>
+              </a>
+            </Link>
+          )}
         </nav>
 
         <div className="p-6 border-t border-white/[0.08] space-y-4 bg-white/[0.01]">
