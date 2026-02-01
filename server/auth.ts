@@ -13,12 +13,19 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login-demo", (req, res) => {
     const { role } = req.body;
+    
+    // Assign correct userId based on role for presence tracking
+    // admin/staff → Nico (userId: 1)
+    // model → Laura (userId: 2)
+    const userId = role === "model" ? 2 : 1;
+    const firstName = role === "model" ? "Laura" : "Nico";
+    
     const user = { 
-      id: 1, 
-      username: `demo_${role}`, 
+      id: userId, 
+      username: firstName, 
       role,
-      firstName: role.charAt(0).toUpperCase() + role.slice(1),
-      lastName: "Demo"
+      firstName,
+      lastName: role === "model" ? "Model" : "Admin"
     };
     (req.session as any).user = user;
     res.json(user);
