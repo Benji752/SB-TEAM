@@ -48,6 +48,11 @@ export function HeartbeatTracker() {
         ? parseInt(rawUserId, 10)
         : uuidToInt(String(rawUserId));
 
+    // Get username from user object (email prefix or username field)
+    const userEmail = (user as any)?.email;
+    const userName = (user as any)?.username || (user as any)?.name;
+    const displayName = userName || (userEmail ? userEmail.split('@')[0] : null);
+
     const sendHeartbeat = async () => {
       const timeSinceLastActivity = Date.now() - lastActivityRef.current;
       
@@ -57,8 +62,11 @@ export function HeartbeatTracker() {
       }
 
       try {
-        await apiRequest("POST", "/api/gamification/heartbeat", { userId: numericUserId });
-        console.log('💓 Heartbeat API OK pour userId:', numericUserId);
+        await apiRequest("POST", "/api/gamification/heartbeat", { 
+          userId: numericUserId,
+          username: displayName
+        });
+        console.log('💓 Heartbeat API OK pour userId:', numericUserId, 'username:', displayName);
         
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/profile", numericUserId] });

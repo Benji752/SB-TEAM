@@ -717,26 +717,26 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   // Get XP activity log with usernames
   app.get("/api/gamification/activity", async (req, res) => {
     try {
-      // Known team members (same as leaderboard)
-      const TEAM_MEMBERS: Record<number, string> = {
-        1: "Nico",
-        2: "Laura",
-      };
+      // Get activities with user info via SQL JOIN
+      const activitiesResult = await db.execute(sql`
+        SELECT 
+          xal.id,
+          xal.user_id as "userId",
+          xal.action_type as "actionType",
+          xal.xp_gained as "xpGained",
+          xal.description,
+          xal.created_at as "createdAt",
+          COALESCE(gp.username, p.username, 'Utilisateur Inconnu') as username
+        FROM xp_activity_log xal
+        LEFT JOIN gamification_profiles gp ON xal.user_id = gp.user_id
+        LEFT JOIN profiles p ON CAST(xal.user_id AS TEXT) = p.id
+        ORDER BY xal.created_at DESC
+        LIMIT 20
+      `);
       
-      // Simple query without problematic JOIN
-      const activities = await db.select()
-        .from(xpActivityLog)
-        .orderBy(desc(xpActivityLog.createdAt))
-        .limit(20);
-      
-      // Add username in JavaScript (no SQL type issues)
-      const result = activities.map(a => ({
-        ...a,
-        username: TEAM_MEMBERS[a.userId] || `User ${a.userId}`
-      }));
-      
-      res.json(result);
+      res.json(activitiesResult.rows);
     } catch (error: any) {
+      console.error("Activity error:", error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -865,12 +865,15 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   // Heartbeat - auto-track presence (+2 XP every 5 minutes)
   app.post("/api/gamification/heartbeat", async (req, res) => {
     try {
-      const schema = z.object({ userId: z.number() });
+      const schema = z.object({ 
+        userId: z.number(),
+        username: z.string().optional()
+      });
       const result = schema.safeParse(req.body);
       if (!result.success) {
         return res.status(400).json({ error: "Invalid request body" });
       }
-      const { userId } = result.data;
+      const { userId, username } = result.data;
       
       // Get user's gamification profile (create if doesn't exist)
       let profile = await db.select().from(gamificationProfiles)
@@ -886,6 +889,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         
         const newProfile = await db.insert(gamificationProfiles).values({
           userId,
+          username: username || null,
           xpTotal: 0,
           level: 1,
           currentStreak: 0,
@@ -894,10 +898,14 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         profile = newProfile;
       }
       
-      // Update lastActiveAt timestamp (this determines online status)
+      // Update lastActiveAt timestamp and always update username if provided
       const now = new Date();
+      const updateData: any = { lastActiveAt: now, updatedAt: now };
+      if (username) {
+        updateData.username = username;
+      }
       await db.update(gamificationProfiles)
-        .set({ lastActiveAt: now, updatedAt: now })
+        .set(updateData)
         .where(eq(gamificationProfiles.userId, userId));
       
       // Award 2 XP for being active

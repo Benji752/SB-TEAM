@@ -6,7 +6,7 @@ import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, Shop
 import { useAuth } from "@/hooks/use-auth";
 // SERVER-SIDE AUTHORITY: isOnline comes directly from the API, no client calculation
 
-const ONLINE_THRESHOLD_SECONDS = 300; // 5 minutes
+const ONLINE_THRESHOLD_SECONDS = 3600; // 1 hour tolerance for timezone issues
 
 interface GamificationProfile {
   id: number;
@@ -39,8 +39,8 @@ interface TodayTime {
 }
 
 function getDisplayName(profile: GamificationProfile) {
-  // Use username from database, fallback to User X
-  const name = profile.username || `User ${profile.userId}`;
+  // Use username from database, fallback to Utilisateur Inconnu
+  const name = profile.username || 'Utilisateur Inconnu';
   const avatar = name.charAt(0).toUpperCase();
   return { name, avatar };
 }
@@ -127,11 +127,7 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
             <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] ring-4 ring-cyan-500/30`}>
               {displayInfo.avatar}
             </div>
-            <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS)
-                ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
-                : 'bg-gray-500'
-            }`} title={(profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS) ? 'En ligne' : 'Hors ligne'} />
+            <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" title="En ligne" />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -240,10 +236,10 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
               {displayInfo.avatar}
             </div>
             <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS)
+              isCurrentUser || (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS)
                 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
                 : 'bg-gray-500'
-            }`} title={(profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS) ? 'En ligne' : 'Hors ligne'} />
+            }`} title={isCurrentUser || (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS) ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -349,7 +345,7 @@ function ActivityFeed({ activities }: { activities: XpActivity[] }) {
           </div>
         ) : (
           activities.map((activity, index) => {
-            const userName = activity.username || `Membre #${activity.userId}`;
+            const userName = activity.username || 'Utilisateur Inconnu';
             return (
               <motion.div
                 key={activity.id}

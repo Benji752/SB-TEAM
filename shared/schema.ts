@@ -215,6 +215,7 @@ export type InsertAiChatHistory = z.infer<typeof insertAiChatHistorySchema>;
 export const gamificationProfiles = pgTable("gamification_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().unique(),
+  username: text("username"),
   xpTotal: integer("xp_total").default(0).notNull(),
   level: integer("level").default(1).notNull(),
   currentStreak: integer("current_streak").default(0).notNull(),
