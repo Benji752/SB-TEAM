@@ -69,6 +69,7 @@ export default function Dashboard() {
   // Separate states for Manual (Supabase) and API (Stripchat)
   const [manualData, setManualData] = useState<any>(null);
   const [apiData, setApiData] = useState<any>(null);
+  const [imageValid, setImageValid] = useState(false);
 
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/model-stats"],
@@ -146,7 +147,8 @@ export default function Dashboard() {
   const displayStripScore = (apiData?.model?.stripScore > 0) ? apiData.model.stripScore : (manualData?.stripScore || 0);
   const displayFavorites = (apiData?.model?.favoritesCount > 0) ? apiData.model.favoritesCount : (manualData?.favorites || 0);
   const viewersCount = apiData?.model?.viewersCount || 0;
-  const isOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true || manualData?.isOnline === true;
+  const apiOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true;
+  const isOnline = apiOnline || imageValid || manualData?.isOnline === true;
   const avatarUrl = apiData?.model?.avatarUrl;
   const roomTitle = apiData?.model?.topic || "Aucun sujet défini";
 
@@ -323,7 +325,9 @@ export default function Dashboard() {
                       src={`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg?t=${imageTimestamp}`}
                       alt="Live Snapshot" 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      onLoad={() => setImageValid(true)}
                       onError={(e) => {
+                        setImageValid(false);
                         (e.target as HTMLImageElement).src = avatarUrl || '';
                         (e.target as HTMLImageElement).className = "w-full h-full object-cover blur-md opacity-50";
                       }}
