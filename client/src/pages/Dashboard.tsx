@@ -270,7 +270,7 @@ export default function Dashboard() {
             <div className="relative h-full flex flex-col md:flex-row">
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
                 <img 
-                  src={`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg?t=${imageTimestamp}`}
+                  src={`https://wsrv.nl/?url=${encodeURIComponent(`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg`)}&t=${imageTimestamp}`}
                   alt="Live Snapshot" 
                   className={cn(
                     "w-full h-full object-cover group-hover:scale-105 transition-transform duration-700",
