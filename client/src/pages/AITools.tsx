@@ -35,7 +35,7 @@ interface ChatMessage {
 
 const WELCOME_MESSAGE: ChatMessage = { 
   role: "assistant", 
-  content: "Bonjour ! Je suis l'IA de SB Digital. Je connais ton business en temps réel :\n\n• **Tes commandes** : Je sais qui sont tes derniers clients\n• **Ton CA** : Je connais les revenus du jour et du mois\n• **Tes modèles** : Je suis le statut de chaque talent\n\nJe peux aussi :\n• Résoudre tes problèmes techniques (Stripchat, OBS...)\n• Analyser tes photos (note /10 + conseils)\n• Rédiger tes posts\n\nDemande-moi \"C'est qui le dernier client ?\" pour tester !" 
+  content: "NOVA en ligne.\n\nJ'ai accès à tout : commandes, revenus, modèles, stats Stripchat. En temps réel.\n\nEnvoie une photo, je l'analyse. Pose une question business, j'ai la réponse. Besoin d'un post qui convertit ? Je rédige.\n\nOn commence ?" 
 };
 
 export default function AITools() {
@@ -241,8 +241,8 @@ export default function AITools() {
               <Bot size={20} className="text-black" />
             </div>
             <div className="flex-1">
-              <h2 className="text-white font-bold">Assistant IA SB Digital</h2>
-              <p className="text-white/40 text-xs">GPT-4o Vision • Mémoire activée • Connait ton business</p>
+              <h2 className="text-white font-bold">NOVA</h2>
+              <p className="text-white/40 text-xs">Intelligence d'élite • Vision GPT-4o • Données temps réel</p>
             </div>
             <Button
               variant="ghost"
