@@ -605,7 +605,9 @@ export default function Leaderboard() {
                 animate="visible"
                 className="space-y-5"
               >
-                {mappedLeaderboard.map((profile, index) => (
+                {mappedLeaderboard
+                    .filter(profile => profile.username && profile.username !== 'Utilisateur Inconnu')
+                    .map((profile, index) => (
                     <LeaderboardCard 
                       key={profile.id} 
                       profile={profile} 

@@ -102,6 +102,12 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       // Delete all work sessions
       await db.delete(workSessions).where(sql`1=1`);
 
+      // Purge orphan/ghost profiles
+      await db.execute(sql`
+        DELETE FROM gamification_profiles 
+        WHERE username IS NULL OR username = '' OR username = 'Utilisateur Inconnu'
+      `);
+
       console.log("[RESET] Season reset by:", username || userId);
       return res.json({ success: true, message: `Saison Reset par ${username || 'Admin'}!` });
     } catch (error: any) {
