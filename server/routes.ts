@@ -649,23 +649,21 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         .from(gamificationProfiles)
         .orderBy(desc(gamificationProfiles.xpTotal));
       
-      // Determine online status: lastActiveAt within last 5 minutes
-      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
       const now = Date.now();
       
-      // Filter to team members only and add data
+      // Filter to team members only and add TIMEAGO data
       const leaderboard = allProfiles
         .filter(p => TEAM_MEMBERS[p.userId] !== undefined)
         .map(p => {
           const teamMember = TEAM_MEMBERS[p.userId];
           const lastActive = p.lastActiveAt ? new Date(p.lastActiveAt).getTime() : 0;
-          const isOnline = (now - lastActive) < ONLINE_THRESHOLD_MS;
+          const secondsSinceLastPing = p.lastActiveAt ? Math.floor((now - lastActive) / 1000) : null;
           
           return {
             ...p,
             username: teamMember.name,
             role: teamMember.role,
-            isOnline
+            secondsSinceLastPing  // TIMEAGO: Frontend judges < 300 = online
           };
         });
       
@@ -1040,21 +1038,25 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         lastActiveAt: gamificationProfiles.lastActiveAt
       }).from(gamificationProfiles);
       
-      // SERVER-SIDE AUTHORITY: 15 minutes threshold for network tolerance
-      const ONLINE_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
-      const now = Date.now();
-      
+      // TIMEAGO APPROACH: Return seconds since last ping (no timezone issues!)
       const presenceMap = allProfiles.reduce((acc, profile) => {
-        const lastActiveTime = profile.lastActiveAt ? new Date(profile.lastActiveAt).getTime() : 0;
-        const isOnline = profile.lastActiveAt ? (now - lastActiveTime) < ONLINE_THRESHOLD_MS : false;
+        let secondsSinceLastPing: number | null = null;
+        
+        if (profile.lastActiveAt) {
+          // Calculate difference in seconds using server time
+          const lastActiveTime = new Date(profile.lastActiveAt).getTime();
+          const now = Date.now();
+          secondsSinceLastPing = Math.floor((now - lastActiveTime) / 1000);
+        }
         
         acc[profile.userId] = {
           lastActiveAt: profile.lastActiveAt,
-          isOnline  // THIS is the single source of truth
+          secondsSinceLastPing  // Frontend will judge: < 300 = online
         };
         return acc;
-      }, {} as Record<number, { lastActiveAt: Date | null; isOnline: boolean }>);
+      }, {} as Record<number, { lastActiveAt: Date | null; secondsSinceLastPing: number | null }>);
       
+      console.log('📊 Presence map:', JSON.stringify(presenceMap));
       res.json(presenceMap);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

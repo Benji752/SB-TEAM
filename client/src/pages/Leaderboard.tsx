@@ -6,6 +6,8 @@ import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, Shop
 import { useAuth } from "@/hooks/use-auth";
 // SERVER-SIDE AUTHORITY: isOnline comes directly from the API, no client calculation
 
+const ONLINE_THRESHOLD_SECONDS = 300; // 5 minutes
+
 interface GamificationProfile {
   id: number;
   userId: number;
@@ -16,7 +18,7 @@ interface GamificationProfile {
   badges: string[];
   role?: string | null;
   username?: string | null;
-  isOnline?: boolean;
+  secondsSinceLastPing?: number | null;  // TIMEAGO approach
   lastActiveAt?: string | null;
 }
 
@@ -126,10 +128,10 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
               {displayInfo.avatar}
             </div>
             <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              profile.isOnline 
+              (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS)
                 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
                 : 'bg-gray-500'
-            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
+            }`} title={(profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS) ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -238,10 +240,10 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
               {displayInfo.avatar}
             </div>
             <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              profile.isOnline 
+              (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS)
                 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
                 : 'bg-gray-500'
-            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
+            }`} title={(profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS) ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">

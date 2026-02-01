@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
-// SERVER-SIDE AUTHORITY: NO date calculations on client!
-// The server sends isOnline: true/false, we just READ it.
+// TIMEAGO APPROACH: Server sends secondsSinceLastPing, we judge locally
+// No timezone issues - just a simple number comparison!
+
+const ONLINE_THRESHOLD_SECONDS = 300; // 5 minutes
 
 interface PresenceData {
   lastActiveAt: string | null;
-  isOnline: boolean;  // Calculated by SERVER only
+  secondsSinceLastPing: number | null;  // Server calculates this
 }
 
 type PresenceMap = Record<string | number, PresenceData>;
@@ -18,10 +20,15 @@ export function useUserPresence(userId: number | string | null | undefined) {
     staleTime: 1000,
   });
 
-  // READ server value directly - NO client-side calculation
+  // TIMEAGO: Simple comparison - no Date objects!
+  const isOnline = data?.secondsSinceLastPing !== null && 
+                   data?.secondsSinceLastPing !== undefined &&
+                   data.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS;
+
   return {
-    isOnline: data?.isOnline ?? false,
+    isOnline,
     lastActiveAt: data?.lastActiveAt || null,
+    secondsSinceLastPing: data?.secondsSinceLastPing ?? null,
     isLoading,
     error
   };
@@ -39,18 +46,22 @@ export function useAllUsersPresence() {
     const numKey = Number(userId);
     
     if (!data) {
-      return { isOnline: false, lastActiveAt: null };
+      return { isOnline: false, lastActiveAt: null, secondsSinceLastPing: null };
     }
     
     const entry = data[key] || data[numKey];
     if (!entry) {
-      return { isOnline: false, lastActiveAt: null };
+      return { isOnline: false, lastActiveAt: null, secondsSinceLastPing: null };
     }
     
-    // READ server value directly - NO client-side calculation
+    // TIMEAGO: < 300 seconds = ONLINE (green)
+    const isOnline = entry.secondsSinceLastPing !== null && 
+                     entry.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS;
+    
     return {
-      isOnline: entry.isOnline,  // Direct from server
-      lastActiveAt: entry.lastActiveAt
+      isOnline,
+      lastActiveAt: entry.lastActiveAt,
+      secondsSinceLastPing: entry.secondsSinceLastPing
     };
   };
 
