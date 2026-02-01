@@ -1,26 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
-import { isUserOnline } from '@/lib/onlineStatus';
+
+// SERVER-SIDE AUTHORITY: NO date calculations on client!
+// The server sends isOnline: true/false, we just READ it.
 
 interface PresenceData {
-  userId: number | string;
   lastActiveAt: string | null;
-  isOnline: boolean;
+  isOnline: boolean;  // Calculated by SERVER only
 }
 
-type PresenceMap = Record<string | number, { lastActiveAt: string | null; isOnline: boolean }>;
+type PresenceMap = Record<string | number, PresenceData>;
 
 export function useUserPresence(userId: number | string | null | undefined) {
   const { data, isLoading, error } = useQuery<PresenceData>({
     queryKey: ['/api/user/presence', userId],
     enabled: !!userId,
-    refetchInterval: 30000,
-    staleTime: 15000,
+    refetchInterval: 3000,
+    staleTime: 1000,
   });
 
-  const isOnline = data?.lastActiveAt ? isUserOnline(data.lastActiveAt) : false;
-
+  // READ server value directly - NO client-side calculation
   return {
-    isOnline,
+    isOnline: data?.isOnline ?? false,
     lastActiveAt: data?.lastActiveAt || null,
     isLoading,
     error
@@ -30,7 +30,7 @@ export function useUserPresence(userId: number | string | null | undefined) {
 export function useAllUsersPresence() {
   const { data, isLoading, error } = useQuery<PresenceMap>({
     queryKey: ['/api/user/presence-all'],
-    refetchInterval: 3000, // Refresh every 3 seconds for near-instant updates
+    refetchInterval: 3000,
     staleTime: 1000,
   });
 
@@ -47,8 +47,9 @@ export function useAllUsersPresence() {
       return { isOnline: false, lastActiveAt: null };
     }
     
+    // READ server value directly - NO client-side calculation
     return {
-      isOnline: isUserOnline(entry.lastActiveAt),
+      isOnline: entry.isOnline,  // Direct from server
       lastActiveAt: entry.lastActiveAt
     };
   };

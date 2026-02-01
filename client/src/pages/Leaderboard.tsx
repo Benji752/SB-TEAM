@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { isUserOnline } from "@/lib/onlineStatus";
+// SERVER-SIDE AUTHORITY: isOnline comes directly from the API, no client calculation
 
 interface GamificationProfile {
   id: number;
@@ -126,10 +126,10 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
               {displayInfo.avatar}
             </div>
             <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              isUserOnline(profile.lastActiveAt) 
+              profile.isOnline 
                 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
                 : 'bg-gray-500'
-            }`} title={isUserOnline(profile.lastActiveAt) ? 'En ligne' : 'Hors ligne'} />
+            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -238,10 +238,10 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
               {displayInfo.avatar}
             </div>
             <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              isUserOnline(profile.lastActiveAt) 
+              profile.isOnline 
                 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
                 : 'bg-gray-500'
-            }`} title={isUserOnline(profile.lastActiveAt) ? 'En ligne' : 'Hors ligne'} />
+            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">

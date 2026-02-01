@@ -1039,16 +1039,17 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         lastActiveAt: gamificationProfiles.lastActiveAt
       }).from(gamificationProfiles);
       
-      const ONLINE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes tolerance
+      // SERVER-SIDE AUTHORITY: 5 minutes threshold, calculated here ONLY
+      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
       const now = Date.now();
       
       const presenceMap = allProfiles.reduce((acc, profile) => {
-        const isOnline = profile.lastActiveAt 
-          ? (now - new Date(profile.lastActiveAt).getTime()) < ONLINE_THRESHOLD_MS 
-          : false;
+        const lastActiveTime = profile.lastActiveAt ? new Date(profile.lastActiveAt).getTime() : 0;
+        const isOnline = profile.lastActiveAt ? (now - lastActiveTime) < ONLINE_THRESHOLD_MS : false;
+        
         acc[profile.userId] = {
           lastActiveAt: profile.lastActiveAt,
-          isOnline
+          isOnline  // THIS is the single source of truth
         };
         return acc;
       }, {} as Record<number, { lastActiveAt: Date | null; isOnline: boolean }>);
