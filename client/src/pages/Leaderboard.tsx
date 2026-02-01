@@ -135,7 +135,13 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
         
         <div className="flex items-center gap-6 relative z-10">
           <div className="relative shrink-0">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] ring-4 ring-cyan-500/30`}>
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black ${
+              profile.level >= 50 
+                ? "bg-gradient-to-br from-sky-300 via-blue-400 to-indigo-600 text-white shadow-[0_0_40px_rgba(56,189,248,0.7)] ring-4 ring-sky-400/60 animate-pulse"
+                : profile.level >= 10
+                  ? "bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-500 text-black shadow-[0_0_30px_rgba(251,191,36,0.6)] ring-4 ring-yellow-400/50"
+                  : "bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] ring-4 ring-cyan-500/30"
+            }`}>
               {displayInfo.avatar}
             </div>
             <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" title="En ligne" />
@@ -213,6 +219,19 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
   };
 
   const getAvatarStyle = () => {
+    // Bordure spéciale basée sur le niveau (priorité sur le rang)
+    const level = profile.level;
+    
+    // Niveau 50+: Diamant (bleu brillant)
+    if (level >= 50) {
+      return "bg-gradient-to-br from-sky-300 via-blue-400 to-indigo-600 text-white shadow-[0_0_40px_rgba(56,189,248,0.7)] ring-4 ring-sky-400/60 animate-pulse";
+    }
+    
+    // Niveau 10+: Or (doré)
+    if (level >= 10) {
+      return "bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-500 text-black shadow-[0_0_30px_rgba(251,191,36,0.6)] ring-4 ring-yellow-400/50";
+    }
+    
     if (isCurrentUser) return "bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_20px_rgba(34,211,238,0.4)] ring-4 ring-cyan-500/30";
     switch (rank) {
       case 1: return "bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black shadow-[0_0_30px_rgba(234,179,8,0.5)] ring-4 ring-yellow-500/30";
