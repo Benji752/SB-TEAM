@@ -11,7 +11,6 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Sparkles, 
   Copy, 
@@ -20,9 +19,9 @@ import {
   Paperclip,
   Bot,
   User,
-  Image as ImageIcon,
   X,
-  Wand2
+  Wand2,
+  Trash2
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -34,13 +33,13 @@ interface ChatMessage {
   image?: string;
 }
 
+const WELCOME_MESSAGE: ChatMessage = { 
+  role: "assistant", 
+  content: "Bonjour ! Je suis l'IA de SB Digital. Je connais ton business en temps réel :\n\n• **Tes commandes** : Je sais qui sont tes derniers clients\n• **Ton CA** : Je connais les revenus du jour et du mois\n• **Tes modèles** : Je suis le statut de chaque talent\n\nJe peux aussi :\n• Résoudre tes problèmes techniques (Stripchat, OBS...)\n• Analyser tes photos (note /10 + conseils)\n• Rédiger tes posts\n\nDemande-moi \"C'est qui le dernier client ?\" pour tester !" 
+};
+
 export default function AITools() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { 
-      role: "assistant", 
-      content: "Bonjour ! Je suis l'IA de SB Digital. Je peux t'aider avec :\n\n• **Problèmes techniques** : Stripchat, OBS, StreamMaster, Proxies\n• **Analyse de photos** : Envoie-moi une image et je te donnerai mon avis (note /10, conseils)\n• **Rédaction de posts** : Légendes Instagram, OnlyFans, Twitter...\n\nComment puis-je t'aider ?" 
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -55,11 +54,51 @@ export default function AITools() {
   const [quickPlatform, setQuickPlatform] = useState("instagram");
   const [isGeneratingQuick, setIsGeneratingQuick] = useState(false);
 
+  // Load chat history from database on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const response = await fetch("/api/ai/chat/history");
+        if (response.ok) {
+          const history = await response.json();
+          if (history.length > 0) {
+            const loadedMessages: ChatMessage[] = [WELCOME_MESSAGE];
+            for (const item of history) {
+              loadedMessages.push({ role: "user", content: item.userMessage });
+              loadedMessages.push({ role: "assistant", content: item.aiResponse });
+            }
+            setMessages(loadedMessages);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load chat history", e);
+      }
+    };
+    loadHistory();
+  }, []);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const clearHistory = async () => {
+    try {
+      await apiRequest("DELETE", "/api/ai/chat/history", {});
+      setMessages([WELCOME_MESSAGE]);
+      toast({
+        title: "Historique effacé",
+        description: "La mémoire de l'IA a été réinitialisée."
+      });
+    } catch (e) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'effacer l'historique.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -201,14 +240,23 @@ export default function AITools() {
             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gold to-gold/60 flex items-center justify-center">
               <Bot size={20} className="text-black" />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-white font-bold">Assistant IA SB Digital</h2>
-              <p className="text-white/40 text-xs">GPT-4o Vision • Expert technique & créatif</p>
+              <p className="text-white/40 text-xs">GPT-4o Vision • Mémoire activée • Connait ton business</p>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={clearHistory}
+              title="Effacer la mémoire"
+              data-testid="button-clear-history"
+            >
+              <Trash2 size={18} />
+            </Button>
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-6" ref={scrollRef}>
+          <div className="flex-1 overflow-y-auto p-6" ref={scrollRef}>
             <div className="space-y-6 max-w-3xl mx-auto">
               {messages.map((msg, idx) => (
                 <div 
@@ -273,7 +321,7 @@ export default function AITools() {
                 </div>
               )}
             </div>
-          </ScrollArea>
+          </div>
 
           {/* Image Preview */}
           {selectedImage && (

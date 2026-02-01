@@ -1,9 +1,9 @@
 import { Express } from "express";
 import { setupAuth } from "./auth";
 import axios from "axios";
-import { modelStats, authLogs, users, profiles, tasks, orders } from "@shared/schema";
+import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory } from "@shared/schema";
 import { db } from "./db";
-import { desc, gte, eq, ne } from "drizzle-orm";
+import { desc, gte, eq, ne, sql } from "drizzle-orm";
 import { storage } from "./storage";
 import OpenAI from "openai";
 
@@ -203,7 +203,29 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     res.json(statsArr);
   });
 
-  // AI Chat with Vision (GPT-4o)
+  // Get AI Chat History
+  app.get("/api/ai/chat/history", async (req, res) => {
+    try {
+      const chatHistory = await db.select().from(aiChatHistory)
+        .orderBy(desc(aiChatHistory.createdAt))
+        .limit(10);
+      res.json(chatHistory.reverse());
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Clear AI Chat History
+  app.delete("/api/ai/chat/history", async (req, res) => {
+    try {
+      await db.delete(aiChatHistory);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // AI Chat with Vision (GPT-4o) - With Business Context & Memory
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { message, image, history } = req.body;
@@ -221,7 +243,74 @@ export async function registerRoutes(_httpServer: any, app: Express) {
         apiKey: process.env.OPENAI_API_KEY,
       });
 
-      const systemPrompt = `Tu es l'IA principale de l'agence SB Digital. Tes compétences :
+      // === FETCH REAL BUSINESS DATA (Dynamic Context) ===
+      
+      // Get last 5 orders
+      const recentOrders = await db.select().from(orders)
+        .orderBy(desc(orders.createdAt))
+        .limit(5);
+      
+      // Calculate today's and month's revenue
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      
+      const allPaidOrders = await db.select().from(orders)
+        .where(eq(orders.status, "paid"));
+      
+      const todayRevenue = allPaidOrders
+        .filter(o => o.createdAt && new Date(o.createdAt) >= today)
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      
+      const monthRevenue = allPaidOrders
+        .filter(o => o.createdAt && new Date(o.createdAt) >= firstDayOfMonth)
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+      
+      // Get models status
+      const allModels = await db.select().from(models);
+      
+      // Get latest model stats
+      const latestStats = await db.select().from(modelStats)
+        .orderBy(desc(modelStats.createdAt))
+        .limit(1);
+
+      // Format business context
+      const ordersContext = recentOrders.length > 0 
+        ? recentOrders.map(o => `- ${o.clientName}: ${o.serviceType} (${o.amount}€, ${o.status})`).join('\n')
+        : "Aucune commande récente";
+      
+      const modelsContext = allModels.length > 0
+        ? allModels.map(m => `- ${m.name}: ${m.status}`).join('\n')
+        : "Aucun modèle enregistré";
+
+      const statsContext = latestStats[0] 
+        ? `En ligne: ${latestStats[0].isOnline ? 'Oui' : 'Non'}, Revenus/h: ${latestStats[0].hourlyRevenue}€, Abonnés: ${latestStats[0].subscribers}`
+        : "Pas de stats disponibles";
+
+      // === LOAD CHAT HISTORY FROM DATABASE ===
+      const dbChatHistory = await db.select().from(aiChatHistory)
+        .orderBy(desc(aiChatHistory.createdAt))
+        .limit(10);
+
+      // Build dynamic system prompt with real data
+      const systemPrompt = `Tu es l'IA principale de l'agence SB Digital. Tu as accès aux données en temps réel de l'agence.
+
+=== DONNÉES ACTUELLES DE L'AGENCE ===
+
+**5 dernières commandes :**
+${ordersContext}
+
+**Chiffre d'affaires :**
+- Aujourd'hui : ${todayRevenue}€
+- Ce mois : ${monthRevenue}€
+
+**Modèles de l'agence :**
+${modelsContext}
+
+**Stats Stripchat :**
+${statsContext}
+
+=== TES COMPÉTENCES ===
 
 **Expert technique** : Tu sais résoudre les bugs Stripchat, OBS, StreamMaster, Proxies et API. Tu donnes des solutions précises et étape par étape.
 
@@ -229,26 +318,33 @@ export async function registerRoutes(_httpServer: any, app: Express) {
 
 **Copywriter** : Tu rédiges des posts engageants pour les réseaux sociaux (Instagram, OnlyFans, Twitter, TikTok).
 
+**Gestionnaire** : Tu connais les commandes, clients et revenus de l'agence. Tu peux répondre aux questions comme "C'est qui le dernier client ?" en utilisant les données ci-dessus.
+
 Ton ton est professionnel, direct et encourageant. Tu utilises des emojis avec modération. Tu structures tes réponses avec des titres en gras (**texte**) pour plus de clarté.
 
-Quand on te montre une photo, analyse TOUJOURS :
+Quand on te montre une photo, analyse :
 1. La qualité technique (lumière, netteté, cadrage)
 2. L'attractivité visuelle (pose, expression, ambiance)
 3. Le potentiel commercial (adapté pour miniature Stripchat, post Instagram, etc.)
 4. Donne une note /10 et 3 conseils d'amélioration`;
 
       // Build messages array
-      const messages: any[] = [
+      const chatMessages: any[] = [
         { role: "system", content: systemPrompt }
       ];
 
-      // Add conversation history (last 10 messages, preserving images)
+      // Add database chat history first
+      for (const histItem of dbChatHistory.reverse()) {
+        chatMessages.push({ role: "user", content: histItem.userMessage });
+        chatMessages.push({ role: "assistant", content: histItem.aiResponse });
+      }
+
+      // Add session history (for images in current session)
       if (history && Array.isArray(history)) {
-        for (const msg of history.slice(-10)) {
+        for (const msg of history.slice(-6)) {
           if (msg.role === "user") {
-            // Preserve image context if present
             if (msg.image) {
-              messages.push({ 
+              chatMessages.push({ 
                 role: "user", 
                 content: [
                   { type: "text", text: msg.content || "Analyse cette image" },
@@ -256,10 +352,10 @@ Quand on te montre une photo, analyse TOUJOURS :
                 ]
               });
             } else {
-              messages.push({ role: "user", content: msg.content });
+              chatMessages.push({ role: "user", content: msg.content });
             }
           } else if (msg.role === "assistant") {
-            messages.push({ role: "assistant", content: msg.content });
+            chatMessages.push({ role: "assistant", content: msg.content });
           }
         }
       }
@@ -272,7 +368,6 @@ Quand on te montre une photo, analyse TOUJOURS :
       }
 
       if (image) {
-        // Image is base64 data URL
         userContent.push({
           type: "image_url",
           image_url: {
@@ -282,16 +377,23 @@ Quand on te montre une photo, analyse TOUJOURS :
         });
       }
 
-      messages.push({ role: "user", content: userContent });
+      chatMessages.push({ role: "user", content: userContent });
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages,
+        messages: chatMessages,
         max_tokens: 1500,
         temperature: 0.7
       });
 
       const content = response.choices[0]?.message?.content || "Je n'ai pas pu générer de réponse.";
+
+      // === SAVE TO DATABASE (Memory) ===
+      await db.insert(aiChatHistory).values({
+        userMessage: message || "[Image envoyée]",
+        aiResponse: content,
+        hasImage: !!image
+      });
 
       res.json({ response: content });
     } catch (error: any) {

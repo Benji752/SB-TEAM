@@ -194,3 +194,16 @@ export const events = pgTable("events", {
 export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true });
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
+
+// AI Chat History (Memory)
+export const aiChatHistory = pgTable("ai_chat_history", {
+  id: serial("id").primaryKey(),
+  userMessage: text("user_message").notNull(),
+  aiResponse: text("ai_response").notNull(),
+  hasImage: boolean("has_image").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAiChatHistorySchema = createInsertSchema(aiChatHistory).omit({ id: true, createdAt: true });
+export type AiChatHistory = typeof aiChatHistory.$inferSelect;
+export type InsertAiChatHistory = z.infer<typeof insertAiChatHistorySchema>;
