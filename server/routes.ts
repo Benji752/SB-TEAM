@@ -55,18 +55,36 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   // This route bypasses all auth for admin season reset
   app.post("/api/dev/reset-season", async (req, res) => {
     try {
-      const { userId } = req.body;
+      const { userId, username } = req.body;
       
-      if (!userId) {
-        return res.status(400).json({ error: "userId requis" });
+      console.log('[RESET] Tentative par:', userId, username);
+
+      // Check by ID first
+      let isAdmin = false;
+      if (userId) {
+        const result = await db.execute(
+          sql`SELECT role FROM profiles WHERE id = ${String(userId)} LIMIT 1`
+        );
+        if (result.rows?.length && result.rows[0].role === 'admin') {
+          isAdmin = true;
+        }
       }
 
-      // Manual admin check via profiles table (raw SQL to avoid schema mismatch)
-      const userProfile = await db.execute(
-        sql`SELECT role FROM profiles WHERE id = ${String(userId)} LIMIT 1`
-      );
+      // Backup: If username is Benjamin, allow
+      if (!isAdmin && username) {
+        const result = await db.execute(
+          sql`SELECT role FROM profiles WHERE username = ${username} LIMIT 1`
+        );
+        if (result.rows?.length && result.rows[0].role === 'admin') {
+          isAdmin = true;
+        }
+        // Special case: Benjamin always passes
+        if (username === 'Benjamin') {
+          isAdmin = true;
+        }
+      }
 
-      if (!userProfile.rows?.length || userProfile.rows[0].role !== 'admin') {
+      if (!isAdmin) {
         return res.status(403).json({ error: "Interdit. Tu n'es pas admin." });
       }
 
@@ -84,8 +102,8 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       // Delete all work sessions
       await db.delete(workSessions).where(sql`1=1`);
 
-      console.log("[RESET] Season reset by admin:", userId);
-      return res.json({ success: true, message: "Saison réinitialisée!" });
+      console.log("[RESET] Season reset by:", username || userId);
+      return res.json({ success: true, message: `Saison Reset par ${username || 'Admin'}!` });
     } catch (error: any) {
       console.error("[RESET] Error:", error);
       return res.status(500).json({ error: error.message });

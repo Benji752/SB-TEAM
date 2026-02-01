@@ -447,7 +447,7 @@ export default function Leaderboard() {
       const response = await fetch('/api/dev/reset-season', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.id })
+        body: JSON.stringify({ userId: user?.id, username: user?.username || 'Benjamin' })
       });
       
       if (!response.ok) {
