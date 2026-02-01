@@ -635,24 +635,37 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 
   // ========== GAMIFICATION ROUTES - SB HUNTER LEAGUE ==========
 
-  // Get leaderboard data - all roles
+  // Get leaderboard data - EXCLUDE admin (referee doesn't play)
   app.get("/api/gamification/leaderboard", async (req, res) => {
     try {
-      // Join with profiles to get role - show everyone
-      const leaderboard = await db.select({
-        id: gamificationProfiles.id,
-        userId: gamificationProfiles.userId,
-        xpTotal: gamificationProfiles.xpTotal,
-        level: gamificationProfiles.level,
-        currentStreak: gamificationProfiles.currentStreak,
-        roleMultiplier: gamificationProfiles.roleMultiplier,
-        badges: gamificationProfiles.badges,
-        role: profiles.role,
-        username: profiles.username
-      })
-      .from(gamificationProfiles)
-      .leftJoin(profiles, sql`${gamificationProfiles.userId}::text = ${profiles.id}`)
-      .orderBy(desc(gamificationProfiles.xpTotal));
+      // Mapping of known team members (userId -> {name, role})
+      const TEAM_MEMBERS: Record<number, { name: string; role: string }> = {
+        1: { name: "Nico", role: "staff" },
+        2: { name: "Laura", role: "model" },
+      };
+      // Admin userId (to exclude) - based on session or known ID
+      const ADMIN_USER_ID = 3; // Adjust if needed
+      
+      // Get all gamification profiles
+      const profiles = await db.select()
+        .from(gamificationProfiles)
+        .orderBy(desc(gamificationProfiles.xpTotal));
+      
+      // Filter out admin and add team member data
+      const leaderboard = profiles
+        .filter(p => {
+          const teamMember = TEAM_MEMBERS[p.userId];
+          // Keep only known team members (exclude admin and unknown users)
+          return teamMember !== undefined;
+        })
+        .map(p => {
+          const teamMember = TEAM_MEMBERS[p.userId];
+          return {
+            ...p,
+            username: teamMember?.name || `User ${p.userId}`,
+            role: teamMember?.role || null
+          };
+        });
       
       res.json(leaderboard);
     } catch (error: any) {

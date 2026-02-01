@@ -15,6 +15,7 @@ interface GamificationProfile {
   badges: string[];
   role?: string | null;
   username?: string | null;
+  fullName?: string | null;
 }
 
 interface XpActivity {
@@ -32,15 +33,11 @@ interface TodayTime {
   formatted: string;
 }
 
-const USER_NAMES: Record<number, { name: string; avatar: string }> = {
-  1: { name: "Nico", avatar: "N" },
-  2: { name: "WildGirl", avatar: "W" },
-};
-
 function getDisplayName(profile: GamificationProfile) {
-  if (profile.username) return { name: profile.username, avatar: profile.username.charAt(0).toUpperCase() };
-  const fallback = USER_NAMES[profile.userId];
-  return fallback || { name: `User ${profile.userId}`, avatar: "?" };
+  // Use username from database, fallback to User X
+  const name = profile.username || `User ${profile.userId}`;
+  const avatar = name.charAt(0).toUpperCase();
+  return { name, avatar };
 }
 
 function getRoleLabel(role?: string | null, multiplier?: number) {
@@ -292,7 +289,7 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
   );
 }
 
-function ActivityFeed({ activities }: { activities: XpActivity[] }) {
+function ActivityFeed({ activities, userNames }: { activities: XpActivity[]; userNames: Record<number, string> }) {
   const getActionIcon = (type: string) => {
     switch (type) {
       case "order_created": return <ShoppingCart size={16} className="text-blue-400" />;
@@ -333,7 +330,7 @@ function ActivityFeed({ activities }: { activities: XpActivity[] }) {
           </div>
         ) : (
           activities.map((activity, index) => {
-            const user = USER_NAMES[activity.userId] || { name: `User ${activity.userId}` };
+            const userName = userNames[activity.userId] || `User ${activity.userId}`;
             return (
               <motion.div
                 key={activity.id}
@@ -347,7 +344,7 @@ function ActivityFeed({ activities }: { activities: XpActivity[] }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white/90 text-sm font-medium truncate">
-                    <span className="text-gold font-bold">{user.name}</span>
+                    <span className="text-gold font-bold">{userName}</span>
                     <span className="text-white/60">{" "}{activity.description}</span>
                   </p>
                   <p className="text-white/40 text-xs mt-0.5">
@@ -444,6 +441,12 @@ export default function Leaderboard() {
   if (todayTime1) todayTimes[1] = todayTime1;
   if (todayTime2) todayTimes[2] = todayTime2;
 
+  // Build a map of userId -> username from leaderboard data
+  const userNames: Record<number, string> = {};
+  leaderboard.forEach(profile => {
+    userNames[profile.userId] = profile.username || `User ${profile.userId}`;
+  });
+
   const currentUserId = typeof user?.id === 'number' ? user.id : parseInt(user?.id as string) || null;
   const myProfile = leaderboard.find(p => p.userId === currentUserId);
   const myRank = myProfile ? leaderboard.findIndex(p => p.userId === currentUserId) + 1 : 0;
@@ -522,7 +525,7 @@ export default function Leaderboard() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <ActivityFeed activities={activities} />
+            <ActivityFeed activities={activities} userNames={userNames} />
           </motion.div>
         </div>
 
