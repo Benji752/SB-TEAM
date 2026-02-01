@@ -53,6 +53,14 @@ Preferred communication style: Simple, everyday language.
 - **Leaderboard**: E-Sport themed rankings with XP progress bars and "Temps passé aujourd'hui" tracking
 - **Database Tables**: gamification_profiles, hunter_leads, work_sessions, xp_activity_log
 
+### Online Status System (Single Source of Truth)
+- **Utility Function**: `client/src/lib/onlineStatus.ts` exports `isUserOnline(lastActiveAt)`
+- **Logic**: Returns `true` if `lastActiveAt` is less than 5 minutes old, otherwise `false`
+- **Usage**: All pages (Leaderboard, Messages, Team) use this same function
+- **Data Source**: `lastActiveAt` field in `gamification_profiles` table, updated by heartbeat
+- **NEVER use**: `is_online` column from profiles table (deprecated/unreliable)
+- **Visual**: 🟢 Green dot = active < 5min, ⚫ Gray dot = inactive > 5min
+
 ### API Structure
 Type-safe API contracts defined in `shared/routes.ts` using Zod schemas:
 - Route definitions include HTTP method, path, input validation, and response schemas

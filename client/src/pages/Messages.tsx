@@ -7,11 +7,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Loader2, Send } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useQuery } from "@tanstack/react-query";
+import { isUserOnline } from "@/lib/onlineStatus";
 
 interface LeaderboardEntry {
   userId: number;
   username: string;
-  isOnline: boolean;
+  lastActiveAt: string | null;
 }
 
 export default function Messages() {
@@ -30,11 +31,11 @@ export default function Messages() {
     refetchInterval: 5000, // Refresh every 5 seconds for real-time status
   });
 
-  // Build username -> isOnline map from leaderboard
+  // Build username -> isOnline map from leaderboard (using lastActiveAt)
   const onlineStatusMap: Record<string, boolean> = {};
   leaderboard.forEach(entry => {
     if (entry.username) {
-      onlineStatusMap[entry.username.toLowerCase()] = entry.isOnline;
+      onlineStatusMap[entry.username.toLowerCase()] = isUserOnline(entry.lastActiveAt);
     }
   });
 
