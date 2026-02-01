@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle } from "lucide-react";
+import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star } from "lucide-react";
 
 interface GamificationProfile {
   id: number;
@@ -52,13 +52,13 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
+    transition: { staggerChildren: 0.15 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };
 
 function XpProgressBar({ xp, level }: { xp: number; level: number }) {
@@ -67,18 +67,28 @@ function XpProgressBar({ xp, level }: { xp: number; level: number }) {
   const progress = ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between text-xs text-white/50 mb-1">
-        <span>Niveau {level}</span>
-        <span>{xp} / {nextLevelXp} XP</span>
+    <div className="w-full mt-3">
+      <div className="flex justify-between text-xs mb-2">
+        <span className="text-gold font-semibold flex items-center gap-1">
+          <Star size={10} className="fill-gold" />
+          Niveau {level}
+        </span>
+        <span className="text-white/60">{xp.toLocaleString()} / {nextLevelXp.toLocaleString()} XP</span>
       </div>
-      <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+      <div className="h-4 bg-black/50 rounded-full overflow-hidden border border-gold/20 relative">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(progress, 100)}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="h-full bg-gradient-to-r from-gold via-yellow-400 to-gold rounded-full"
-        />
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="h-full bg-gradient-to-r from-yellow-500 via-gold to-amber-400 rounded-full relative"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/30 rounded-full" />
+          <motion.div 
+            className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-r from-transparent to-white/50"
+            animate={{ opacity: [0.3, 0.8, 0.3] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </motion.div>
       </div>
     </div>
   );
@@ -90,78 +100,110 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
   
   const getRankIcon = () => {
     switch (rank) {
-      case 1: return <Crown size={24} className="text-yellow-400" />;
-      case 2: return <Medal size={24} className="text-gray-300" />;
-      case 3: return <Medal size={24} className="text-amber-600" />;
-      default: return <span className="text-white/30 font-bold">#{rank}</span>;
+      case 1: return <Crown size={32} className="text-yellow-400 drop-shadow-[0_0_10px_rgba(234,179,8,0.8)]" />;
+      case 2: return <Medal size={28} className="text-gray-300 drop-shadow-[0_0_8px_rgba(156,163,175,0.6)]" />;
+      case 3: return <Medal size={28} className="text-amber-500 drop-shadow-[0_0_8px_rgba(217,119,6,0.6)]" />;
+      default: return <span className="text-white/40 font-black text-2xl">#{rank}</span>;
     }
   };
 
-  const getRankGlow = () => {
+  const getCardStyle = () => {
     switch (rank) {
-      case 1: return "shadow-[0_0_30px_rgba(234,179,8,0.3)] border-yellow-500/50";
-      case 2: return "shadow-[0_0_20px_rgba(156,163,175,0.2)] border-gray-400/30";
-      case 3: return "shadow-[0_0_20px_rgba(180,83,9,0.2)] border-amber-600/30";
-      default: return "border-white/10";
+      case 1: return "bg-gradient-to-br from-yellow-900/30 via-[#0A0A0A] to-amber-900/20 border-2 border-yellow-500/60 shadow-[0_0_40px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]";
+      case 2: return "bg-gradient-to-br from-gray-800/30 via-[#0A0A0A] to-gray-700/20 border-2 border-gray-400/40 shadow-[0_0_30px_rgba(156,163,175,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]";
+      case 3: return "bg-gradient-to-br from-amber-900/30 via-[#0A0A0A] to-orange-900/20 border-2 border-amber-500/40 shadow-[0_0_30px_rgba(217,119,6,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]";
+      default: return "bg-[#0A0A0A] border border-white/10 shadow-lg";
+    }
+  };
+
+  const getAvatarStyle = () => {
+    switch (rank) {
+      case 1: return "bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black shadow-[0_0_30px_rgba(234,179,8,0.5)] ring-4 ring-yellow-500/30";
+      case 2: return "bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500 text-black shadow-[0_0_20px_rgba(156,163,175,0.4)] ring-4 ring-gray-400/30";
+      case 3: return "bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 text-white shadow-[0_0_20px_rgba(217,119,6,0.4)] ring-4 ring-amber-500/30";
+      default: return "bg-gradient-to-br from-white/20 to-white/5 text-white ring-2 ring-white/10";
     }
   };
 
   return (
-    <motion.div variants={itemVariants}>
-      <Card className={`bg-[#0A0A0A] border ${getRankGlow()} rounded-2xl p-6 relative overflow-hidden`}>
+    <motion.div 
+      variants={itemVariants}
+      whileHover={{ scale: 1.02, y: -4 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      <Card className={`${getCardStyle()} rounded-2xl p-6 relative overflow-hidden`}>
         {rank === 1 && (
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+          <>
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
+          </>
         )}
         
-        <div className="flex items-center gap-4">
-          <div className="w-12 flex justify-center">
+        <div className="flex items-center gap-6 relative z-10">
+          <div className="w-14 flex justify-center shrink-0">
             {getRankIcon()}
           </div>
           
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${
-            rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-600 text-black" :
-            rank === 2 ? "bg-gradient-to-br from-gray-300 to-gray-500 text-black" :
-            rank === 3 ? "bg-gradient-to-br from-amber-500 to-amber-700 text-white" :
-            "bg-white/10 text-white"
-          }`}>
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black shrink-0 ${getAvatarStyle()}`}>
             {displayInfo.avatar}
           </div>
           
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold text-white">{displayInfo.name}</h3>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="text-2xl font-black text-white tracking-tight">{displayInfo.name}</h3>
+              <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
                 profile.roleMultiplier > 1 
-                  ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" 
+                  ? "bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-300 border border-purple-400/40 shadow-[0_0_10px_rgba(168,85,247,0.3)]" 
                   : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
               }`}>
-                {roleLabel} {profile.roleMultiplier > 1 && `(${profile.roleMultiplier}x)`}
+                {roleLabel} {profile.roleMultiplier > 1 && (
+                  <span className="text-pink-400 ml-1">{profile.roleMultiplier}x</span>
+                )}
               </span>
             </div>
             <XpProgressBar xp={profile.xpTotal} level={profile.level} />
           </div>
           
-          <div className="text-right">
-            <div className="text-3xl font-bold text-gold">{profile.xpTotal}</div>
-            <div className="text-xs text-white/50 uppercase tracking-wider">XP Total</div>
+          <div className="text-right shrink-0">
+            <motion.div 
+              className="text-4xl font-black bg-gradient-to-r from-gold via-yellow-300 to-amber-400 bg-clip-text text-transparent"
+              animate={{ textShadow: ["0 0 20px rgba(234,179,8,0.5)", "0 0 40px rgba(234,179,8,0.8)", "0 0 20px rgba(234,179,8,0.5)"] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              {profile.xpTotal.toLocaleString()}
+            </motion.div>
+            <div className="text-xs text-white/50 uppercase tracking-widest font-semibold">XP Total</div>
           </div>
         </div>
         
-        <div className="flex gap-2 mt-4 ml-16">
+        <div className="flex gap-2 mt-5 ml-20 flex-wrap">
           {todayTime && todayTime.todayMinutes > 0 && (
-            <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full flex items-center gap-1">
+            <motion.span 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="text-xs px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-cyan-400 rounded-full flex items-center gap-1.5 border border-cyan-500/30 font-medium"
+            >
               <Timer size={12} /> Aujourd'hui: {todayTime.formatted}
-            </span>
+            </motion.span>
           )}
           {profile.currentStreak > 0 && (
-            <span className="text-xs px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full flex items-center gap-1">
-              <Zap size={12} /> {profile.currentStreak} streak
-            </span>
+            <motion.span 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="text-xs px-3 py-1.5 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-400 rounded-full flex items-center gap-1.5 border border-orange-500/30 font-medium"
+            >
+              <Flame size={12} className="text-orange-400" /> {profile.currentStreak} streak
+            </motion.span>
           )}
           {profile.badges?.includes("night_owl") && (
-            <span className="text-xs px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full flex items-center gap-1">
+            <motion.span 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400 rounded-full flex items-center gap-1.5 border border-purple-500/30 font-medium"
+            >
               <Moon size={12} /> Night Owl
-            </span>
+            </motion.span>
           )}
         </div>
       </Card>
@@ -172,48 +214,125 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
 function ActivityFeed({ activities }: { activities: XpActivity[] }) {
   const getActionIcon = (type: string) => {
     switch (type) {
-      case "order_created": return <ShoppingCart size={14} className="text-blue-400" />;
-      case "order_paid": return <CheckCircle size={14} className="text-green-400" />;
-      case "lead_approved": return <Target size={14} className="text-green-400" />;
-      case "work_session": return <Clock size={14} className="text-purple-400" />;
-      default: return <Zap size={14} className="text-gold" />;
+      case "order_created": return <ShoppingCart size={16} className="text-blue-400" />;
+      case "order_paid": return <CheckCircle size={16} className="text-green-400" />;
+      case "lead_approved": return <Target size={16} className="text-green-400" />;
+      case "work_session": return <Clock size={16} className="text-purple-400" />;
+      default: return <Zap size={16} className="text-gold" />;
+    }
+  };
+
+  const getActionColor = (type: string) => {
+    switch (type) {
+      case "order_created": return "from-blue-500/20 to-blue-600/10 border-blue-500/30";
+      case "order_paid": return "from-green-500/20 to-green-600/10 border-green-500/30";
+      case "lead_approved": return "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30";
+      case "work_session": return "from-purple-500/20 to-purple-600/10 border-purple-500/30";
+      default: return "from-gold/20 to-amber-600/10 border-gold/30";
     }
   };
 
   return (
-    <Card className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-6">
-      <h3 className="text-white font-bold uppercase tracking-wider text-sm mb-4 flex items-center gap-2">
-        <TrendingUp size={16} className="text-gold" />
+    <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-gold/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(234,179,8,0.1),inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+      
+      <h3 className="text-white font-black uppercase tracking-widest text-sm mb-5 flex items-center gap-3">
+        <div className="p-2 bg-gold/20 rounded-lg">
+          <TrendingUp size={18} className="text-gold" />
+        </div>
         Activité Récente
+        <div className="flex-1 h-px bg-gradient-to-r from-gold/30 to-transparent ml-2" />
       </h3>
-      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+      
+      <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gold/20 scrollbar-track-transparent">
         {activities.length === 0 ? (
-          <p className="text-white/30 text-sm text-center py-4">Aucune activité pour le moment</p>
+          <div className="text-center py-8">
+            <Zap className="w-12 h-12 text-white/10 mx-auto mb-3" />
+            <p className="text-white/30 text-sm">Aucune activité pour le moment</p>
+          </div>
         ) : (
-          activities.map((activity) => {
+          activities.map((activity, index) => {
             const user = USER_NAMES[activity.userId] || { name: `User ${activity.userId}` };
             return (
               <motion.div
                 key={activity.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-xl"
+                transition={{ delay: index * 0.05 }}
+                className={`flex items-center gap-3 p-3 bg-gradient-to-r ${getActionColor(activity.actionType)} rounded-xl border backdrop-blur-sm`}
               >
-                {getActionIcon(activity.actionType)}
-                <div className="flex-1">
-                  <p className="text-white/80 text-sm">
-                    <span className="text-gold font-medium">{user.name}</span>
-                    {" "}{activity.description}
+                <div className="p-2 bg-black/30 rounded-lg">
+                  {getActionIcon(activity.actionType)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/90 text-sm font-medium truncate">
+                    <span className="text-gold font-bold">{user.name}</span>
+                    <span className="text-white/60">{" "}{activity.description}</span>
                   </p>
-                  <p className="text-white/30 text-xs">
+                  <p className="text-white/40 text-xs mt-0.5">
                     {new Date(activity.createdAt).toLocaleString("fr-FR")}
                   </p>
                 </div>
-                <span className="text-green-400 font-bold text-sm">+{activity.xpGained} XP</span>
+                <motion.span 
+                  className="text-green-400 font-black text-sm bg-green-500/10 px-2 py-1 rounded-lg border border-green-500/20 shrink-0"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  +{activity.xpGained}
+                </motion.span>
               </motion.div>
             );
           })
         )}
+      </div>
+    </Card>
+  );
+}
+
+function RulesCard() {
+  const rules = [
+    { icon: ShoppingCart, color: "blue", title: "Nouvelle Commande", xp: "+10 XP", desc: "Créer une commande" },
+    { icon: CheckCircle, color: "green", title: "Commande Payée", xp: "+100 XP", desc: "Quand statut = Payé" },
+    { icon: Clock, color: "purple", title: "Présence Active", xp: "+2 XP / 5min", desc: "Tracking automatique" },
+    { icon: Moon, color: "yellow", title: "Night Owl", xp: "+50 XP", desc: "00h00 - 06h00" },
+  ];
+
+  const colorMap: Record<string, string> = {
+    blue: "from-blue-500/30 to-blue-600/10 border-blue-500/40 text-blue-400",
+    green: "from-green-500/30 to-green-600/10 border-green-500/40 text-green-400",
+    purple: "from-purple-500/30 to-purple-600/10 border-purple-500/40 text-purple-400",
+    yellow: "from-yellow-500/30 to-yellow-600/10 border-yellow-500/40 text-yellow-400",
+  };
+
+  return (
+    <Card className="bg-gradient-to-br from-purple-900/20 via-[#0A0A0A] to-gold/10 border-2 border-white/10 rounded-2xl p-6 relative overflow-hidden shadow-[0_0_40px_rgba(168,85,247,0.1)]">
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-gold/5 rounded-full blur-3xl" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+      
+      <h3 className="text-white font-black uppercase tracking-widest text-sm mb-6 flex items-center gap-3 relative z-10">
+        <div className="p-2 bg-gold/20 rounded-lg">
+          <Trophy size={18} className="text-gold" />
+        </div>
+        Règles du Jeu
+        <div className="flex-1 h-px bg-gradient-to-r from-gold/30 to-transparent ml-2" />
+      </h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+        {rules.map((rule, index) => (
+          <motion.div 
+            key={rule.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className={`p-5 bg-gradient-to-br ${colorMap[rule.color]} rounded-xl border backdrop-blur-sm`}
+          >
+            <rule.icon className="mb-3" size={24} />
+            <p className="text-white font-bold text-sm">{rule.title}</p>
+            <p className="text-2xl font-black mt-1">{rule.xp}</p>
+            <p className="text-white/40 text-xs mt-2">{rule.desc}</p>
+          </motion.div>
+        ))}
       </div>
     </Card>
   );
@@ -249,32 +368,50 @@ export default function Leaderboard() {
         className="space-y-8"
       >
         <motion.div variants={itemVariants} className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Trophy className="text-gold" size={32} />
-              SB HUNTER LEAGUE
+          <div className="relative">
+            <motion.div 
+              className="absolute -inset-4 bg-gradient-to-r from-gold/20 via-transparent to-purple-500/20 blur-2xl"
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <h1 className="text-4xl font-black text-white flex items-center gap-4 relative">
+              <div className="p-3 bg-gradient-to-br from-gold/30 to-amber-600/20 rounded-xl border border-gold/30 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                <Trophy className="text-gold" size={36} />
+              </div>
+              <div>
+                <span className="bg-gradient-to-r from-gold via-yellow-300 to-amber-400 bg-clip-text text-transparent">
+                  SB HUNTER LEAGUE
+                </span>
+                <p className="text-white/40 text-sm font-medium mt-1 tracking-wide">
+                  Classement Staff - XP automatique via commandes
+                </p>
+              </div>
             </h1>
-            <p className="text-white/50 mt-1">Classement Staff - XP automatique via commandes</p>
           </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <motion.div variants={itemVariants} className="lg:col-span-2 space-y-4">
-            <h2 className="text-white/70 uppercase tracking-wider text-sm font-medium flex items-center gap-2">
-              <Crown size={16} className="text-gold" />
+            <h2 className="text-white/70 uppercase tracking-widest text-sm font-bold flex items-center gap-3 ml-2">
+              <Crown size={18} className="text-gold" />
               Classement
+              <div className="flex-1 h-px bg-gradient-to-r from-gold/30 to-transparent" />
             </h2>
             
             {loadingLeaderboard ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin w-8 h-8 border-2 border-gold border-t-transparent rounded-full" />
+              <div className="flex justify-center py-16">
+                <motion.div 
+                  className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
               </div>
             ) : (
               <motion.div 
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-4"
+                className="space-y-5"
               >
                 {leaderboard.map((profile, index) => (
                     <LeaderboardCard 
@@ -294,37 +431,7 @@ export default function Leaderboard() {
         </div>
 
         <motion.div variants={itemVariants}>
-          <Card className="bg-gradient-to-r from-purple-900/20 via-transparent to-gold/10 border-white/[0.05] rounded-2xl p-6">
-            <h3 className="text-white font-bold uppercase tracking-wider text-sm mb-4">
-              Règles du Jeu
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-              <div className="p-4 bg-white/[0.02] rounded-xl">
-                <ShoppingCart className="text-blue-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Nouvelle Commande</p>
-                <p className="text-white/50">+10 XP</p>
-                <p className="text-white/30 text-xs mt-1">Créer une commande</p>
-              </div>
-              <div className="p-4 bg-white/[0.02] rounded-xl">
-                <CheckCircle className="text-green-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Commande Payée</p>
-                <p className="text-white/50">+100 XP Bonus</p>
-                <p className="text-white/30 text-xs mt-1">Quand statut = Payé</p>
-              </div>
-              <div className="p-4 bg-white/[0.02] rounded-xl">
-                <Clock className="text-purple-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Présence Active</p>
-                <p className="text-white/50">+2 XP / 5 min</p>
-                <p className="text-white/30 text-xs mt-1">Tracking automatique</p>
-              </div>
-              <div className="p-4 bg-white/[0.02] rounded-xl">
-                <Moon className="text-yellow-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Night Owl</p>
-                <p className="text-white/50">+50 XP</p>
-                <p className="text-white/30 text-xs mt-1">00h00 - 06h00</p>
-              </div>
-            </div>
-          </Card>
+          <RulesCard />
         </motion.div>
       </motion.div>
     </DashboardLayout>

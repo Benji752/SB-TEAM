@@ -651,7 +651,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         username: profiles.username
       })
       .from(gamificationProfiles)
-      .leftJoin(profiles, eq(gamificationProfiles.userId, profiles.id))
+      .leftJoin(profiles, sql`${gamificationProfiles.userId}::text = ${profiles.id}`)
       .where(
         sql`${profiles.role} IN ('admin', 'staff') OR ${profiles.role} IS NULL`
       )
