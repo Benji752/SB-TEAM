@@ -443,16 +443,19 @@ export default function Leaderboard() {
 
   const resetSeasonMutation = useMutation({
     mutationFn: async () => {
-      // Use Supabase RPC to bypass session/API issues
-      // No parameters - DB uses auth.uid() internally
-      const { error } = await supabase.rpc('admin_reset_season');
+      // Direct API call - bypasses auth middleware
+      const response = await fetch('/api/dev/reset-season', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user?.id })
+      });
       
-      if (error) {
-        console.error("[RPC] reset_season error:", error);
-        throw new Error(error.message || "Erreur lors de la réinitialisation");
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Erreur lors de la réinitialisation");
       }
       
-      return { success: true, message: "Saison réinitialisée avec succès!" };
+      return await response.json();
     },
     onSuccess: (data) => {
       toast({

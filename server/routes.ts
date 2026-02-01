@@ -51,6 +51,47 @@ async function awardXP(userId: number, xpAmount: number, actionType: string, des
 }
 
 export async function registerRoutes(_httpServer: any, app: Express) {
+  // ========== DEV ROUTE - NO AUTH MIDDLEWARE ==========
+  // This route bypasses all auth for admin season reset
+  app.post("/api/dev/reset-season", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "userId requis" });
+      }
+
+      // Manual admin check via profiles table (raw SQL to avoid schema mismatch)
+      const userProfile = await db.execute(
+        sql`SELECT role FROM profiles WHERE id = ${String(userId)} LIMIT 1`
+      );
+
+      if (!userProfile.rows?.length || userProfile.rows[0].role !== 'admin') {
+        return res.status(403).json({ error: "Interdit. Tu n'es pas admin." });
+      }
+
+      // Reset gamification_profiles
+      await db.update(gamificationProfiles)
+        .set({ xpTotal: 0, level: 1, currentStreak: 0 })
+        .where(sql`1=1`);
+
+      // Delete all activity logs
+      await db.delete(xpActivityLog).where(sql`1=1`);
+      
+      // Delete all hunter leads
+      await db.delete(hunterLeads).where(sql`1=1`);
+      
+      // Delete all work sessions
+      await db.delete(workSessions).where(sql`1=1`);
+
+      console.log("[RESET] Season reset by admin:", userId);
+      return res.json({ success: true, message: "Saison réinitialisée!" });
+    } catch (error: any) {
+      console.error("[RESET] Error:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
   setupAuth(app);
 
   // Recent Activities
