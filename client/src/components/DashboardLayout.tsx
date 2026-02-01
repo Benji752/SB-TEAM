@@ -23,7 +23,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartbeatTracker, useHeartbeatStatus } from "@/components/HeartbeatTracker";
-import { useHeartbeat } from "@/hooks/useHeartbeat";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -41,8 +40,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   console.log('Sidebar loaded');
   const [location] = useLocation();
   const { logout, user } = useAuth();
-  
-  useHeartbeat(user?.id ? Number(user.id) : null);
 
   const handleLogout = async (e?: React.MouseEvent) => {
     if (e) {

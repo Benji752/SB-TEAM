@@ -53,19 +53,22 @@ Preferred communication style: Simple, everyday language.
 - **Leaderboard**: E-Sport themed rankings with XP progress bars and "Temps passé aujourd'hui" tracking
 - **Database Tables**: gamification_profiles, hunter_leads, work_sessions, xp_activity_log
 
-### Online Status System (Single Source of Truth)
-- **Global Heartbeat**: `useHeartbeat` hook in `DashboardLayout` pings `/api/user/ping` every 60 seconds
-- **Data Source**: `lastActiveAt` field in `gamification_profiles` table (NOT profiles.is_online)
-- **Utility Function**: `client/src/lib/onlineStatus.ts` exports `isUserOnline(lastActiveAt)`
-- **Presence Hook**: `useAllUsersPresence()` hook fetches `/api/user/presence-all` for bulk status
-- **Logic**: Returns `true` if `lastActiveAt` < 5 minutes old, otherwise `false`
-- **Usage**: 
-  - Team (Models.tsx): Uses `useAllUsersPresence().getPresence(userId)`
-  - Messages: Uses `useAllUsersPresence().getPresence(userId)`
-  - Leaderboard: Uses `isUserOnline(profile.lastActiveAt)` directly from API
-- **NEVER use**: `is_online` column from profiles table (deprecated/unreliable)
-- **Visual**: 🟢 Green dot = active < 5min, ⚫ Gray dot = inactive > 5min
-- **Behavior**: When user closes tab, heartbeats stop → after 5 min, they appear offline on ALL pages simultaneously
+### Online Status System (Single Source of Truth) - REFACTORED Feb 2026
+- **SQL View**: `gamification_leaderboard_view` - calculates `seconds_since_active` server-side using PostgreSQL NOW()
+- **Unified Hook**: `useGamificationData()` from `client/src/hooks/useGamificationData.ts`
+  - Fetches `/api/gamification/leaderboard-view` every 30s
+  - Auto-pings `/api/gamification/ping` every 60s when user is active
+  - Provides `isUserOnline(userId: number)` function
+  - Returns `leaderboard`, `currentUser`, `currentUserId`, `isLoading`
+- **Ping Route**: POST `/api/gamification/ping` - updates `last_active_at` + awards 4 XP
+- **Threshold**: 300 seconds (5 minutes) - if `seconds_since_active < 300` → user is online
+- **UUID to Hash**: `uuidToInt()` function converts string UUID to consistent integer for gamification system
+- **Usage (all pages use same hook)**:
+  - Leaderboard.tsx: `useGamificationData()` for full leaderboard with `isOnline` field
+  - Models.tsx: `isUserOnline(uuidToInt(profile.id))`
+  - Messages.tsx: `isUserOnline(uuidToInt(profile.id))`
+- **Visual**: Green dot = active < 5min, Gray dot = inactive > 5min
+- **Behavior**: When user closes tab, pings stop → after 5 min, they appear offline on ALL pages simultaneously
 
 ### API Structure
 Type-safe API contracts defined in `shared/routes.ts` using Zod schemas:

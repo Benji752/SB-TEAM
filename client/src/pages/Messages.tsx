@@ -6,7 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import { useAllUsersPresence } from "@/hooks/useUserPresence";
+import { useGamificationData } from "@/hooks/useGamificationData";
+
+function uuidToInt(uuid: string): number {
+  let hash = 0;
+  for (let i = 0; i < uuid.length; i++) {
+    const char = uuid.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
 
 export default function Messages() {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -18,7 +28,7 @@ export default function Messages() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  const { getPresence } = useAllUsersPresence();
+  const { isUserOnline } = useGamificationData();
 
   useEffect(() => {
     async function init() {
@@ -178,7 +188,7 @@ export default function Messages() {
                     </Avatar>
                     <div 
                       className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
-                        getPresence(profile.id).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
+                        isUserOnline(uuidToInt(profile.id)) ? 'bg-[#10B981]' : 'bg-gray-500'
                       }`}
                     />
                   </div>
@@ -208,16 +218,16 @@ export default function Messages() {
                   </Avatar>
                   <div 
                     className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
-                      getPresence(selectedUser.id).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
+                      isUserOnline(uuidToInt(selectedUser.id)) ? 'bg-[#10B981]' : 'bg-gray-500'
                     }`}
                   />
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${getPresence(selectedUser.id).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
-                    <p className={`text-[10px] uppercase tracking-widest font-bold ${getPresence(selectedUser.id).isOnline ? 'text-[#10B981]' : 'text-gray-500'}`}>
-                      {getPresence(selectedUser.id).isOnline ? 'En ligne' : 'Hors ligne'}
+                    <div className={`w-1.5 h-1.5 rounded-full ${isUserOnline(uuidToInt(selectedUser.id)) ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
+                    <p className={`text-[10px] uppercase tracking-widest font-bold ${isUserOnline(uuidToInt(selectedUser.id)) ? 'text-[#10B981]' : 'text-gray-500'}`}>
+                      {isUserOnline(uuidToInt(selectedUser.id)) ? 'En ligne' : 'Hors ligne'}
                     </p>
                   </div>
                 </div>
