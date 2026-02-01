@@ -178,7 +178,7 @@ export default function Messages() {
                     </Avatar>
                     <div 
                       className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
-                        getPresence(Number(profile.id)).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
+                        getPresence(profile.id).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
                       }`}
                     />
                   </div>
@@ -208,16 +208,16 @@ export default function Messages() {
                   </Avatar>
                   <div 
                     className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
-                      getPresence(Number(selectedUser.id)).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
+                      getPresence(selectedUser.id).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
                     }`}
                   />
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${getPresence(Number(selectedUser.id)).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
-                    <p className={`text-[10px] uppercase tracking-widest font-bold ${getPresence(Number(selectedUser.id)).isOnline ? 'text-[#10B981]' : 'text-gray-500'}`}>
-                      {getPresence(Number(selectedUser.id)).isOnline ? 'En ligne' : 'Hors ligne'}
+                    <div className={`w-1.5 h-1.5 rounded-full ${getPresence(selectedUser.id).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
+                    <p className={`text-[10px] uppercase tracking-widest font-bold ${getPresence(selectedUser.id).isOnline ? 'text-[#10B981]' : 'text-gray-500'}`}>
+                      {getPresence(selectedUser.id).isOnline ? 'En ligne' : 'Hors ligne'}
                     </p>
                   </div>
                 </div>

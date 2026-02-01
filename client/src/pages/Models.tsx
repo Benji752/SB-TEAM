@@ -84,11 +84,11 @@ export default function TeamPage() {
                 </Avatar>
                 <div 
                   className={`absolute bottom-0 right-0 w-5 h-5 border-4 border-[#0A0A0A] rounded-full shadow-lg ${
-                    getPresence(Number(profile.id)).isOnline 
+                    getPresence(profile.id).isOnline 
                       ? 'bg-[#10B981]' 
                       : 'bg-gray-500'
                   }`}
-                  title={getPresence(Number(profile.id)).isOnline ? 'En ligne' : 'Hors ligne'}
+                  title={getPresence(profile.id).isOnline ? 'En ligne' : 'Hors ligne'}
                 />
               </div>
 

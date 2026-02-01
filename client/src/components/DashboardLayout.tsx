@@ -60,12 +60,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           action: 'LOGOUT',
           details: 'Déconnexion manuelle'
         });
-
-        // MISE À JOUR CRUCIALE DU STATUT AVANT DÉCONNEXION
-        await supabase
-          .from('profiles')
-          .update({ is_online: false })
-          .eq('id', user.id);
+        // Note: Online status is now determined by lastActiveAt in gamification_profiles
+        // No need to update is_online column (deprecated)
       }
 
       // 1. Nettoyage brutal

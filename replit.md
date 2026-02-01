@@ -54,12 +54,18 @@ Preferred communication style: Simple, everyday language.
 - **Database Tables**: gamification_profiles, hunter_leads, work_sessions, xp_activity_log
 
 ### Online Status System (Single Source of Truth)
+- **Global Heartbeat**: `useHeartbeat` hook in `DashboardLayout` pings `/api/user/ping` every 60 seconds
+- **Data Source**: `lastActiveAt` field in `gamification_profiles` table (NOT profiles.is_online)
 - **Utility Function**: `client/src/lib/onlineStatus.ts` exports `isUserOnline(lastActiveAt)`
-- **Logic**: Returns `true` if `lastActiveAt` is less than 5 minutes old, otherwise `false`
-- **Usage**: All pages (Leaderboard, Messages, Team) use this same function
-- **Data Source**: `lastActiveAt` field in `gamification_profiles` table, updated by heartbeat
+- **Presence Hook**: `useAllUsersPresence()` hook fetches `/api/user/presence-all` for bulk status
+- **Logic**: Returns `true` if `lastActiveAt` < 5 minutes old, otherwise `false`
+- **Usage**: 
+  - Team (Models.tsx): Uses `useAllUsersPresence().getPresence(userId)`
+  - Messages: Uses `useAllUsersPresence().getPresence(userId)`
+  - Leaderboard: Uses `isUserOnline(profile.lastActiveAt)` directly from API
 - **NEVER use**: `is_online` column from profiles table (deprecated/unreliable)
 - **Visual**: 🟢 Green dot = active < 5min, ⚫ Gray dot = inactive > 5min
+- **Behavior**: When user closes tab, heartbeats stop → after 5 min, they appear offline on ALL pages simultaneously
 
 ### API Structure
 Type-safe API contracts defined in `shared/routes.ts` using Zod schemas:

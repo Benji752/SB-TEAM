@@ -2,14 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { isUserOnline } from '@/lib/onlineStatus';
 
 interface PresenceData {
-  userId: number;
+  userId: number | string;
   lastActiveAt: string | null;
   isOnline: boolean;
 }
 
-type PresenceMap = Record<number, { lastActiveAt: string | null; isOnline: boolean }>;
+type PresenceMap = Record<string | number, { lastActiveAt: string | null; isOnline: boolean }>;
 
-export function useUserPresence(userId: number | null | undefined) {
+export function useUserPresence(userId: number | string | null | undefined) {
   const { data, isLoading, error } = useQuery<PresenceData>({
     queryKey: ['/api/user/presence', userId],
     enabled: !!userId,
@@ -34,13 +34,22 @@ export function useAllUsersPresence() {
     staleTime: 15000,
   });
 
-  const getPresence = (userId: number) => {
-    if (!data || !data[userId]) {
+  const getPresence = (userId: number | string) => {
+    const key = String(userId);
+    const numKey = Number(userId);
+    
+    if (!data) {
       return { isOnline: false, lastActiveAt: null };
     }
+    
+    const entry = data[key] || data[numKey];
+    if (!entry) {
+      return { isOnline: false, lastActiveAt: null };
+    }
+    
     return {
-      isOnline: isUserOnline(data[userId].lastActiveAt),
-      lastActiveAt: data[userId].lastActiveAt
+      isOnline: isUserOnline(entry.lastActiveAt),
+      lastActiveAt: entry.lastActiveAt
     };
   };
 
