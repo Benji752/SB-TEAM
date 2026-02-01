@@ -17,6 +17,7 @@ import Messages from "@/pages/Messages";
 import Models from "@/pages/Models";
 import Projects from "@/pages/Projects";
 import Landing from "@/pages/Landing";
+import ResetPassword from "@/pages/ResetPassword";
 import AITools from "@/pages/AITools";
 import Leaderboard from "@/pages/Leaderboard";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -202,6 +203,9 @@ export default function App() {
     };
   }, [session?.user?.id]);
 
+  const [location] = useLocation();
+  const isResetPasswordPage = location === "/reset-password";
+
   if (loading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-[#050505]">
@@ -216,7 +220,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {!session ? (
+        {isResetPasswordPage ? (
+          <ResetPassword />
+        ) : !session ? (
           <Landing />
         ) : (
           <>

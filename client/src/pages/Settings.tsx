@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -9,16 +10,30 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProfileSchema, type InsertProfile } from "@shared/schema";
+import { insertProfileSchema, type Profile } from "@shared/schema";
+import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+
+type InsertProfile = z.infer<typeof insertProfileSchema>;
 
 export default function Settings() {
   const { user } = useAuth();
   const { data: profile, isLoading } = useProfile();
   const updateMutation = useUpdateProfile();
   const { toast } = useToast();
+
+  // Email change state
+  const [newEmail, setNewEmail] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
+
+  // Password change state
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<InsertProfile>({
     resolver: zodResolver(insertProfileSchema.partial()),
@@ -41,6 +56,76 @@ export default function Settings() {
       toast({ title: "Success", description: "Profile updated successfully" });
     } catch (e) {
       toast({ title: "Error", description: "Failed to update profile", variant: "destructive" });
+    }
+  };
+
+  // Handle email change
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail) {
+      toast({ title: "Erreur", description: "Veuillez entrer un nouvel email.", variant: "destructive" });
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) throw error;
+      
+      toast({ 
+        title: "Email mis à jour", 
+        description: "Un email de confirmation a été envoyé à votre nouvelle adresse." 
+      });
+      setNewEmail("");
+    } catch (error: any) {
+      toast({ 
+        title: "Erreur", 
+        description: error.message || "Impossible de mettre à jour l'email.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  // Handle password change
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPassword || !confirmPassword) {
+      toast({ title: "Erreur", description: "Veuillez remplir tous les champs.", variant: "destructive" });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Erreur", description: "Les mots de passe ne correspondent pas.", variant: "destructive" });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({ title: "Erreur", description: "Le mot de passe doit contenir au moins 6 caractères.", variant: "destructive" });
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      
+      toast({ 
+        title: "Mot de passe mis à jour", 
+        description: "Votre mot de passe a été changé avec succès." 
+      });
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      toast({ 
+        title: "Erreur", 
+        description: error.message || "Impossible de mettre à jour le mot de passe.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -76,29 +161,121 @@ export default function Settings() {
           </Card>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Edit Profile</CardTitle>
-              <CardDescription>Update your username and bio.</CardDescription>
+              <CardTitle>Modifier le Profil</CardTitle>
+              <CardDescription>Mettez à jour votre nom d'utilisateur et bio.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Username</Label>
-                  <Input {...form.register("username")} placeholder="username" />
+                  <Label>Nom d'utilisateur</Label>
+                  <Input {...form.register("username")} placeholder="username" data-testid="input-username" />
                   {form.formState.errors.username && <p className="text-xs text-red-500">{form.formState.errors.username.message}</p>}
                 </div>
                 
                 <div className="space-y-2">
                   <Label>Bio</Label>
-                  <Textarea {...form.register("bio")} placeholder="Tell us about yourself..." className="min-h-[120px]" />
+                  <Textarea {...form.register("bio")} placeholder="Parlez-nous de vous..." className="min-h-[120px]" data-testid="input-bio" />
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button type="submit" disabled={updateMutation.isPending}>
+                  <Button type="submit" disabled={updateMutation.isPending} data-testid="button-save-profile">
                     {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
+                    Enregistrer
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Changer l'Email
+              </CardTitle>
+              <CardDescription>Mettez à jour votre adresse email. Un email de confirmation sera envoyé.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleEmailChange} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Email actuel</Label>
+                  <Input value={user?.email || ""} disabled className="bg-muted" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nouvel email</Label>
+                  <Input 
+                    type="email" 
+                    placeholder="nouveau@email.com" 
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    data-testid="input-new-email"
+                  />
+                </div>
+                <div className="flex justify-end pt-2">
+                  <Button type="submit" disabled={emailLoading} data-testid="button-change-email">
+                    {emailLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Changer l'email
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Changer le Mot de Passe
+              </CardTitle>
+              <CardDescription>Mettez à jour votre mot de passe. Minimum 6 caractères.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Nouveau mot de passe</Label>
+                  <div className="relative">
+                    <Input 
+                      type={showNewPassword ? "text" : "password"}
+                      placeholder="Nouveau mot de passe" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      data-testid="input-new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Confirmer le mot de passe</Label>
+                  <div className="relative">
+                    <Input 
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirmer le mot de passe" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      data-testid="input-confirm-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <Button type="submit" disabled={passwordLoading} data-testid="button-change-password">
+                    {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Changer le mot de passe
                   </Button>
                 </div>
               </form>
