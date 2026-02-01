@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { 
   XAxis, 
   YAxis, 
@@ -11,6 +12,32 @@ import {
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15
+    }
+  }
+};
+
+const MotionCard = motion(Card);
 import { 
   Users, 
   TrendingUp, 
@@ -289,8 +316,13 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-12">
-          <Card className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
+        <motion.div 
+          className="grid gap-6 lg:grid-cols-12"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <MotionCard variants={cardVariants} className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
             <div className="relative h-full flex flex-col md:flex-row">
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
                 <div className="relative w-full h-full">
@@ -371,9 +403,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </Card>
+          </MotionCard>
 
-          <div className="lg:col-span-4 flex flex-col gap-4">
+          <motion.div variants={cardVariants} className="lg:col-span-4 flex flex-col gap-4">
             {stripStats.slice(0, 2).map((stat, i) => (
               <Card key={i} className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
                 <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
@@ -385,10 +417,15 @@ export default function Dashboard() {
                 </span>
               </Card>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <Card className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]">
+        <MotionCard 
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]"
+        >
           <div className="space-y-8">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
@@ -438,10 +475,15 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
           </div>
-        </Card>
+        </MotionCard>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
@@ -493,9 +535,9 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-          </Card>
+          </MotionCard>
 
-          <Card className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
+          <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
@@ -550,8 +592,8 @@ export default function Dashboard() {
                 <div className="text-center py-8 text-white/20 text-[10px] font-black uppercase tracking-widest">Tout est à jour !</div>
               )}
             </div>
-          </Card>
-        </div>
+          </MotionCard>
+        </motion.div>
       </div>
     </DashboardLayout>
   );

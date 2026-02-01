@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Select, 
   SelectContent, 
@@ -26,6 +27,20 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+
+const bubbleVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 20
+    }
+  }
+};
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -258,55 +273,63 @@ export default function AITools() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6" ref={scrollRef}>
             <div className="space-y-6 max-w-3xl mx-auto">
-              {messages.map((msg, idx) => (
-                <div 
-                  key={idx} 
-                  className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
-                >
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === "user" 
-                      ? "bg-blue-500/20 text-blue-400" 
-                      : "bg-gold/20 text-gold"
-                  }`}>
-                    {msg.role === "user" ? <User size={16} /> : <Bot size={16} />}
-                  </div>
-                  <div className={`flex-1 ${msg.role === "user" ? "text-right" : ""}`}>
-                    {msg.image && (
-                      <img 
-                        src={msg.image} 
-                        alt="Uploaded" 
-                        className={`max-w-[300px] rounded-xl mb-2 border border-white/10 ${
-                          msg.role === "user" ? "ml-auto" : ""
-                        }`}
-                      />
-                    )}
-                    <div 
-                      className={`inline-block px-4 py-3 rounded-2xl max-w-full ${
-                        msg.role === "user" 
-                          ? "bg-blue-500/20 text-white" 
-                          : "bg-white/[0.03] text-white/80"
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                        {msg.content.split(/\*\*(.*?)\*\*/g).map((part, i) => 
-                          i % 2 === 1 ? <strong key={i}>{part}</strong> : part
-                        )}
-                      </p>
-                      {msg.role === "assistant" && msg.content.length > 50 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(msg.content)}
-                          className="mt-2 text-white/30 hover:text-gold text-xs h-6 px-2"
-                          data-testid="button-copy-message"
-                        >
-                          <Copy size={12} className="mr-1" /> Copier
-                        </Button>
-                      )}
+              <AnimatePresence mode="popLayout">
+                {messages.map((msg, idx) => (
+                  <motion.div 
+                    key={idx}
+                    variants={bubbleVariants}
+                    initial="hidden"
+                    animate="visible"
+                    layout
+                    className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                      msg.role === "user" 
+                        ? "bg-blue-500/20 text-blue-400" 
+                        : "bg-gold/20 text-gold"
+                    }`}>
+                      {msg.role === "user" ? <User size={16} /> : <Bot size={16} />}
                     </div>
-                  </div>
-                </div>
-              ))}
+                    <div className={`flex-1 ${msg.role === "user" ? "text-right" : ""}`}>
+                      {msg.image && (
+                        <img 
+                          src={msg.image} 
+                          alt="Uploaded" 
+                          className={`max-w-[300px] rounded-xl mb-2 border border-white/10 ${
+                            msg.role === "user" ? "ml-auto" : ""
+                          }`}
+                        />
+                      )}
+                      <div 
+                        className={`inline-block px-4 py-3 rounded-2xl max-w-full ${
+                          msg.role === "user" 
+                            ? "bg-blue-500/20 text-white" 
+                            : "bg-white/[0.03] text-white/80"
+                        }`}
+                      >
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                          {msg.content.split(/\*\*(.*?)\*\*/g).map((part, i) => 
+                            i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                          )}
+                        </p>
+                        {msg.role === "assistant" && msg.content.length > 50 && (
+                          <motion.div whileTap={{ scale: 0.95 }}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyToClipboard(msg.content)}
+                              className="mt-2 text-white/30 text-xs h-6 px-2"
+                              data-testid="button-copy-message"
+                            >
+                              <Copy size={12} className="mr-1" /> Copier
+                            </Button>
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {isLoading && (
                 <div className="flex gap-4">
                   <div className="h-8 w-8 rounded-full bg-gold/20 flex items-center justify-center">
@@ -355,15 +378,17 @@ export default function AITools() {
                 accept="image/*"
                 className="hidden"
               />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-xl"
-                data-testid="button-upload-image"
-              >
-                <Paperclip size={20} />
-              </Button>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-xl"
+                  data-testid="button-upload-image"
+                >
+                  <Paperclip size={20} />
+                </Button>
+              </motion.div>
               <div className="flex-1 relative">
                 <Input
                   value={inputMessage}
@@ -374,15 +399,17 @@ export default function AITools() {
                   data-testid="input-chat-message"
                 />
               </div>
-              <Button
-                onClick={sendMessage}
-                disabled={isLoading || (!inputMessage.trim() && !selectedImage)}
-                size="icon"
-                className="bg-gold text-black rounded-xl"
-                data-testid="button-send-message"
-              >
-                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-              </Button>
+              <motion.div whileTap={{ scale: 0.95 }}>
+                <Button
+                  onClick={sendMessage}
+                  disabled={isLoading || (!inputMessage.trim() && !selectedImage)}
+                  size="icon"
+                  className="bg-gold text-black rounded-xl"
+                  data-testid="button-send-message"
+                >
+                  {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                </Button>
+              </motion.div>
             </div>
           </div>
         </div>

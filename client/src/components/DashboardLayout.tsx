@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -20,6 +21,18 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 }
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: "easeOut",
+  duration: 0.3
+};
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   console.log('Sidebar loaded');
@@ -192,7 +205,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 ml-64 min-h-screen">
         <div className="max-w-[1600px] mx-auto p-10">
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>
