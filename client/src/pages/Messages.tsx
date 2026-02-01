@@ -4,16 +4,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2, Send } from "lucide-react";
+import { MessageSquare, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
-import { useQuery } from "@tanstack/react-query";
-import { isUserOnline } from "@/lib/onlineStatus";
-
-interface LeaderboardEntry {
-  userId: number;
-  username: string;
-  lastActiveAt: string | null;
-}
+import { useAllUsersPresence } from "@/hooks/useUserPresence";
 
 export default function Messages() {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -24,20 +17,8 @@ export default function Messages() {
   const [messageText, setMessageText] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Fetch online status from gamification leaderboard (heartbeat-based)
-  const { data: leaderboard = [] } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["/api/gamification/leaderboard"],
-    refetchInterval: 5000, // Refresh every 5 seconds for real-time status
-  });
-
-  // Build username -> isOnline map from leaderboard (using lastActiveAt)
-  const onlineStatusMap: Record<string, boolean> = {};
-  leaderboard.forEach(entry => {
-    if (entry.username) {
-      onlineStatusMap[entry.username.toLowerCase()] = isUserOnline(entry.lastActiveAt);
-    }
-  });
+  
+  const { getPresence } = useAllUsersPresence();
 
   useEffect(() => {
     async function init() {
@@ -195,9 +176,11 @@ export default function Messages() {
                         {profile.username?.[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    {onlineStatusMap[profile.username?.toLowerCase()] && (
-                      <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg z-10" />
-                    )}
+                    <div 
+                      className={`absolute bottom-0 right-0 w-3.5 h-3.5 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
+                        getPresence(Number(profile.id)).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
+                      }`}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-white truncate">{profile.username}</div>
@@ -223,16 +206,18 @@ export default function Messages() {
                       {selectedUser.username?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  {onlineStatusMap[selectedUser.username?.toLowerCase()] && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg z-10" />
-                  )}
+                  <div 
+                    className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
+                      getPresence(Number(selectedUser.id)).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'
+                    }`}
+                  />
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${onlineStatusMap[selectedUser.username?.toLowerCase()] ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
-                    <p className={`text-[10px] uppercase tracking-widest font-bold ${onlineStatusMap[selectedUser.username?.toLowerCase()] ? 'text-[#10B981]' : 'text-gray-500'}`}>
-                      {onlineStatusMap[selectedUser.username?.toLowerCase()] ? 'En ligne' : 'Hors ligne'}
+                    <div className={`w-1.5 h-1.5 rounded-full ${getPresence(Number(selectedUser.id)).isOnline ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
+                    <p className={`text-[10px] uppercase tracking-widest font-bold ${getPresence(Number(selectedUser.id)).isOnline ? 'text-[#10B981]' : 'text-gray-500'}`}>
+                      {getPresence(Number(selectedUser.id)).isOnline ? 'En ligne' : 'Hors ligne'}
                     </p>
                   </div>
                 </div>
