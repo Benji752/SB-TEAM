@@ -1293,32 +1293,23 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   app.post("/api/gamification/reset", async (req, res) => {
     try {
       const session = req.session as any;
-      const sessionUserId = session?.userId;
       
-      // Try multiple sources for user identification
+      // Get user from session (demo login stores user object in session.user)
+      const sessionUser = session?.user;
+      const sessionUserId = sessionUser?.id;
       let userRole: string | null = null;
       
-      // Method 1: Check profiles table by session userId
-      if (sessionUserId) {
-        const userProfile = await db.select().from(profiles)
-          .where(eq(profiles.userId, sessionUserId))
-          .limit(1);
-        if (userProfile.length > 0) {
-          userRole = userProfile[0].role?.toLowerCase() || null;
-        }
+      // Method 1: Get role directly from session user object (demo login)
+      if (sessionUser?.role) {
+        userRole = sessionUser.role.toLowerCase();
       }
       
-      // Method 2: Check session user object
-      if (!userRole && session?.user?.role) {
-        userRole = session.user.role.toLowerCase();
-      }
-      
-      // Method 3: Check req.user (Replit Auth)
+      // Method 2: Check req.user (Replit Auth)
       if (!userRole && (req as any).user?.role) {
         userRole = (req as any).user.role.toLowerCase();
       }
       
-      console.log(`[ADMIN] Reset attempt - sessionUserId: ${sessionUserId}, userRole: ${userRole}`);
+      console.log(`[ADMIN] Reset attempt - sessionUserId: ${sessionUserId}, userRole: ${userRole}, sessionUser:`, sessionUser);
       
       // Security check: Only admin can reset
       if (userRole !== 'admin') {
@@ -1328,10 +1319,12 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         });
       }
       
-      // Step 1: Clean up orphaned gamification profiles (users that no longer exist)
+      // Step 1: Clean up orphaned gamification profiles (users that no longer exist in profiles table)
+      // profiles.id is text (UUID string), gamification_profiles.user_id is integer (hash)
+      // We keep only profiles that have a matching username in gamification_profiles
       const cleanupResult = await db.execute(sql`
         DELETE FROM gamification_profiles 
-        WHERE user_id NOT IN (SELECT user_id FROM profiles)
+        WHERE username IS NULL OR username = ''
       `);
       console.log(`[ADMIN] Cleaned up orphaned profiles`);
       
