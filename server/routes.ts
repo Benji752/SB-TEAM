@@ -1293,38 +1293,48 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   app.post("/api/gamification/reset", async (req, res) => {
     try {
       const session = req.session as any;
-      
-      // Get user from session (demo login stores user object in session.user)
       const sessionUser = session?.user;
-      const sessionUserId = sessionUser?.id;
-      let userRole: string | null = null;
       
-      // Method 1: Get role directly from session user object (demo login)
-      if (sessionUser?.role) {
-        userRole = sessionUser.role.toLowerCase();
+      // Get userId from session (demo login stores id in session.user.id)
+      let userId: string | null = null;
+      
+      // Method 1: From demo session
+      if (sessionUser?.id) {
+        userId = String(sessionUser.id);
       }
       
-      // Method 2: Check req.user (Replit Auth)
-      if (!userRole && (req as any).user?.role) {
-        userRole = (req as any).user.role.toLowerCase();
+      // Method 2: From req.user (Replit Auth)
+      if (!userId && (req as any).user?.id) {
+        userId = String((req as any).user.id);
       }
       
-      console.log(`[ADMIN] Reset attempt - sessionUserId: ${sessionUserId}, userRole: ${userRole}, sessionUser:`, sessionUser);
+      console.log(`[ADMIN] Reset attempt - userId: ${userId}, sessionUser:`, sessionUser);
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Non authentifié. Veuillez vous reconnecter." });
+      }
+      
+      // MANDATORY DB CHECK: Query profiles table directly for role verification
+      const profileResult = await db.execute(sql`
+        SELECT role FROM profiles WHERE id = ${userId}
+      `);
+      
+      const userRole = (profileResult.rows?.[0] as any)?.role?.toLowerCase() || null;
+      console.log(`[ADMIN] DB role check - userId: ${userId}, dbRole: ${userRole}`);
       
       // Security check: Only admin can reset
       if (userRole !== 'admin') {
         return res.status(403).json({ 
           error: "Accès refusé. Seuls les administrateurs peuvent réinitialiser la saison.",
-          debug: { sessionUserId, userRole }
+          debug: { userId, userRole }
         });
       }
       
-      // Step 1: Clean up orphaned gamification profiles (users that no longer exist in profiles table)
-      // profiles.id is text (UUID string), gamification_profiles.user_id is integer (hash)
-      // We keep only profiles that have a matching username in gamification_profiles
+      // Step 1: Clean up orphaned gamification profiles (users not in profiles table)
       const cleanupResult = await db.execute(sql`
         DELETE FROM gamification_profiles 
-        WHERE username IS NULL OR username = ''
+        WHERE user_id NOT IN (SELECT CAST(id AS INTEGER) FROM profiles WHERE id ~ '^[0-9]+$')
+        AND (username IS NULL OR username = '')
       `);
       console.log(`[ADMIN] Cleaned up orphaned profiles`);
       
@@ -1345,7 +1355,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       // Step 5: Clear work sessions
       await db.delete(workSessions);
       
-      console.log(`[ADMIN] Season reset completed by admin (userId: ${sessionUserId})`);
+      console.log(`[ADMIN] Season reset completed by admin (userId: ${userId})`);
       
       res.json({ 
         success: true, 
