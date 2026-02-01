@@ -88,8 +88,12 @@ export default function Dashboard() {
       const res = await fetch(proxyUrl);
       if (res.ok) {
         const data = await res.json();
+        console.log('Retour API:', data);
         setApiData(data);
-        setIsOnline(data?.model?.status === 'public');
+        
+        // Check the path data.user.status as requested
+        const status = data?.user?.status;
+        setIsOnline(status === 'public');
       } else {
         setIsOnline(false);
       }
