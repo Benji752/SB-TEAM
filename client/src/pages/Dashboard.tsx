@@ -66,10 +66,10 @@ export default function Dashboard() {
     select: (data: any) => data.filter((t: any) => !t.is_done).slice(0, 5) 
   });
 
-  // Separate states for Manual (Supabase) and API (Stripchat)
+  // Separate states for Manual (Supabase) and DB stats
   const [manualData, setManualData] = useState<any>(null);
-  const [apiData, setApiData] = useState<any>(null);
-  const [imageValid, setImageValid] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
 
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/model-stats"],
@@ -86,31 +86,11 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch API data via proxy
-  const fetchApiData = async () => {
-    try {
-      const targetUrl = "https://fr.stripchat.com/api/front/v2/models/username/wildgirlshow";
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-      
-      const res = await fetch(proxyUrl);
-      if (res.ok) {
-        const wrapper = await res.json();
-        if (wrapper && wrapper.contents) {
-          const realData = JSON.parse(wrapper.contents);
-          if (realData) {
-            setApiData(realData);
-          }
-        }
-      }
-    } catch (e) {
-      console.error("API fetch failed", e);
-    }
-  };
-
   useEffect(() => {
     loadManualData();
-    fetchApiData();
-    const interval = setInterval(fetchApiData, 60000);
+    const interval = setInterval(() => {
+      setImageTimestamp(Date.now());
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -144,15 +124,12 @@ export default function Dashboard() {
   // DISPLAY LOGIC (THE "BEST OF")
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
   const displaySubscribers = manualData?.subscribers || 0;
-  const displayStripScore = (apiData?.model?.stripScore > 0) ? apiData.model.stripScore : (manualData?.stripScore || 0);
-  const displayFavorites = (apiData?.model?.favoritesCount > 0) ? apiData.model.favoritesCount : (manualData?.favorites || 0);
-  const viewersCount = apiData?.model?.viewersCount || 0;
-  const apiOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true;
-  const isOnline = apiOnline || imageValid || manualData?.isOnline === true;
-  const avatarUrl = apiData?.model?.avatarUrl;
-  const roomTitle = apiData?.model?.topic || "Aucun sujet défini";
+  const displayStripScore = manualData?.stripScore || 0;
+  const displayFavorites = manualData?.favorites || 0;
+  const viewersCount = 0; // Removed since API is disabled
+  const avatarUrl = null; // We'll use a local fallback if needed or the profile system
+  const roomTitle = "WildgirlShow Live";
 
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
 
   useEffect(() => {
@@ -317,55 +294,44 @@ export default function Dashboard() {
           {/* Now Playing Style Live Monitoring Card */}
           <Card className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
             <div className="relative h-full flex flex-col md:flex-row">
-              {/* Camera Section - Direct Snapshot */}
+              {/* Camera Section - Visual Detection Only */}
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
-                {isOnline ? (
-                  <>
-                    <img 
-                      src={`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg?t=${imageTimestamp}`}
-                      alt="Live Snapshot" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      onLoad={() => setImageValid(true)}
-                      onError={(e) => {
-                        setImageValid(false);
-                        (e.target as HTMLImageElement).src = avatarUrl || '';
-                        (e.target as HTMLImageElement).className = "w-full h-full object-cover blur-md opacity-50";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                  </>
-                ) : (
+                <img 
+                  src={`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg?t=${imageTimestamp}`}
+                  alt="Live Snapshot" 
+                  className={cn(
+                    "w-full h-full object-cover group-hover:scale-105 transition-transform duration-700",
+                    !isOnline && "hidden"
+                  )}
+                  onLoad={() => setIsOnline(true)}
+                  onError={() => setIsOnline(false)}
+                />
+                
+                {!isOnline && (
                   <div className="relative w-full h-full flex items-center justify-center bg-[#050505]">
-                    {avatarUrl ? (
-                      <div className="relative w-full h-full">
-                        <img 
-                          src={avatarUrl} 
-                          alt="Profile" 
-                          className="w-full h-full object-cover blur-xl opacity-30 scale-110" 
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <img 
-                            src={avatarUrl} 
-                            alt="Profile Avatar" 
-                            className="w-32 h-32 rounded-full object-cover border-4 border-white/10 shadow-2xl" 
-                          />
+                    <div className="relative w-full h-full">
+                      <div className="absolute inset-0 bg-gold/5 blur-3xl opacity-20" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+                        <div className="h-24 w-24 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center backdrop-blur-sm shadow-2xl">
+                          <Video size={32} className="text-white/10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 block">OFFLINE</span>
+                          <span className="text-xs font-bold text-white/40 uppercase tracking-widest">En attente du prochain live</span>
                         </div>
                       </div>
-                    ) : (
-                      <Video size={80} className="text-white/5" />
-                    )}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40">
-                      <div className="h-16 w-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center backdrop-blur-sm">
-                        <Video size={24} className="text-white/20" />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Caméra inactive</span>
                     </div>
                   </div>
                 )}
                 
+                {isOnline && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />}
+                
                 {/* Overlay Badge */}
                 <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none">
-                  <div className={`h-2.5 w-2.5 rounded-full ${isOnline ? 'bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.8)]' : 'bg-gray-500'}`} />
+                  <div className={cn(
+                    "h-2.5 w-2.5 rounded-full transition-all duration-500",
+                    isOnline ? "bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.8)]" : "bg-gray-500"
+                  )} />
                   <span className="text-[10px] font-black text-white uppercase tracking-widest">
                     {isOnline ? 'EN LIGNE' : 'HORS LIGNE'}
                   </span>
