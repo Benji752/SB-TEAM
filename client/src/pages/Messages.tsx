@@ -4,9 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2 } from "lucide-react";
+import { MessageSquare, Loader2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useGamificationData } from "@/hooks/useGamificationData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function uuidToInt(uuid: string): number {
   let hash = 0;
@@ -26,6 +27,10 @@ export default function Messages() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminViewMode, setAdminViewMode] = useState(false);
+  const [adminViewUser1, setAdminViewUser1] = useState<any>(null);
+  const [adminViewUser2, setAdminViewUser2] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const { isUserOnline } = useGamificationData();
@@ -36,6 +41,17 @@ export default function Messages() {
         setIsLoadingProfiles(true);
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
+        
+        // Check if user is admin
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          setIsAdmin(profile?.role === 'admin');
+        }
+        
         await fetchProfiles(user?.id);
       } catch (err) {
         console.error("Initialization error:", err);
@@ -64,7 +80,8 @@ export default function Messages() {
       
       if (error) throw error;
       
-      const filtered = (data || []).filter(p => p.id !== currentUserId);
+      // En mode admin view, on garde tous les profils
+      const filtered = adminViewMode ? (data || []) : (data || []).filter(p => p.id !== currentUserId);
       setProfiles(filtered);
 
       // Refresh selected user data if active
@@ -76,9 +93,35 @@ export default function Messages() {
       console.error("Error fetching profiles:", err);
     }
   }
+  
+  // Fetch messages between two users (admin mode)
+  async function fetchAdminMessages(user1Id: string, user2Id: string) {
+    try {
+      setIsLoadingMessages(true);
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (err) {
+      console.error("Error fetching admin messages:", err);
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  }
+
+  // Effect pour mode admin viewer
+  useEffect(() => {
+    if (adminViewMode && adminViewUser1 && adminViewUser2) {
+      fetchAdminMessages(adminViewUser1.id, adminViewUser2.id);
+    }
+  }, [adminViewMode, adminViewUser1, adminViewUser2]);
 
   useEffect(() => {
-    if (selectedUser && currentUser) {
+    if (selectedUser && currentUser && !adminViewMode) {
       fetchMessages(selectedUser.id);
     }
   }, [selectedUser, currentUser]);
@@ -157,7 +200,53 @@ export default function Messages() {
       <div className="h-[calc(100vh-12rem)] flex gap-6">
         <Card className="w-96 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
           <div className="p-8 border-b border-white/[0.05]">
-            <h2 className="text-2xl font-bold text-white">Messages</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Messages</h2>
+              {isAdmin && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => {
+                    setAdminViewMode(!adminViewMode);
+                    setMessages([]);
+                    setSelectedUser(null);
+                    setAdminViewUser1(null);
+                    setAdminViewUser2(null);
+                  }}
+                  className={`${adminViewMode ? 'text-gold bg-gold/20' : 'text-muted-foreground'}`}
+                  title={adminViewMode ? "Mode normal" : "Mode observateur admin"}
+                >
+                  {adminViewMode ? <EyeOff size={18} /> : <Eye size={18} />}
+                </Button>
+              )}
+            </div>
+            {adminViewMode && (
+              <div className="mt-4 p-3 bg-gold/10 rounded-xl border border-gold/20">
+                <div className="text-xs text-gold font-bold uppercase tracking-wider mb-2">Mode Observateur Admin</div>
+                <div className="space-y-2">
+                  <Select onValueChange={(val) => setAdminViewUser1(profiles.find(p => p.id === val))}>
+                    <SelectTrigger className="bg-black/40 border-white/10 text-white h-9">
+                      <SelectValue placeholder="Utilisateur 1" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profiles.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.username}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select onValueChange={(val) => setAdminViewUser2(profiles.find(p => p.id === val))}>
+                    <SelectTrigger className="bg-black/40 border-white/10 text-white h-9">
+                      <SelectValue placeholder="Utilisateur 2" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profiles.filter(p => p.id !== adminViewUser1?.id).map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.username}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
@@ -203,7 +292,66 @@ export default function Messages() {
         </Card>
 
         <Card className="flex-1 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
-          {selectedUser ? (
+          {/* Mode Admin Viewer */}
+          {adminViewMode && adminViewUser1 && adminViewUser2 ? (
+            <>
+              <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-gold/5">
+                <Eye size={20} className="text-gold" />
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8 border border-white/10">
+                    <AvatarFallback className="bg-white/[0.05] text-gold font-bold text-xs">
+                      {adminViewUser1.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-white font-bold">{adminViewUser1.username}</span>
+                  <span className="text-muted-foreground mx-2">↔</span>
+                  <Avatar className="h-8 w-8 border border-white/10">
+                    <AvatarFallback className="bg-white/[0.05] text-gold font-bold text-xs">
+                      {adminViewUser2.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-white font-bold">{adminViewUser2.username}</span>
+                </div>
+                <div className="ml-auto text-xs text-gold/70 uppercase tracking-wider">Mode Lecture Seule</div>
+              </div>
+
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 flex flex-col gap-4 custom-scrollbar">
+                {isLoadingMessages && messages.length === 0 ? (
+                  <div className="flex justify-center p-8"><Loader2 className="animate-spin text-gold" /></div>
+                ) : messages.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground opacity-50 italic">
+                    <MessageSquare size={48} className="mb-4" />
+                    <p>Aucun message entre ces utilisateurs.</p>
+                  </div>
+                ) : (
+                  messages.map((msg) => {
+                    const isFromUser1 = msg.sender_id === adminViewUser1.id;
+                    const senderName = isFromUser1 ? adminViewUser1.username : adminViewUser2.username;
+                    return (
+                      <div 
+                        key={msg.id}
+                        className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm ${
+                          isFromUser1 
+                            ? 'self-start bg-blue-500/20 text-white rounded-tl-none border border-blue-500/30' 
+                            : 'self-end bg-purple-500/20 text-white rounded-tr-none border border-purple-500/30'
+                        }`}
+                      >
+                        <div className="text-[10px] font-bold mb-1 opacity-70">{senderName}</div>
+                        <div className="font-medium break-words">{msg.content}</div>
+                        <div className="text-[9px] mt-1 opacity-50 text-right">
+                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="p-6 border-t border-white/[0.05] bg-white/[0.01] text-center text-muted-foreground text-sm">
+                Mode observateur - Lecture seule
+              </div>
+            </>
+          ) : selectedUser && !adminViewMode ? (
             <>
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
                 <div className="relative z-0">
@@ -280,10 +428,14 @@ export default function Messages() {
             <div className="flex-1 flex items-center justify-center text-center p-8">
               <div>
                 <div className="h-20 w-20 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-6 border border-white/[0.05] text-gold">
-                  <MessageSquare size={32} />
+                  {adminViewMode ? <Eye size={32} /> : <MessageSquare size={32} />}
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Sélectionnez une conversation</h3>
-                <p className="text-muted-foreground">Choisissez un membre pour commencer à discuter.</p>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {adminViewMode ? "Sélectionnez deux utilisateurs" : "Sélectionnez une conversation"}
+                </h3>
+                <p className="text-muted-foreground">
+                  {adminViewMode ? "Choisissez deux membres pour voir leur conversation." : "Choisissez un membre pour commencer à discuter."}
+                </p>
               </div>
             </div>
           )}
