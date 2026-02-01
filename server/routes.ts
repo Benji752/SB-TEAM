@@ -673,6 +673,70 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
+  // ========== NEW SIMPLIFIED GAMIFICATION SYSTEM ==========
+
+  // Get leaderboard from SQL View (Source of Truth)
+  app.get("/api/gamification/leaderboard-view", async (req, res) => {
+    try {
+      const result = await db.execute(sql`SELECT * FROM gamification_leaderboard_view`);
+      res.json(result.rows);
+    } catch (error: any) {
+      console.error("Leaderboard view error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Simplified ping - just update last_active_at and username
+  app.post("/api/gamification/ping", async (req, res) => {
+    try {
+      const schema = z.object({ 
+        userId: z.number(),
+        username: z.string().optional()
+      });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+      const { userId, username } = result.data;
+      
+      const now = new Date();
+      
+      // Check if profile exists
+      const existing = await db.select().from(gamificationProfiles)
+        .where(eq(gamificationProfiles.userId, userId))
+        .limit(1);
+      
+      if (existing.length) {
+        // Update existing profile
+        const updateData: any = { lastActiveAt: now, updatedAt: now };
+        if (username) updateData.username = username;
+        
+        await db.update(gamificationProfiles)
+          .set(updateData)
+          .where(eq(gamificationProfiles.userId, userId));
+      } else {
+        // Create new profile
+        await db.insert(gamificationProfiles).values({
+          userId,
+          username: username || null,
+          xpTotal: 0,
+          level: 1,
+          currentStreak: 0,
+          roleMultiplier: 2.0,
+          lastActiveAt: now
+        });
+      }
+      
+      // Award 2 XP for presence
+      await awardXP(userId, 4, "presence", "Présence active");
+      
+      res.json({ success: true, timestamp: now.toISOString() });
+    } catch (error: any) {
+      console.error("Ping error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Get user's gamification profile
   app.get("/api/gamification/profile/:userId", async (req, res) => {
     try {
