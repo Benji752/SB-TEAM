@@ -54,14 +54,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     
     try {
       if (user?.id) {
+        const userId = typeof user.id === 'number' ? user.id : parseInt(user.id as string);
+        
+        // Mark user as offline immediately via API
+        try {
+          await fetch('/api/user/offline', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
+        } catch (e) {
+          // Ignore offline API errors
+        }
+        
         // Enregistrement du LOGOUT
         await supabase.from('activity_logs').insert({
           user_id: user.id,
           action: 'LOGOUT',
           details: 'Déconnexion manuelle'
         });
-        // Note: Online status is now determined by lastActiveAt in gamification_profiles
-        // No need to update is_online column (deprecated)
       }
 
       // 1. Nettoyage brutal

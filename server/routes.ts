@@ -988,6 +988,29 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
+  // Mark user as offline (called on logout)
+  app.post("/api/user/offline", async (req, res) => {
+    try {
+      const schema = z.object({ userId: z.number() });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+      const { userId } = result.data;
+      
+      // Set lastActiveAt to a date in the past (20 minutes ago) to ensure offline status
+      const offlineDate = new Date(Date.now() - 20 * 60 * 1000);
+      
+      await db.update(gamificationProfiles)
+        .set({ lastActiveAt: offlineDate })
+        .where(eq(gamificationProfiles.userId, userId));
+      
+      res.json({ success: true, status: 'offline' });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Get user presence status
   app.get("/api/user/presence/:userId", async (req, res) => {
     try {
@@ -1003,7 +1026,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       }
       
       const lastActiveAt = profile[0].lastActiveAt;
-      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
+      const ONLINE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes tolerance
       const isOnline = lastActiveAt 
         ? (Date.now() - new Date(lastActiveAt).getTime()) < ONLINE_THRESHOLD_MS 
         : false;
@@ -1022,7 +1045,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         lastActiveAt: gamificationProfiles.lastActiveAt
       }).from(gamificationProfiles);
       
-      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
+      const ONLINE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes tolerance
       const now = Date.now();
       
       const presenceMap = allProfiles.reduce((acc, profile) => {

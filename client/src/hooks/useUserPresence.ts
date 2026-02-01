@@ -30,8 +30,8 @@ export function useUserPresence(userId: number | string | null | undefined) {
 export function useAllUsersPresence() {
   const { data, isLoading, error } = useQuery<PresenceMap>({
     queryKey: ['/api/user/presence-all'],
-    refetchInterval: 30000,
-    staleTime: 15000,
+    refetchInterval: 10000, // Refresh every 10 seconds for faster status updates
+    staleTime: 5000,
   });
 
   const getPresence = (userId: number | string) => {
