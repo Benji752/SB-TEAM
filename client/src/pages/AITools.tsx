@@ -13,31 +13,57 @@ import { Label } from "@/components/ui/label";
 import { 
   Sparkles, 
   Copy, 
-  Instagram, 
-  Twitter, 
-  Music2, 
-  Lock,
   Loader2
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AITools() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<string[]>([]);
+  const [subject, setSubject] = useState("");
+  const [tone, setTone] = useState("seductrice");
+  const [platform, setPlatform] = useState("instagram");
   const { toast } = useToast();
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    if (!subject.trim()) {
+      toast({
+        title: "Sujet requis",
+        description: "Veuillez entrer un sujet pour la génération.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsGenerating(true);
-    // Simulation
-    setTimeout(() => {
-      setResults([
-        "Capture l'instant présent... ✨ Ce bikini accentue parfaitement chaque courbe. Vous préférez la vue de face ou de dos ? Dites-le moi en commentaire ! #BeachVibes #SummerBody",
-        "Le soleil, le sable et moi. 🌊 J'ai quelque chose de très spécial à vous montrer sur mon lien en bio... Ne le ratez pas, c'est seulement pour les vrais curieux. 🔥",
-        "Parfois, tout ce dont on a besoin, c'est d'un peu de sel dans les cheveux et de sable sur la peau. 🐚 Venez me rejoindre pour une session privée ce soir, je vous attends."
-      ]);
+    setResults([]);
+
+    try {
+      const response = await apiRequest("POST", "/api/ai/generate", {
+        subject,
+        tone,
+        platform
+      });
+      
+      const data = await response.json();
+      
+      if (data.suggestions && Array.isArray(data.suggestions)) {
+        setResults(data.suggestions);
+      } else if (data.error) {
+        throw new Error(data.error);
+      }
+    } catch (error: any) {
+      console.error("Generation error:", error);
+      toast({
+        title: "Erreur de génération",
+        description: error.message || "Une erreur est survenue lors de la génération.",
+        variant: "destructive"
+      });
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -68,6 +94,8 @@ export default function AITools() {
                 <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Sujet du post</Label>
                 <Textarea 
                   placeholder="ex: Photo en bikini à la plage"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
                   className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl min-h-[120px] resize-none focus:border-gold/50 transition-colors"
                 />
               </div>
@@ -75,7 +103,7 @@ export default function AITools() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Ton</Label>
-                  <Select defaultValue="seductrice">
+                  <Select value={tone} onValueChange={setTone}>
                     <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12">
                       <SelectValue />
                     </SelectTrigger>
@@ -91,7 +119,7 @@ export default function AITools() {
 
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Plateforme</Label>
-                  <Select defaultValue="instagram">
+                  <Select value={platform} onValueChange={setPlatform}>
                     <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12">
                       <SelectValue />
                     </SelectTrigger>

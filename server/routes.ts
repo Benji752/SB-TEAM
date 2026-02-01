@@ -5,6 +5,7 @@ import { modelStats, authLogs, users, profiles, tasks, orders } from "@shared/sc
 import { db } from "./db";
 import { desc, gte, eq, ne } from "drizzle-orm";
 import { storage } from "./storage";
+import OpenAI from "openai";
 
 export async function registerRoutes(_httpServer: any, app: Express) {
   setupAuth(app);
@@ -202,5 +203,69 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     res.json(statsArr);
   });
 
-  // Remove the static dummy route
+  // AI Content Generation
+  app.post("/api/ai/generate", async (req, res) => {
+    try {
+      const { subject, tone, platform } = req.body;
+      
+      if (!subject) {
+        return res.status(400).json({ error: "Le sujet est requis" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const toneDescriptions: Record<string, string> = {
+        seductrice: "séductrice, sensuelle et mystérieuse",
+        humoristique: "drôle, légère et décalée",
+        mysterieuse: "mystérieuse, intrigante avec des sous-entendus",
+        domina: "autoritaire, dominante et directe",
+        gnd: "naturelle, accessible et amicale comme la fille d'à côté"
+      };
+
+      const platformGuidelines: Record<string, string> = {
+        instagram: "Format Instagram: hashtags pertinents, max 2200 caractères, engageant",
+        onlyfans: "Format OnlyFans: incitatif, mention du lien en bio, exclusivité",
+        twitter: "Format Twitter/X: concis, max 280 caractères, viral",
+        tiktok: "Format TikTok: tendance, jeune, avec des références actuelles"
+      };
+
+      const systemPrompt = `Tu es une rédactrice professionnelle pour créatrices de contenu adulte.
+Tu génères 3 propositions de légendes/posts créatifs et engageants.
+Ton choisi: ${toneDescriptions[tone] || toneDescriptions.seductrice}
+${platformGuidelines[platform] || platformGuidelines.instagram}
+Réponds UNIQUEMENT avec un tableau JSON de 3 strings, sans explication.
+Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Sujet du post: ${subject}` }
+        ],
+        temperature: 0.9,
+        max_tokens: 1000
+      });
+
+      const content = response.choices[0]?.message?.content || "[]";
+      
+      // Parse the JSON array from the response
+      let suggestions: string[] = [];
+      try {
+        suggestions = JSON.parse(content);
+        if (!Array.isArray(suggestions)) {
+          suggestions = [content];
+        }
+      } catch {
+        // If JSON parsing fails, split by newlines or return as single item
+        suggestions = content.split('\n').filter(s => s.trim().length > 0).slice(0, 3);
+      }
+
+      res.json({ suggestions });
+    } catch (error: any) {
+      console.error("AI generation error:", error.message);
+      res.status(500).json({ error: "Erreur de génération IA: " + error.message });
+    }
+  });
 }
