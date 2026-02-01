@@ -1456,4 +1456,43 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       res.status(500).json({ error: error.message });
     }
   });
+
+  // ===================== GROUP CHAT API =====================
+  
+  // Get all group messages
+  app.get("/api/group-messages", async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT * FROM group_messages 
+        ORDER BY created_at ASC 
+        LIMIT 100
+      `);
+      res.json(result.rows || []);
+    } catch (error: any) {
+      console.error("Error fetching group messages:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+  // Send a group message
+  app.post("/api/group-messages", async (req, res) => {
+    try {
+      const { senderId, senderUsername, content } = req.body;
+      
+      if (!senderId || !senderUsername || !content?.trim()) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      const result = await db.execute(sql`
+        INSERT INTO group_messages (sender_id, sender_username, content)
+        VALUES (${senderId}, ${senderUsername}, ${content.trim()})
+        RETURNING *
+      `);
+      
+      res.json(result.rows[0]);
+    } catch (error: any) {
+      console.error("Error sending group message:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 }

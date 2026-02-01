@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2, Eye, EyeOff } from "lucide-react";
+import { MessageSquare, Loader2, Eye, EyeOff, Users, User } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useGamificationData } from "@/hooks/useGamificationData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,11 +27,16 @@ export default function Messages() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminViewMode, setAdminViewMode] = useState(false);
   const [adminViewUser1, setAdminViewUser1] = useState<any>(null);
   const [adminViewUser2, setAdminViewUser2] = useState<any>(null);
+  const [chatMode, setChatMode] = useState<'dm' | 'group'>('group');
+  const [groupMessages, setGroupMessages] = useState<any[]>([]);
+  const [isLoadingGroupMessages, setIsLoadingGroupMessages] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const groupScrollRef = useRef<HTMLDivElement>(null);
   
   const { isUserOnline } = useGamificationData();
 
@@ -42,17 +47,19 @@ export default function Messages() {
         const { data: { user } } = await supabase.auth.getUser();
         setCurrentUser(user);
         
-        // Check if user is admin
+        // Check if user is admin and get profile
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('role')
+            .select('*')
             .eq('id', user.id)
             .single();
           setIsAdmin(profile?.role === 'admin');
+          setCurrentUserProfile(profile);
         }
         
         await fetchProfiles(user?.id);
+        await fetchGroupMessages();
       } catch (err) {
         console.error("Initialization error:", err);
       } finally {
@@ -112,6 +119,47 @@ export default function Messages() {
       setIsLoadingMessages(false);
     }
   }
+  
+  // Fetch group messages via API
+  async function fetchGroupMessages() {
+    try {
+      setIsLoadingGroupMessages(true);
+      const response = await fetch('/api/group-messages');
+      if (!response.ok) throw new Error('Failed to fetch');
+      const data = await response.json();
+      setGroupMessages(data || []);
+    } catch (err) {
+      console.error("Error fetching group messages:", err);
+    } finally {
+      setIsLoadingGroupMessages(false);
+    }
+  }
+  
+  // Send group message via API
+  async function handleSendGroupMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!messageText.trim() || !currentUser || !currentUserProfile) return;
+
+    try {
+      const response = await fetch('/api/group-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          senderId: currentUser.id,
+          senderUsername: currentUserProfile.username,
+          content: messageText.trim()
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to send');
+      
+      setMessageText("");
+      await fetchGroupMessages();
+    } catch (err: any) {
+      console.error("Error sending group message:", err);
+      alert("Erreur lors de l'envoi");
+    }
+  }
 
   // Effect pour mode admin viewer
   useEffect(() => {
@@ -131,6 +179,20 @@ export default function Messages() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+  
+  useEffect(() => {
+    if (groupScrollRef.current) {
+      groupScrollRef.current.scrollTop = groupScrollRef.current.scrollHeight;
+    }
+  }, [groupMessages]);
+  
+  // Auto-refresh group messages every 5 seconds
+  useEffect(() => {
+    if (chatMode === 'group') {
+      const interval = setInterval(fetchGroupMessages, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [chatMode]);
 
   async function fetchMessages(recipientId: string) {
     if (!currentUser) return;
@@ -199,10 +261,10 @@ export default function Messages() {
     <DashboardLayout>
       <div className="h-[calc(100vh-12rem)] flex gap-6">
         <Card className="w-96 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
-          <div className="p-8 border-b border-white/[0.05]">
-            <div className="flex items-center justify-between">
+          <div className="p-6 border-b border-white/[0.05]">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-white">Messages</h2>
-              {isAdmin && (
+              {isAdmin && chatMode === 'dm' && (
                 <Button
                   size="icon"
                   variant="ghost"
@@ -220,7 +282,30 @@ export default function Messages() {
                 </Button>
               )}
             </div>
-            {adminViewMode && (
+            
+            {/* Onglets Chat Groupe / DM */}
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setChatMode('group'); setAdminViewMode(false); }}
+                className={`flex-1 gap-2 ${chatMode === 'group' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
+              >
+                <Users size={16} />
+                Chat Équipe
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setChatMode('dm')}
+                className={`flex-1 gap-2 ${chatMode === 'dm' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
+              >
+                <User size={16} />
+                Privé
+              </Button>
+            </div>
+            
+            {adminViewMode && chatMode === 'dm' && (
               <div className="mt-4 p-3 bg-gold/10 rounded-xl border border-gold/20">
                 <div className="text-xs text-gold font-bold uppercase tracking-wider mb-2">Mode Observateur Admin</div>
                 <div className="space-y-2">
@@ -249,6 +334,8 @@ export default function Messages() {
             )}
           </div>
           
+          {/* Liste des contacts (mode DM seulement) */}
+          {chatMode === 'dm' && (
           <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
             {isLoadingProfiles ? (
               <div className="flex justify-center p-8">
@@ -289,11 +376,84 @@ export default function Messages() {
               ))
             )}
           </div>
+          )}
+          
+          {/* Info Chat Groupe (mode group) */}
+          {chatMode === 'group' && (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+              <div className="h-16 w-16 bg-gold/10 rounded-full flex items-center justify-center mb-4 border border-gold/20">
+                <Users size={28} className="text-gold" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Chat Équipe</h3>
+              <p className="text-sm text-muted-foreground">Tout le monde peut voir et participer à cette conversation.</p>
+            </div>
+          )}
         </Card>
 
         <Card className="flex-1 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
-          {/* Mode Admin Viewer */}
-          {adminViewMode && adminViewUser1 && adminViewUser2 ? (
+          {/* Mode Chat Groupe */}
+          {chatMode === 'group' ? (
+            <>
+              <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-gradient-to-r from-gold/10 to-transparent">
+                <div className="h-10 w-10 bg-gold/20 rounded-full flex items-center justify-center border border-gold/30">
+                  <Users size={20} className="text-gold" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Chat Équipe SB Digital</h3>
+                  <p className="text-xs text-muted-foreground">Tous les membres de l'équipe</p>
+                </div>
+              </div>
+
+              <div ref={groupScrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-3 custom-scrollbar">
+                {isLoadingGroupMessages && groupMessages.length === 0 ? (
+                  <div className="flex justify-center p-8"><Loader2 className="animate-spin text-gold" /></div>
+                ) : groupMessages.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground opacity-50 italic">
+                    <MessageSquare size={48} className="mb-4" />
+                    <p>Aucun message. Soyez le premier à écrire !</p>
+                  </div>
+                ) : (
+                  groupMessages.map((msg) => {
+                    const isMe = msg.sender_id === currentUser?.id;
+                    return (
+                      <div 
+                        key={msg.id}
+                        className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+                          isMe 
+                            ? 'self-end bg-gold text-black rounded-tr-none shadow-[0_5px_15px_rgba(201,162,77,0.1)]' 
+                            : 'self-start bg-white/[0.05] text-white rounded-tl-none border border-white/[0.08]'
+                        }`}
+                      >
+                        {!isMe && (
+                          <div className="text-[10px] font-bold mb-1 text-gold">{msg.sender_username}</div>
+                        )}
+                        <div className="font-medium break-words">{msg.content}</div>
+                        <div className={`text-[9px] mt-1 opacity-50 text-right ${isMe ? 'text-black/70' : 'text-white/50'}`}>
+                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <form onSubmit={handleSendGroupMessage} className="p-6 border-t border-white/[0.05] flex gap-3 bg-white/[0.01]">
+                <Input 
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Écrivez à l'équipe..." 
+                  className="flex-1 bg-black/40 border-white/[0.1] text-white h-12 rounded-xl px-4 focus:border-gold/50"
+                />
+                <Button 
+                  type="submit" 
+                  disabled={!messageText.trim() || isLoadingGroupMessages}
+                  className="luxury-button h-12 px-6 rounded-xl flex gap-2 font-bold uppercase text-[10px] tracking-widest"
+                >
+                  Envoyer
+                </Button>
+              </form>
+            </>
+          ) : adminViewMode && adminViewUser1 && adminViewUser2 ? (
             <>
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-gold/5">
                 <Eye size={20} className="text-gold" />
