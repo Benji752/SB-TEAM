@@ -123,8 +123,7 @@ export default function Dashboard() {
 
   const username = "wildgirlshow";
   const targetUrl = `https://img.stripchat.com/access/snapshots/${username}/${username}_snapshot.jpg`;
-  const proxyUrlBase = `https://images.weserv.nl/?url=${encodeURIComponent(targetUrl)}&maxage=0&output=jpg`;
-  const proxyUrl = `${proxyUrlBase}&t=${imageTimestamp}`;
+  const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(targetUrl)}&maxage=0&output=jpg&t=${imageTimestamp}`;
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
