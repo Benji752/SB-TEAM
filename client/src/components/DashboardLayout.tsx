@@ -20,7 +20,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartbeatTracker, useHeartbeatStatus } from "@/components/HeartbeatTracker";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
@@ -63,6 +63,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
           });
+          // Invalidate presence queries instantly so other users see the change
+          queryClient.invalidateQueries({ queryKey: ['/api/user/presence-all'] });
         } catch (e) {
           // Ignore offline API errors
         }

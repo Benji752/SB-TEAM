@@ -48,6 +48,7 @@ export function HeartbeatTracker() {
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/profile", userId] });
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/today-time", userId] });
+        queryClient.invalidateQueries({ queryKey: ["/api/user/presence-all"] });
       } catch (error) {
         // Silently ignore heartbeat failures
       }
