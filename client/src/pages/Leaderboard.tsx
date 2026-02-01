@@ -445,7 +445,7 @@ export default function Leaderboard() {
     mutationFn: async () => {
       // Use Supabase RPC to bypass session/API issues
       // No parameters - DB uses auth.uid() internally
-      const { error } = await supabase.rpc('reset_season');
+      const { error } = await supabase.rpc('admin_reset_season');
       
       if (error) {
         console.error("[RPC] reset_season error:", error);
