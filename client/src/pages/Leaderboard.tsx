@@ -27,6 +27,7 @@ interface XpActivity {
   xpGained: number;
   description: string;
   createdAt: string;
+  username?: string | null;
 }
 
 interface TodayTime {
@@ -305,7 +306,7 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
   );
 }
 
-function ActivityFeed({ activities, userNames }: { activities: XpActivity[]; userNames: Record<number, string> }) {
+function ActivityFeed({ activities }: { activities: XpActivity[] }) {
   const getActionIcon = (type: string) => {
     switch (type) {
       case "order_created": return <ShoppingCart size={16} className="text-blue-400" />;
@@ -346,7 +347,7 @@ function ActivityFeed({ activities, userNames }: { activities: XpActivity[]; use
           </div>
         ) : (
           activities.map((activity, index) => {
-            const userName = userNames[activity.userId] || `User ${activity.userId}`;
+            const userName = activity.username || `Membre #${activity.userId}`;
             return (
               <motion.div
                 key={activity.id}
@@ -457,12 +458,6 @@ export default function Leaderboard() {
   if (todayTime1) todayTimes[1] = todayTime1;
   if (todayTime2) todayTimes[2] = todayTime2;
 
-  // Build a map of userId -> username from leaderboard data
-  const userNames: Record<number, string> = {};
-  leaderboard.forEach(profile => {
-    userNames[profile.userId] = profile.username || `User ${profile.userId}`;
-  });
-
   const currentUserId = typeof user?.id === 'number' ? user.id : parseInt(user?.id as string) || null;
   const myProfile = leaderboard.find(p => p.userId === currentUserId);
   const myRank = myProfile ? leaderboard.findIndex(p => p.userId === currentUserId) + 1 : 0;
@@ -541,7 +536,7 @@ export default function Leaderboard() {
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <ActivityFeed activities={activities} userNames={userNames} />
+            <ActivityFeed activities={activities} />
           </motion.div>
         </div>
 

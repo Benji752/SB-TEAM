@@ -722,11 +722,20 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
-  // Get XP activity log
+  // Get XP activity log with usernames
   app.get("/api/gamification/activity", async (req, res) => {
     try {
-      const activities = await db.select()
+      const activities = await db.select({
+        id: xpActivityLog.id,
+        userId: xpActivityLog.userId,
+        actionType: xpActivityLog.actionType,
+        xpGained: xpActivityLog.xpGained,
+        description: xpActivityLog.description,
+        createdAt: xpActivityLog.createdAt,
+        username: profiles.username,
+      })
         .from(xpActivityLog)
+        .leftJoin(profiles, eq(xpActivityLog.userId, profiles.id))
         .orderBy(desc(xpActivityLog.createdAt))
         .limit(20);
       
