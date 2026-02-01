@@ -2,8 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer } from "lucide-react";
-import { LeadDeclarationForm } from "@/components/LeadDeclarationForm";
+import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle } from "lucide-react";
 
 interface GamificationProfile {
   id: number;
@@ -13,6 +12,8 @@ interface GamificationProfile {
   currentStreak: number;
   roleMultiplier: number;
   badges: string[];
+  role?: string | null;
+  username?: string | null;
 }
 
 interface XpActivity {
@@ -30,10 +31,22 @@ interface TodayTime {
   formatted: string;
 }
 
-const USER_NAMES: Record<number, { name: string; avatar: string; role: string }> = {
-  1: { name: "Nico", avatar: "N", role: "Staff" },
-  2: { name: "WildGirl", avatar: "W", role: "Model" },
+const USER_NAMES: Record<number, { name: string; avatar: string }> = {
+  1: { name: "Nico", avatar: "N" },
+  2: { name: "WildGirl", avatar: "W" },
 };
+
+function getDisplayName(profile: GamificationProfile) {
+  if (profile.username) return { name: profile.username, avatar: profile.username.charAt(0).toUpperCase() };
+  const fallback = USER_NAMES[profile.userId];
+  return fallback || { name: `User ${profile.userId}`, avatar: "?" };
+}
+
+function getRoleLabel(role?: string | null) {
+  if (role === 'admin') return 'Admin';
+  if (role === 'staff') return 'Staff';
+  return 'Staff';
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -72,7 +85,8 @@ function XpProgressBar({ xp, level }: { xp: number; level: number }) {
 }
 
 function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationProfile; rank: number; todayTime?: TodayTime }) {
-  const user = USER_NAMES[profile.userId] || { name: `User ${profile.userId}`, avatar: "?", role: "Unknown" };
+  const displayInfo = getDisplayName(profile);
+  const roleLabel = getRoleLabel(profile.role);
   
   const getRankIcon = () => {
     switch (rank) {
@@ -110,18 +124,18 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
             rank === 3 ? "bg-gradient-to-br from-amber-500 to-amber-700 text-white" :
             "bg-white/10 text-white"
           }`}>
-            {user.avatar}
+            {displayInfo.avatar}
           </div>
           
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold text-white">{user.name}</h3>
+              <h3 className="text-xl font-bold text-white">{displayInfo.name}</h3>
               <span className={`text-xs px-2 py-0.5 rounded-full ${
                 profile.roleMultiplier > 1 
                   ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" 
                   : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
               }`}>
-                {user.role} {profile.roleMultiplier > 1 && `(${profile.roleMultiplier}x)`}
+                {roleLabel} {profile.roleMultiplier > 1 && `(${profile.roleMultiplier}x)`}
               </span>
             </div>
             <XpProgressBar xp={profile.xpTotal} level={profile.level} />
@@ -158,8 +172,10 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
 function ActivityFeed({ activities }: { activities: XpActivity[] }) {
   const getActionIcon = (type: string) => {
     switch (type) {
+      case "order_created": return <ShoppingCart size={14} className="text-blue-400" />;
+      case "order_paid": return <CheckCircle size={14} className="text-green-400" />;
       case "lead_approved": return <Target size={14} className="text-green-400" />;
-      case "work_session": return <Clock size={14} className="text-blue-400" />;
+      case "work_session": return <Clock size={14} className="text-purple-400" />;
       default: return <Zap size={14} className="text-gold" />;
     }
   };
@@ -238,11 +254,7 @@ export default function Leaderboard() {
               <Trophy className="text-gold" size={32} />
               SB HUNTER LEAGUE
             </h1>
-            <p className="text-white/50 mt-1">Compétition Staff vs Modèle</p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <LeadDeclarationForm userId={1} />
+            <p className="text-white/50 mt-1">Classement Staff - XP automatique via commandes</p>
           </div>
         </motion.div>
 
@@ -265,13 +277,13 @@ export default function Leaderboard() {
                 className="space-y-4"
               >
                 {leaderboard.map((profile, index) => (
-                  <LeaderboardCard 
-                    key={profile.id} 
-                    profile={profile} 
-                    rank={index + 1} 
-                    todayTime={todayTimes[profile.userId]}
-                  />
-                ))}
+                    <LeaderboardCard 
+                      key={profile.id} 
+                      profile={profile} 
+                      rank={index + 1} 
+                      todayTime={todayTimes[profile.userId]}
+                    />
+                  ))}
               </motion.div>
             )}
           </motion.div>
@@ -286,24 +298,30 @@ export default function Leaderboard() {
             <h3 className="text-white font-bold uppercase tracking-wider text-sm mb-4">
               Règles du Jeu
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
               <div className="p-4 bg-white/[0.02] rounded-xl">
-                <Target className="text-green-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Chasse Réussie</p>
-                <p className="text-white/50">100 XP × multiplicateur</p>
-                <p className="text-white/30 text-xs mt-1">Staff: 200 XP | Modèle: 100 XP</p>
+                <ShoppingCart className="text-blue-400 mb-2" size={20} />
+                <p className="text-white/80 font-medium">Nouvelle Commande</p>
+                <p className="text-white/50">+10 XP</p>
+                <p className="text-white/30 text-xs mt-1">Créer une commande</p>
               </div>
               <div className="p-4 bg-white/[0.02] rounded-xl">
-                <Clock className="text-blue-400 mb-2" size={20} />
+                <CheckCircle className="text-green-400 mb-2" size={20} />
+                <p className="text-white/80 font-medium">Commande Payée</p>
+                <p className="text-white/50">+100 XP Bonus</p>
+                <p className="text-white/30 text-xs mt-1">Quand statut = Payé</p>
+              </div>
+              <div className="p-4 bg-white/[0.02] rounded-xl">
+                <Clock className="text-purple-400 mb-2" size={20} />
                 <p className="text-white/80 font-medium">Présence Active</p>
-                <p className="text-white/50">+2 XP / 5 min (~24 XP/h)</p>
+                <p className="text-white/50">+2 XP / 5 min</p>
                 <p className="text-white/30 text-xs mt-1">Tracking automatique</p>
               </div>
               <div className="p-4 bg-white/[0.02] rounded-xl">
-                <Moon className="text-purple-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Bonus Night Owl</p>
+                <Moon className="text-yellow-400 mb-2" size={20} />
+                <p className="text-white/80 font-medium">Night Owl</p>
                 <p className="text-white/50">+50 XP</p>
-                <p className="text-white/30 text-xs mt-1">Actions entre 00h00 et 06h00</p>
+                <p className="text-white/30 text-xs mt-1">00h00 - 06h00</p>
               </div>
             </div>
           </Card>

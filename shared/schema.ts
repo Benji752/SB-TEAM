@@ -138,6 +138,7 @@ export const orders = pgTable("orders", {
   serviceType: text("service_type").notNull().default("Custom"),
   amount: integer("amount").notNull(),
   status: text("status", { enum: ["paid", "pending", "cancelled"] }).notNull().default("pending"),
+  createdBy: integer("created_by"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

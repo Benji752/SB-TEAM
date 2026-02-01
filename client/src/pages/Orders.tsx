@@ -49,12 +49,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertOrderSchema, type Order } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
 
 export default function Orders() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: orders, isLoading } = useQuery<Order[]>({
@@ -78,7 +80,9 @@ export default function Orders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      toast({ title: "Succès", description: "Commande ajoutée avec succès." });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/activity"] });
+      toast({ title: "Succès", description: "Commande ajoutée avec succès. +10 XP !" });
       setIsModalOpen(false);
       form.reset();
     },
@@ -99,9 +103,12 @@ export default function Orders() {
       const res = await apiRequest("PATCH", `/api/orders/${id}/status`, { status });
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      toast({ title: "Statut mis à jour", description: "Le statut de la commande a été modifié." });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/activity"] });
+      const bonusMsg = variables.status === "paid" ? " +100 XP Bonus !" : "";
+      toast({ title: "Statut mis à jour", description: `Le statut de la commande a été modifié.${bonusMsg}` });
     },
   });
 
@@ -141,7 +148,7 @@ export default function Orders() {
                 </DialogTitle>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit((data) => createMutation.mutate(data))} className="space-y-4 py-4">
+                <form onSubmit={form.handleSubmit((data) => createMutation.mutate({ ...data, createdBy: typeof user?.id === 'number' ? user.id : undefined }))} className="space-y-4 py-4">
                   <FormField
                     control={form.control}
                     name="clientName"

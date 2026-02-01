@@ -96,7 +96,48 @@ export async function registerRoutes(_httpServer: any, app: Express) {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      const order = await storage.createOrder(req.body);
+      // Get creator from session (more reliable than trusting req.body)
+      const sessionUserId = (req.session as any)?.userId;
+      const creatorId = sessionUserId || req.body.createdBy;
+      
+      // Create order with createdBy from session if available
+      const orderData = { ...req.body, createdBy: creatorId || null };
+      const order = await storage.createOrder(orderData);
+      
+      // Award +10 XP for creating an order
+      if (creatorId && typeof creatorId === 'number') {
+        // Get or create gamification profile
+        let [profile] = await db.select().from(gamificationProfiles).where(eq(gamificationProfiles.userId, creatorId));
+        
+        if (!profile) {
+          [profile] = await db.insert(gamificationProfiles).values({
+            userId: creatorId,
+            xpTotal: 0,
+            level: 1,
+            currentStreak: 0,
+            roleMultiplier: 1.0,
+            badges: [],
+          }).returning();
+        }
+        
+        // Add +10 XP
+        const xpGained = 10;
+        const newXp = profile.xpTotal + xpGained;
+        const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
+        
+        await db.update(gamificationProfiles)
+          .set({ xpTotal: newXp, level: newLevel })
+          .where(eq(gamificationProfiles.userId, creatorId));
+        
+        // Log the activity
+        await db.insert(xpActivityLog).values({
+          userId: creatorId,
+          actionType: "order_created",
+          xpGained,
+          description: `a initié une commande pour ${order.clientName}`,
+        });
+      }
+      
       res.json(order);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -106,7 +147,49 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   app.patch("/api/orders/:id/status", async (req, res) => {
     try {
       const { status } = req.body;
-      const order = await storage.updateOrderStatus(parseInt(req.params.id), status);
+      const orderId = parseInt(req.params.id);
+      
+      // Get the current order to check for status change and creator
+      const [currentOrder] = await db.select().from(orders).where(eq(orders.id, orderId));
+      
+      const order = await storage.updateOrderStatus(orderId, status);
+      
+      // Award +100 XP bonus when order becomes 'paid' (and wasn't already paid)
+      if (status === 'paid' && currentOrder && currentOrder.status !== 'paid' && currentOrder.createdBy) {
+        const creatorId = currentOrder.createdBy;
+        
+        // Get gamification profile
+        let [profile] = await db.select().from(gamificationProfiles).where(eq(gamificationProfiles.userId, creatorId));
+        
+        if (!profile) {
+          [profile] = await db.insert(gamificationProfiles).values({
+            userId: creatorId,
+            xpTotal: 0,
+            level: 1,
+            currentStreak: 0,
+            roleMultiplier: 1.0,
+            badges: [],
+          }).returning();
+        }
+        
+        // Add +100 XP bonus
+        const xpGained = 100;
+        const newXp = profile.xpTotal + xpGained;
+        const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
+        
+        await db.update(gamificationProfiles)
+          .set({ xpTotal: newXp, level: newLevel })
+          .where(eq(gamificationProfiles.userId, creatorId));
+        
+        // Log the activity
+        await db.insert(xpActivityLog).values({
+          userId: creatorId,
+          actionType: "order_paid",
+          xpGained,
+          description: `Commande ${currentOrder.clientName} payée ! Jackpot`,
+        });
+      }
+      
       res.json(order);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -552,9 +635,10 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 
   // ========== GAMIFICATION ROUTES - SB HUNTER LEAGUE ==========
 
-  // Get leaderboard data
+  // Get leaderboard data - only staff/admin roles
   app.get("/api/gamification/leaderboard", async (req, res) => {
     try {
+      // Join with profiles to get role and filter to only admin/staff
       const leaderboard = await db.select({
         id: gamificationProfiles.id,
         userId: gamificationProfiles.userId,
@@ -562,9 +646,15 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         level: gamificationProfiles.level,
         currentStreak: gamificationProfiles.currentStreak,
         roleMultiplier: gamificationProfiles.roleMultiplier,
-        badges: gamificationProfiles.badges
+        badges: gamificationProfiles.badges,
+        role: profiles.role,
+        username: profiles.username
       })
       .from(gamificationProfiles)
+      .leftJoin(profiles, eq(gamificationProfiles.userId, profiles.id))
+      .where(
+        sql`${profiles.role} IN ('admin', 'staff') OR ${profiles.role} IS NULL`
+      )
       .orderBy(desc(gamificationProfiles.xpTotal));
       
       res.json(leaderboard);
