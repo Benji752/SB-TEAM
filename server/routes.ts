@@ -1293,14 +1293,49 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   app.post("/api/gamification/reset", async (req, res) => {
     try {
       const session = req.session as any;
-      const userRole = session?.user?.role?.toLowerCase();
+      const sessionUserId = session?.userId;
+      
+      // Try multiple sources for user identification
+      let userRole: string | null = null;
+      
+      // Method 1: Check profiles table by session userId
+      if (sessionUserId) {
+        const userProfile = await db.select().from(profiles)
+          .where(eq(profiles.userId, sessionUserId))
+          .limit(1);
+        if (userProfile.length > 0) {
+          userRole = userProfile[0].role?.toLowerCase() || null;
+        }
+      }
+      
+      // Method 2: Check session user object
+      if (!userRole && session?.user?.role) {
+        userRole = session.user.role.toLowerCase();
+      }
+      
+      // Method 3: Check req.user (Replit Auth)
+      if (!userRole && (req as any).user?.role) {
+        userRole = (req as any).user.role.toLowerCase();
+      }
+      
+      console.log(`[ADMIN] Reset attempt - sessionUserId: ${sessionUserId}, userRole: ${userRole}`);
       
       // Security check: Only admin can reset
       if (userRole !== 'admin') {
-        return res.status(403).json({ error: "Accès refusé. Seuls les administrateurs peuvent réinitialiser la saison." });
+        return res.status(403).json({ 
+          error: "Accès refusé. Seuls les administrateurs peuvent réinitialiser la saison.",
+          debug: { sessionUserId, userRole }
+        });
       }
       
-      // Reset all gamification profiles: XP to 0, level to 1
+      // Step 1: Clean up orphaned gamification profiles (users that no longer exist)
+      const cleanupResult = await db.execute(sql`
+        DELETE FROM gamification_profiles 
+        WHERE user_id NOT IN (SELECT user_id FROM profiles)
+      `);
+      console.log(`[ADMIN] Cleaned up orphaned profiles`);
+      
+      // Step 2: Reset all remaining gamification profiles: XP to 0, level to 1
       await db.update(gamificationProfiles)
         .set({
           xpTotal: 0,
@@ -1308,20 +1343,20 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
           currentStreak: 0
         });
       
-      // Clear XP activity log
+      // Step 3: Clear XP activity log
       await db.delete(xpActivityLog);
       
-      // Clear hunter leads
+      // Step 4: Clear hunter leads
       await db.delete(hunterLeads);
       
-      // Clear work sessions
+      // Step 5: Clear work sessions
       await db.delete(workSessions);
       
-      console.log(`[ADMIN] Season reset by user role: ${userRole}`);
+      console.log(`[ADMIN] Season reset completed by admin (userId: ${sessionUserId})`);
       
       res.json({ 
         success: true, 
-        message: "Saison réinitialisée avec succès. Tous les XP, niveaux et historiques ont été remis à zéro." 
+        message: "Saison réinitialisée avec succès. Tous les XP, niveaux, historiques et profils orphelins ont été nettoyés." 
       });
     } catch (error: any) {
       console.error("[ADMIN] Reset season error:", error);
