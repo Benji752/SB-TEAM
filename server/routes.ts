@@ -747,6 +747,123 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
+  // ========== AUTO-TRACKING HEARTBEAT ==========
+  
+  // Heartbeat - auto-track presence (+2 XP every 5 minutes)
+  app.post("/api/gamification/heartbeat", async (req, res) => {
+    try {
+      const schema = z.object({ userId: z.number() });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+      const { userId } = result.data;
+      
+      // Get user's gamification profile (create if doesn't exist)
+      let profile = await db.select().from(gamificationProfiles)
+        .where(eq(gamificationProfiles.userId, userId))
+        .limit(1);
+      
+      if (!profile.length) {
+        // First try to get role from profiles table
+        const userProfile = await db.select().from(profiles)
+          .where(eq(profiles.id, userId))
+          .limit(1);
+        
+        let userRole = userProfile.length ? userProfile[0].role?.toLowerCase() : null;
+        
+        // Fallback to session role
+        if (!userRole) {
+          const session = req.session as any;
+          userRole = session?.user?.role?.toLowerCase();
+        }
+        
+        const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
+        
+        const newProfile = await db.insert(gamificationProfiles).values({
+          userId,
+          xpTotal: 0,
+          level: 1,
+          currentStreak: 0,
+          roleMultiplier
+        }).returning();
+        profile = newProfile;
+      }
+      
+      // Award 2 XP for being active
+      const xpGained = 2;
+      const multiplier = profile[0].roleMultiplier || 1.0;
+      const finalXp = Math.floor(xpGained * multiplier);
+      
+      await awardXP(userId, finalXp, "presence", "Présence active");
+      
+      // Track today's active time using a dedicated auto-tracking session
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Find today's auto-tracking session (pointsEarned = -1 is our marker for auto sessions)
+      const todayAutoSession = await db.select().from(workSessions)
+        .where(and(
+          eq(workSessions.userId, userId),
+          gte(workSessions.startTime, today),
+          eq(workSessions.isActive, false),
+          sql`${workSessions.pointsEarned} = -1`
+        ))
+        .limit(1);
+      
+      // Create or update auto-tracking session
+      if (!todayAutoSession.length) {
+        await db.insert(workSessions).values({
+          userId,
+          startTime: new Date(),
+          endTime: new Date(),
+          durationMinutes: 5,
+          pointsEarned: -1, // Marker for auto-tracking session
+          isActive: false
+        });
+      } else {
+        await db.update(workSessions)
+          .set({
+            durationMinutes: sql`${workSessions.durationMinutes} + 5`,
+            endTime: new Date()
+          })
+          .where(eq(workSessions.id, todayAutoSession[0].id));
+      }
+      
+      res.json({ xpGained: finalXp, message: "Heartbeat recorded" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get today's active time for a user (auto-tracking only)
+  app.get("/api/gamification/today-time/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Only get auto-tracking sessions (pointsEarned = -1 is our marker)
+      const sessions = await db.select().from(workSessions)
+        .where(and(
+          eq(workSessions.userId, userId),
+          gte(workSessions.startTime, today),
+          sql`${workSessions.pointsEarned} = -1`
+        ));
+      
+      const totalMinutes = sessions.reduce((acc, s) => acc + (s.durationMinutes || 0), 0);
+      
+      res.json({ 
+        userId,
+        todayMinutes: totalMinutes,
+        formatted: `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // ========== HUNTER LEADS ==========
 
   // Declare a new lead

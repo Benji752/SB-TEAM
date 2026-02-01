@@ -45,6 +45,14 @@ Preferred communication style: Simple, everyday language.
 - **Tasks**: Kanban-style task management with priority and status
 - **Agency Stats**: Revenue and subscriber analytics data
 
+### Gamification System (SB HUNTER LEAGUE)
+- **Auto-Tracking**: Invisible HeartbeatTracker component detects user activity and awards +2 XP every 5 minutes
+- **Role Multipliers**: Staff/Admin get 2.0x XP multiplier, Models get 1.0x
+- **Chasse (Leads)**: Declaring new prospects awards 100 XP × role multiplier upon admin approval
+- **Night Owl Bonus**: +50 XP for actions between 00:00-06:00
+- **Leaderboard**: E-Sport themed rankings with XP progress bars and "Temps passé aujourd'hui" tracking
+- **Database Tables**: gamification_profiles, hunter_leads, work_sessions, xp_activity_log
+
 ### API Structure
 Type-safe API contracts defined in `shared/routes.ts` using Zod schemas:
 - Route definitions include HTTP method, path, input validation, and response schemas

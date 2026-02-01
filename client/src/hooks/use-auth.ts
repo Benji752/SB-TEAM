@@ -5,6 +5,20 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
+      // First try demo session auth
+      try {
+        const sessionResponse = await fetch("/api/user");
+        if (sessionResponse.ok) {
+          const sessionUser = await sessionResponse.json();
+          if (sessionUser && sessionUser.id) {
+            return sessionUser;
+          }
+        }
+      } catch (e) {
+        // Fall back to Supabase
+      }
+      
+      // Try Supabase auth
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) return null;
       
@@ -22,6 +36,11 @@ export function useAuth() {
   });
 
   const logout = async () => {
+    // Try demo logout first
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } catch (e) {}
+    
     await supabase.auth.signOut();
     window.location.href = "/";
   };

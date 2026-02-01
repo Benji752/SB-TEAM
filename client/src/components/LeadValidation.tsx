@@ -54,7 +54,7 @@ export function LeadValidation() {
       }
       
       toast({
-        title: approved ? "Lead validé !" : "Lead refusé",
+        title: approved ? "Chasse réussie !" : "Chasse refusée",
         description: approved ? `+${data.xpAwarded} XP attribués` : "Aucun XP attribué",
       });
     },
@@ -86,7 +86,7 @@ export function LeadValidation() {
       <div className="flex items-center gap-2 mb-4">
         <Target size={18} className="text-gold" />
         <h3 className="text-white font-bold uppercase tracking-wider text-sm">
-          Leads à valider
+          Chasses à valider
         </h3>
         <span className="bg-gold/20 text-gold text-xs px-2 py-0.5 rounded-full ml-auto">
           {pendingLeads.length}

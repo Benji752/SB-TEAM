@@ -64,7 +64,7 @@ export function LeadDeclarationForm({ userId }: LeadDeclarationFormProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/leads/pending"] });
       
       toast({
-        title: "Lead déclaré !",
+        title: "Chasse déclarée !",
         description: "En attente de validation par l'admin",
       });
       
@@ -91,7 +91,7 @@ export function LeadDeclarationForm({ userId }: LeadDeclarationFormProps) {
             data-testid="button-declare-lead"
           >
             <Target size={16} className="mr-2" />
-            DÉCLARER UNE PRISE
+            DÉCLARER UNE CHASSE
           </Button>
         </motion.div>
       </DialogTrigger>
@@ -99,12 +99,12 @@ export function LeadDeclarationForm({ userId }: LeadDeclarationFormProps) {
         <DialogHeader>
           <DialogTitle className="text-gold flex items-center gap-2">
             <Target size={20} />
-            Nouvelle Prise
+            Nouvelle Chasse
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-white/70">Nom du client</Label>
+            <Label className="text-white/70">Nom du prospect / Nouveau Fan</Label>
             <Input
               value={clientUsername}
               onChange={(e) => setClientUsername(e.target.value)}

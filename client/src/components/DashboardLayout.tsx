@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
+import { HeartbeatTracker, useHeartbeatStatus } from "@/components/HeartbeatTracker";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -115,10 +116,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   ];
 
   const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
+  const isActive = useHeartbeatStatus();
   console.log('User Role:', user?.role);
 
   return (
     <div className="flex min-h-screen bg-[#050505]">
+      <HeartbeatTracker />
       {/* Sidebar */}
       <aside className="w-64 border-r border-white/[0.08] flex flex-col fixed inset-y-0 bg-[#050505] z-50">
         <div className="p-8">
@@ -128,6 +131,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="text-xl font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
           </div>
+          
+          {user && (
+            <div className={`mt-4 flex items-center gap-2 px-3 py-1.5 rounded-full ${
+              isActive 
+                ? "bg-green-500/10 border border-green-500/20" 
+                : "bg-yellow-500/10 border border-yellow-500/20"
+            }`}>
+              <motion.div
+                animate={{ opacity: isActive ? [1, 0.4, 1] : 0.5 }}
+                transition={{ repeat: isActive ? Infinity : 0, duration: 1.5 }}
+                className={`w-2 h-2 rounded-full ${isActive ? "bg-green-500" : "bg-yellow-500"}`}
+              />
+              <span className={`text-xs font-medium ${isActive ? "text-green-400" : "text-yellow-400"}`}>
+                {isActive ? "En ligne (+XP actifs)" : "Inactif"}
+              </span>
+            </div>
+          )}
         </div>
 
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">

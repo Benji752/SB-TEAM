@@ -2,8 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp } from "lucide-react";
-import { ShiftTimer } from "@/components/ShiftTimer";
+import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer } from "lucide-react";
 import { LeadDeclarationForm } from "@/components/LeadDeclarationForm";
 
 interface GamificationProfile {
@@ -23,6 +22,12 @@ interface XpActivity {
   xpGained: number;
   description: string;
   createdAt: string;
+}
+
+interface TodayTime {
+  userId: number;
+  todayMinutes: number;
+  formatted: string;
 }
 
 const USER_NAMES: Record<number, { name: string; avatar: string; role: string }> = {
@@ -66,7 +71,7 @@ function XpProgressBar({ xp, level }: { xp: number; level: number }) {
   );
 }
 
-function LeaderboardCard({ profile, rank }: { profile: GamificationProfile; rank: number }) {
+function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationProfile; rank: number; todayTime?: TodayTime }) {
   const user = USER_NAMES[profile.userId] || { name: `User ${profile.userId}`, avatar: "?", role: "Unknown" };
   
   const getRankIcon = () => {
@@ -129,6 +134,11 @@ function LeaderboardCard({ profile, rank }: { profile: GamificationProfile; rank
         </div>
         
         <div className="flex gap-2 mt-4 ml-16">
+          {todayTime && todayTime.todayMinutes > 0 && (
+            <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full flex items-center gap-1">
+              <Timer size={12} /> Aujourd'hui: {todayTime.formatted}
+            </span>
+          )}
           {profile.currentStreak > 0 && (
             <span className="text-xs px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full flex items-center gap-1">
               <Zap size={12} /> {profile.currentStreak} streak
@@ -202,6 +212,18 @@ export default function Leaderboard() {
     queryKey: ["/api/gamification/activity"],
   });
 
+  const { data: todayTime1 } = useQuery<TodayTime>({
+    queryKey: ["/api/gamification/today-time", 1],
+  });
+
+  const { data: todayTime2 } = useQuery<TodayTime>({
+    queryKey: ["/api/gamification/today-time", 2],
+  });
+
+  const todayTimes: Record<number, TodayTime> = {};
+  if (todayTime1) todayTimes[1] = todayTime1;
+  if (todayTime2) todayTimes[2] = todayTime2;
+
   return (
     <DashboardLayout>
       <motion.div
@@ -220,7 +242,6 @@ export default function Leaderboard() {
           </div>
           
           <div className="flex items-center gap-4">
-            <ShiftTimer userId={1} />
             <LeadDeclarationForm userId={1} />
           </div>
         </motion.div>
@@ -244,7 +265,12 @@ export default function Leaderboard() {
                 className="space-y-4"
               >
                 {leaderboard.map((profile, index) => (
-                  <LeaderboardCard key={profile.id} profile={profile} rank={index + 1} />
+                  <LeaderboardCard 
+                    key={profile.id} 
+                    profile={profile} 
+                    rank={index + 1} 
+                    todayTime={todayTimes[profile.userId]}
+                  />
                 ))}
               </motion.div>
             )}
@@ -263,15 +289,15 @@ export default function Leaderboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="p-4 bg-white/[0.02] rounded-xl">
                 <Target className="text-green-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Nouveau Lead</p>
+                <p className="text-white/80 font-medium">Chasse Réussie</p>
                 <p className="text-white/50">100 XP × multiplicateur</p>
                 <p className="text-white/30 text-xs mt-1">Staff: 200 XP | Modèle: 100 XP</p>
               </div>
               <div className="p-4 bg-white/[0.02] rounded-xl">
                 <Clock className="text-blue-400 mb-2" size={20} />
-                <p className="text-white/80 font-medium">Temps de Travail</p>
-                <p className="text-white/50">10 XP / 30 min</p>
-                <p className="text-white/30 text-xs mt-1">Avec multiplicateur de rôle</p>
+                <p className="text-white/80 font-medium">Présence Active</p>
+                <p className="text-white/50">+2 XP / 5 min (~24 XP/h)</p>
+                <p className="text-white/30 text-xs mt-1">Tracking automatique</p>
               </div>
               <div className="p-4 bg-white/[0.02] rounded-xl">
                 <Moon className="text-purple-400 mb-2" size={20} />
