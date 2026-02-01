@@ -444,13 +444,8 @@ export default function Leaderboard() {
   const resetSeasonMutation = useMutation({
     mutationFn: async () => {
       // Use Supabase RPC to bypass session/API issues
-      // Pass user.id as caller_user_id for admin verification in DB
-      const userId = user?.id ? String(user.id) : null;
-      if (!userId) {
-        throw new Error("Non authentifié. Veuillez vous reconnecter.");
-      }
-      
-      const { error } = await supabase.rpc('reset_season', { caller_user_id: userId });
+      // No parameters - DB uses auth.uid() internally
+      const { error } = await supabase.rpc('reset_season');
       
       if (error) {
         console.error("[RPC] reset_season error:", error);
