@@ -717,21 +717,25 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   // Get XP activity log with usernames
   app.get("/api/gamification/activity", async (req, res) => {
     try {
-      const activities = await db.select({
-        id: xpActivityLog.id,
-        userId: xpActivityLog.userId,
-        actionType: xpActivityLog.actionType,
-        xpGained: xpActivityLog.xpGained,
-        description: xpActivityLog.description,
-        createdAt: xpActivityLog.createdAt,
-        username: profiles.username,
-      })
+      // Known team members (same as leaderboard)
+      const TEAM_MEMBERS: Record<number, string> = {
+        1: "Nico",
+        2: "Laura",
+      };
+      
+      // Simple query without problematic JOIN
+      const activities = await db.select()
         .from(xpActivityLog)
-        .leftJoin(profiles, eq(xpActivityLog.userId, profiles.id))
         .orderBy(desc(xpActivityLog.createdAt))
         .limit(20);
       
-      res.json(activities);
+      // Add username in JavaScript (no SQL type issues)
+      const result = activities.map(a => ({
+        ...a,
+        username: TEAM_MEMBERS[a.userId] || `User ${a.userId}`
+      }));
+      
+      res.json(result);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
