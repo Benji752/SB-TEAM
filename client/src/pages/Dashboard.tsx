@@ -89,17 +89,20 @@ export default function Dashboard() {
   const fetchApiData = async () => {
     try {
       const targetUrl = "https://fr.stripchat.com/api/front/v2/models/username/wildgirlshow";
-      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
       
       const res = await fetch(proxyUrl);
       if (res.ok) {
-        const realData = await res.json();
-        if (realData) {
-          setApiData(realData);
+        const wrapper = await res.json();
+        if (wrapper && wrapper.contents) {
+          const realData = JSON.parse(wrapper.contents);
+          if (realData) {
+            setApiData(realData);
+          }
         }
       }
     } catch (e) {
-      console.error("API fetch failed, keeping apiData as null", e);
+      console.error("API fetch failed", e);
     }
   };
 
@@ -146,6 +149,16 @@ export default function Dashboard() {
   const isOnline = apiData?.model?.status === 'public' || apiData?.model?.isLive === true || manualData?.isOnline === true;
   const avatarUrl = apiData?.model?.avatarUrl;
   const roomTitle = apiData?.model?.topic || "Aucun sujet défini";
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setImageTimestamp(Date.now());
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -302,14 +315,49 @@ export default function Dashboard() {
           {/* Now Playing Style Live Monitoring Card */}
           <Card className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
             <div className="relative h-full flex flex-col md:flex-row">
-              {/* Camera Section - Official iFrame Embed */}
+              {/* Camera Section - Direct Snapshot */}
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
-                <iframe 
-                  src="https://fr.stripchat.com/embed/wildgirlshow"
-                  className="w-full h-full border-0 min-h-[300px]"
-                  allow="autoplay; encrypted-media"
-                  title="Stripchat Live Embed"
-                />
+                {isOnline ? (
+                  <>
+                    <img 
+                      src={`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg?t=${imageTimestamp}`}
+                      alt="Live Snapshot" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = avatarUrl || '';
+                        (e.target as HTMLImageElement).className = "w-full h-full object-cover blur-md opacity-50";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                  </>
+                ) : (
+                  <div className="relative w-full h-full flex items-center justify-center bg-[#050505]">
+                    {avatarUrl ? (
+                      <div className="relative w-full h-full">
+                        <img 
+                          src={avatarUrl} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover blur-xl opacity-30 scale-110" 
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <img 
+                            src={avatarUrl} 
+                            alt="Profile Avatar" 
+                            className="w-32 h-32 rounded-full object-cover border-4 border-white/10 shadow-2xl" 
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <Video size={80} className="text-white/5" />
+                    )}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/40">
+                      <div className="h-16 w-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center backdrop-blur-sm">
+                        <Video size={24} className="text-white/20" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Caméra inactive</span>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Overlay Badge */}
                 <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none">
