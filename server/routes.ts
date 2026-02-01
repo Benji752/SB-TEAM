@@ -1066,17 +1066,17 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const multiplier = profile[0].roleMultiplier || 1.0;
       const finalXp = Math.floor(xpGained * multiplier);
       
-      await awardXP(userId, finalXp, "presence", "Présence active");
+      await awardXP(userId, finalXp, "presence", `Présence active +${finalXp} XP`);
       
       // Track today's active time using a dedicated auto-tracking session
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
       
       // Find today's auto-tracking session (pointsEarned = -1 is our marker for auto sessions)
       const todayAutoSession = await db.select().from(workSessions)
         .where(and(
           eq(workSessions.userId, userId),
-          gte(workSessions.startTime, today),
+          gte(workSessions.startTime, todayDate),
           eq(workSessions.isActive, false),
           sql`${workSessions.pointsEarned} = -1`
         ))

@@ -70,19 +70,26 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 100, damping: 15 } }
 };
 
+// Nouvelle formule linéaire: Level = Floor(XP / 100) + 1
+function calculateLevelFromXp(xp: number): number {
+  return Math.floor(xp / 100) + 1;
+}
+
 function XpProgressBar({ xp, level }: { xp: number; level: number }) {
-  const currentLevelXp = Math.pow(level - 1, 2) * 100;
-  const nextLevelXp = Math.pow(level, 2) * 100;
-  const progress = ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
+  // Formule linéaire: 100 XP = 1 niveau
+  const currentLevelXp = (level - 1) * 100;
+  const nextLevelXp = level * 100;
+  const xpInCurrentLevel = xp - currentLevelXp;
+  const progress = (xpInCurrentLevel / 100) * 100; // Progrès vers le prochain centaine
 
   return (
     <div className="w-full mt-3">
-      <div className="flex justify-between text-xs mb-2">
-        <span className="text-gold font-semibold flex items-center gap-1">
+      <div className="flex justify-between text-xs mb-2 gap-2">
+        <span className="text-gold font-semibold flex items-center gap-1 whitespace-nowrap">
           <Star size={10} className="fill-gold" />
-          Niveau {level}
+          Niv. {level}
         </span>
-        <span className="text-white/60">{xp.toLocaleString()} / {nextLevelXp.toLocaleString()} XP</span>
+        <span className="text-white/60 whitespace-nowrap">{xpInCurrentLevel}/100 XP</span>
       </div>
       <div className="h-4 bg-black/50 rounded-full overflow-hidden border border-gold/20 relative">
         <motion.div
