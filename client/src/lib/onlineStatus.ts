@@ -1,11 +1,20 @@
-// DEPRECATED: Server-Side Authority is now in place.
-// All isOnline calculations are done by the server in /api/user/presence-all
-// The frontend should ONLY read the isOnline boolean from the API response.
-// 
-// DO NOT use this function for new code.
-// This file is kept for backwards compatibility only.
+// TIMEAGO Approach: Frontend judges online status from secondsSinceLastPing
+// Server returns secondsSinceLastPing as an integer, frontend compares < 300 (5 min)
 
+const ONLINE_THRESHOLD_SECONDS = 300; // 5 minutes
+
+export function isUserOnlineFromSeconds(secondsSinceLastPing: number | null | undefined): boolean {
+  if (secondsSinceLastPing === null || secondsSinceLastPing === undefined) {
+    return false;
+  }
+  return secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS;
+}
+
+// Legacy function - kept for backwards compatibility
 export function isUserOnline(lastActiveAt: string | Date | null | undefined): boolean {
-  console.warn('DEPRECATED: isUserOnline() should not be called. Use server isOnline value instead.');
-  return false; // Always return false to force using server value
+  if (!lastActiveAt) return false;
+  const lastActive = new Date(lastActiveAt);
+  const now = new Date();
+  const diffSeconds = Math.floor((now.getTime() - lastActive.getTime()) / 1000);
+  return diffSeconds < ONLINE_THRESHOLD_SECONDS;
 }

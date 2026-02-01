@@ -5,7 +5,7 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      // First try demo session auth
+      // First try demo session auth (silently - no console spam)
       try {
         const sessionResponse = await fetch("/api/user");
         if (sessionResponse.ok) {
@@ -14,22 +14,28 @@ export function useAuth() {
             return sessionUser;
           }
         }
-      } catch (e) {
-        // Fall back to Supabase
+        // 401 is expected when not logged in via demo - don't log it
+      } catch {
+        // Network error - fall back to Supabase silently
       }
       
-      // Try Supabase auth
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) return null;
-      
-      // Fetch profile associated with user
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Try Supabase auth (primary auth method)
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) return null;
+        
+        // Fetch profile associated with user
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-      return { ...user, ...profile };
+        return { ...user, ...profile };
+      } catch {
+        // Supabase not configured or error - return null silently
+        return null;
+      }
     },
     retry: false,
     staleTime: 1000 * 60 * 5,

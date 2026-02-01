@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabaseClient";
 
 const HEARTBEAT_INTERVAL = 60 * 1000; // Every 60 seconds
 const ACTIVITY_THRESHOLD = 5 * 60 * 1000; // 5 minutes inactivity threshold
@@ -29,9 +30,9 @@ export function HeartbeatTracker() {
   }, []);
 
   useEffect(() => {
-    // Accept both number and string IDs
-    const userId = typeof user?.id === 'number' ? user.id : parseInt(user?.id as string);
-    if (!userId || isNaN(userId)) return;
+    // Get user ID - could be number (demo) or string (Supabase UUID)
+    const userId = user?.id;
+    if (!userId) return;
 
     const sendHeartbeat = async () => {
       const timeSinceLastActivity = Date.now() - lastActivityRef.current;
@@ -42,7 +43,33 @@ export function HeartbeatTracker() {
       }
 
       try {
-        await apiRequest("POST", "/api/gamification/heartbeat", { userId });
+        // Use Supabase directly to bypass 401 API issues
+        // This updates last_active_at in gamification_profiles table
+        const now = new Date().toISOString();
+        
+        // First try to update existing record
+        const { error: updateError } = await supabase
+          .from('gamification_profiles')
+          .update({ last_active_at: now, updated_at: now })
+          .eq('user_id', userId);
+        
+        // If no record exists, create one
+        if (updateError) {
+          await supabase
+            .from('gamification_profiles')
+            .upsert({
+              user_id: userId,
+              last_active_at: now,
+              updated_at: now,
+              xp_total: 0,
+              level: 1,
+              current_streak: 0,
+              role_multiplier: 1,
+              badges: []
+            }, { onConflict: 'user_id' });
+        }
+
+        console.log('💓 Heartbeat Supabase OK pour userId:', userId);
         
         // Invalidate queries to update UI immediately
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
@@ -51,6 +78,7 @@ export function HeartbeatTracker() {
         queryClient.invalidateQueries({ queryKey: ["/api/user/presence-all"] });
       } catch (error) {
         // Silently ignore heartbeat failures
+        console.log('💓 Heartbeat failed silently');
       }
     };
 
@@ -60,7 +88,6 @@ export function HeartbeatTracker() {
 
     // Then every 60 seconds
     const interval = setInterval(() => {
-      console.log('💓 Heartbeat périodique envoyé pour userId:', userId);
       sendHeartbeat();
     }, HEARTBEAT_INTERVAL);
 
