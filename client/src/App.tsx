@@ -17,6 +17,7 @@ import Messages from "@/pages/Messages";
 import Models from "@/pages/Models";
 import Projects from "@/pages/Projects";
 import Landing from "@/pages/Landing";
+import AITools from "@/pages/AITools";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useEffect, useState } from "react";
 import { apiRequest } from "./lib/queryClient";
@@ -244,6 +245,9 @@ export default function App() {
               </Route>
               <Route path="/projects">
                 <Projects />
+              </Route>
+              <Route path="/ai-studio">
+                <AITools />
               </Route>
               <Route path="/profile">
                 <ProfilePage />

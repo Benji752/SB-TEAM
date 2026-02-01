@@ -12,7 +12,8 @@ import {
   Clock,
   MessageSquare,
   Users,
-  Briefcase
+  Briefcase,
+  Sparkles
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -86,6 +87,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     { label: "Tableau de bord", icon: LayoutDashboard, href: "/", testId: "link-dashboard" },
+    { label: "IA Studio", icon: Sparkles, href: "/ai-studio", testId: "link-ai-studio" },
     { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects" },
     { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders" },
     { label: "Ressources", icon: FileText, href: "/resources", testId: "link-resources" },
