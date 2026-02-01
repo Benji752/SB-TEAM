@@ -36,7 +36,8 @@ export function LeadValidation() {
 
   const { data: pendingLeads = [], isLoading } = useQuery<HunterLead[]>({
     queryKey: ["/api/gamification/leads/pending"],
-    refetchInterval: 10000,
+    refetchInterval: 30000,
+    staleTime: 25000,
   });
 
   const validateMutation = useMutation({
