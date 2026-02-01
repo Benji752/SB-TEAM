@@ -54,6 +54,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
 
+function uuidToInt(uuid: string): number {
+  let hash = 0;
+  for (let i = 0; i < uuid.length; i++) {
+    const char = uuid.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
 export default function Orders() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -82,7 +92,7 @@ export default function Orders() {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/activity"] });
-      toast({ title: "Succès", description: "Commande ajoutée avec succès. +10 XP !" });
+      toast({ title: "Succès", description: "Commande ajoutée avec succès. +75 XP !" });
       setIsModalOpen(false);
       form.reset();
     },
@@ -107,7 +117,7 @@ export default function Orders() {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/activity"] });
-      const bonusMsg = variables.status === "paid" ? " +100 XP Bonus !" : "";
+      const bonusMsg = variables.status === "paid" ? " +75 XP Bonus !" : "";
       toast({ title: "Statut mis à jour", description: `Le statut de la commande a été modifié.${bonusMsg}` });
     },
   });
@@ -148,7 +158,7 @@ export default function Orders() {
                 </DialogTitle>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit((data) => createMutation.mutate({ ...data, createdBy: typeof user?.id === 'number' ? user.id : undefined }))} className="space-y-4 py-4">
+                <form onSubmit={form.handleSubmit((data) => createMutation.mutate({ ...data, createdBy: user?.id ? uuidToInt(String(user.id)) : undefined }))} className="space-y-4 py-4">
                   <FormField
                     control={form.control}
                     name="clientName"

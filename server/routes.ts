@@ -168,14 +168,15 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     try {
       // Get creator from session (more reliable than trusting req.body)
       const sessionUserId = (req.session as any)?.userId;
-      const creatorId = sessionUserId || req.body.createdBy;
+      const rawCreatorId = sessionUserId || req.body.createdBy;
+      const creatorId = rawCreatorId ? (typeof rawCreatorId === 'number' ? rawCreatorId : parseInt(String(rawCreatorId), 10)) : null;
       
       // Create order with createdBy from session if available
       const orderData = { ...req.body, createdBy: creatorId || null };
       const order = await storage.createOrder(orderData);
       
-      // Award +10 XP for creating an order
-      if (creatorId && typeof creatorId === 'number') {
+      // Award XP for creating an order
+      if (creatorId && !isNaN(creatorId)) {
         // Get or create gamification profile
         let [profile] = await db.select().from(gamificationProfiles).where(eq(gamificationProfiles.userId, creatorId));
         
