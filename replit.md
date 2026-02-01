@@ -45,28 +45,35 @@ Preferred communication style: Simple, everyday language.
 - **Tasks**: Kanban-style task management with priority and status
 - **Agency Stats**: Revenue and subscriber analytics data
 
-### Gamification System (SB HUNTER LEAGUE)
-- **Auto-Tracking**: Invisible HeartbeatTracker component detects user activity and awards +2 XP every 5 minutes
+### Gamification System (SB HUNTER LEAGUE) - SAISON MENSUELLE Feb 2026
+- **Objectif**: Niveau 300 par saison (progression rapide x10)
+- **Formule de niveau**: `Level = Floor(XP / 100) + 1` (linéaire: 100 XP = 1 niveau)
+- **Gains XP**:
+  - Présence: +10 XP toutes les 10 minutes × multiplicateur de rôle
+  - Commande créée: +75 XP
+  - Commande payée: +75 XP (total par commande: 150 XP)
+  - Login quotidien: +50 XP (première connexion du jour)
+  - Night Owl Bonus: +50 XP pour actions entre 00:00-06:00
+  - Leads approuvés: +150 XP × multiplicateur de rôle
 - **Role Multipliers**: Staff/Admin get 2.0x XP multiplier, Models get 1.0x
-- **Chasse (Leads)**: Declaring new prospects awards 100 XP × role multiplier upon admin approval
-- **Night Owl Bonus**: +50 XP for actions between 00:00-06:00
-- **Leaderboard**: E-Sport themed rankings with XP progress bars and "Temps passé aujourd'hui" tracking
+- **Leaderboard**: E-Sport themed rankings with XP progress bars (supporte niveaux 3 chiffres)
 - **Database Tables**: gamification_profiles, hunter_leads, work_sessions, xp_activity_log
-- **Admin Season Reset**: POST `/api/gamification/reset` - Admin-only endpoint that:
+- **Admin Season Reset**: POST `/api/dev/reset-season` - Admin-only endpoint (bypass auth):
   - Resets all gamification_profiles: xpTotal=0, level=1, currentStreak=0
   - Clears xp_activity_log, hunter_leads, and work_sessions tables
-  - Requires admin role verification via session
-  - Button visible only to admins on Leaderboard page with confirmation dialog
+  - Requires username='Benjamin' or admin role in profiles table
+  - Button visible only to admins on Leaderboard page with dark-themed confirmation modal
 
 ### Online Status System (Single Source of Truth) - REFACTORED Feb 2026
 - **SQL View**: `gamification_leaderboard_view` - calculates `seconds_since_active` server-side using PostgreSQL NOW()
 - **Unified Hook**: `useGamificationData()` from `client/src/hooks/useGamificationData.ts`
   - Fetches `/api/gamification/leaderboard-view` every 30s
-  - Auto-pings `/api/gamification/ping` every 60s when user is active
+  - Auto-pings `/api/gamification/ping` every 10 minutes when user is active
   - Provides `isUserOnline(userId: number)` function
   - Returns `leaderboard`, `currentUser`, `currentUserId`, `isLoading`
-- **Ping Route**: POST `/api/gamification/ping` - updates `last_active_at` + awards 4 XP
-- **Threshold**: 300 seconds (5 minutes) - if `seconds_since_active < 300` → user is online
+- **Ping Route**: POST `/api/gamification/ping` - updates `last_active_at` + awards 10 XP
+- **Heartbeat Route**: POST `/api/gamification/heartbeat` - awards 10 XP × multiplier + daily login bonus
+- **Threshold**: 900 seconds (15 minutes) - if `seconds_since_active < 900` → user is online (matches 10-min heartbeat)
 - **UUID to Hash**: `uuidToInt()` function converts string UUID to consistent integer for gamification system
 - **Usage (all pages use same hook)**:
   - Leaderboard.tsx: `useGamificationData()` for full leaderboard with `isOnline` field
