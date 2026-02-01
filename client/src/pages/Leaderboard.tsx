@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User, AlertTriangle } from "lucide-react";
+import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User, AlertTriangle, Coffee, Gift, Lock } from "lucide-react";
 import { useGamificationData, LeaderboardUser } from "@/hooks/useGamificationData";
 import { useAuth } from "@/hooks/use-auth";
 import { queryClient } from "@/lib/queryClient";
@@ -412,11 +412,150 @@ function ActivityFeed({ activities }: { activities: XpActivity[] }) {
   );
 }
 
+function SeasonRewards({ currentLevel }: { currentLevel: number }) {
+  const rewards = [
+    {
+      level: 50,
+      title: "Morning Glory",
+      reward: "Petit-Déj offert (Croissants/Café)",
+      icon: Coffee,
+      tier: "Débutant",
+      colors: {
+        border: "border-amber-600/60",
+        bg: "from-amber-900/40 via-orange-900/20 to-amber-800/30",
+        glow: "shadow-[0_0_30px_rgba(217,119,6,0.3)]",
+        text: "text-amber-400",
+        badge: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        icon: "text-amber-400",
+        progress: "bg-gradient-to-r from-amber-500 to-orange-500",
+      }
+    },
+    {
+      level: 100,
+      title: "Shopping Spree",
+      reward: "Carte Cadeau 20€ (Amazon/Culture)",
+      icon: Gift,
+      tier: "Confirmé",
+      colors: {
+        border: "border-cyan-500/60",
+        bg: "from-cyan-900/40 via-blue-900/20 to-cyan-800/30",
+        glow: "shadow-[0_0_30px_rgba(34,211,238,0.3)]",
+        text: "text-cyan-400",
+        badge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+        icon: "text-cyan-400",
+        progress: "bg-gradient-to-r from-cyan-500 to-blue-500",
+      }
+    },
+    {
+      level: 300,
+      title: "Le Jackpot",
+      reward: "Prime 100€ + Badge MVP",
+      icon: Trophy,
+      tier: "Légende",
+      colors: {
+        border: "border-yellow-400/70",
+        bg: "from-yellow-900/50 via-amber-900/30 to-yellow-800/40",
+        glow: "shadow-[0_0_40px_rgba(234,179,8,0.4)]",
+        text: "text-yellow-400",
+        badge: "bg-yellow-500/20 text-yellow-300 border-yellow-500/40",
+        icon: "text-yellow-400",
+        progress: "bg-gradient-to-r from-yellow-400 to-amber-500",
+      }
+    },
+  ];
+
+  return (
+    <Card className="bg-gradient-to-br from-purple-900/20 via-[#0A0A0A] to-gold/10 border-2 border-white/10 rounded-2xl p-6 relative overflow-hidden">
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-gold/5 rounded-full blur-3xl" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+      
+      <h3 className="text-white font-black uppercase tracking-widest text-sm mb-6 flex items-center gap-3 relative z-10">
+        <div className="p-2 bg-gold/20 rounded-lg">
+          <Star size={18} className="text-gold" />
+        </div>
+        Récompenses de la Saison
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+        {rewards.map((reward, index) => {
+          const isUnlocked = currentLevel >= reward.level;
+          const progress = Math.min((currentLevel / reward.level) * 100, 100);
+          const Icon = reward.icon;
+          
+          return (
+            <motion.div
+              key={reward.level}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ scale: 1.02, y: -4 }}
+              className={`relative rounded-xl border-2 p-5 backdrop-blur-sm transition-all duration-300 ${
+                isUnlocked 
+                  ? `${reward.colors.border} ${reward.colors.glow} bg-gradient-to-br ${reward.colors.bg}` 
+                  : "border-white/10 bg-gradient-to-br from-gray-900/50 to-gray-800/30 opacity-60"
+              }`}
+            >
+              {isUnlocked && (
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+              )}
+              
+              <div className="flex items-start justify-between mb-4">
+                <div className={`p-3 rounded-xl ${isUnlocked ? "bg-black/30" : "bg-black/20"}`}>
+                  <Icon size={28} className={isUnlocked ? reward.colors.icon : "text-gray-500"} />
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full border font-bold uppercase tracking-wider ${
+                  isUnlocked ? reward.colors.badge : "bg-gray-500/20 text-gray-400 border-gray-500/30"
+                }`}>
+                  {reward.tier}
+                </span>
+              </div>
+
+              <h4 className={`text-xl font-black mb-1 ${isUnlocked ? reward.colors.text : "text-gray-400"}`}>
+                {reward.title}
+              </h4>
+              
+              <p className={`text-sm mb-4 ${isUnlocked ? "text-white/70" : "text-gray-500"}`}>
+                {reward.reward}
+              </p>
+
+              {isUnlocked ? (
+                <div className="flex items-center gap-2 bg-green-500/20 rounded-lg px-3 py-2 border border-green-500/30">
+                  <CheckCircle size={18} className="text-green-400" />
+                  <span className="text-green-400 font-bold text-sm uppercase tracking-wider">Débloqué</span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400 font-medium">Progression</span>
+                    <span className="text-white/60 font-bold">Niv. {currentLevel} / {reward.level}</span>
+                  </div>
+                  <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                    <motion.div 
+                      className={`h-full ${reward.colors.progress} rounded-full`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 1, delay: index * 0.2 }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-500 text-xs">
+                    <Lock size={12} />
+                    <span>Encore {reward.level - currentLevel} niveaux</span>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 function RulesCard() {
   const rules = [
-    { icon: ShoppingCart, color: "blue", title: "Nouvelle Commande", xp: "+10 XP", desc: "Créer une commande" },
-    { icon: CheckCircle, color: "green", title: "Commande Payée", xp: "+100 XP", desc: "Quand statut = Payé" },
-    { icon: Clock, color: "purple", title: "Présence Active", xp: "+2 XP / 5min", desc: "Tracking automatique" },
+    { icon: ShoppingCart, color: "blue", title: "Nouvelle Commande", xp: "+75 XP", desc: "Créer une commande" },
+    { icon: CheckCircle, color: "green", title: "Commande Payée", xp: "+75 XP", desc: "Quand statut = Payé" },
+    { icon: Clock, color: "purple", title: "Présence Active", xp: "+10 XP / 10min", desc: "Tracking automatique" },
     { icon: Moon, color: "yellow", title: "Night Owl", xp: "+50 XP", desc: "00h00 - 06h00" },
   ];
 
@@ -650,6 +789,10 @@ export default function Leaderboard() {
             <ActivityFeed activities={activities} />
           </motion.div>
         </div>
+
+        <motion.div variants={itemVariants}>
+          <SeasonRewards currentLevel={currentUser?.level || 1} />
+        </motion.div>
 
         <motion.div variants={itemVariants}>
           <RulesCard />
