@@ -941,6 +941,70 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
+  // ========== PRESENCE PING (Simple lastActiveAt update) ==========
+  app.post("/api/user/ping", async (req, res) => {
+    try {
+      const schema = z.object({ userId: z.number() });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+      const { userId } = result.data;
+      
+      // Update lastActiveAt in gamification_profiles
+      const updated = await db.update(gamificationProfiles)
+        .set({ lastActiveAt: new Date() })
+        .where(eq(gamificationProfiles.userId, userId))
+        .returning();
+      
+      if (!updated.length) {
+        // Create profile if doesn't exist
+        const session = req.session as any;
+        const userRole = session?.user?.role?.toLowerCase() || 'staff';
+        const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
+        
+        await db.insert(gamificationProfiles).values({
+          userId,
+          xpTotal: 0,
+          level: 1,
+          currentStreak: 0,
+          roleMultiplier,
+          lastActiveAt: new Date()
+        });
+      }
+      
+      res.json({ success: true, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user presence status
+  app.get("/api/user/presence/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      const profile = await db.select({ lastActiveAt: gamificationProfiles.lastActiveAt })
+        .from(gamificationProfiles)
+        .where(eq(gamificationProfiles.userId, userId))
+        .limit(1);
+      
+      if (!profile.length) {
+        return res.json({ userId, lastActiveAt: null, isOnline: false });
+      }
+      
+      const lastActiveAt = profile[0].lastActiveAt;
+      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
+      const isOnline = lastActiveAt 
+        ? (Date.now() - new Date(lastActiveAt).getTime()) < ONLINE_THRESHOLD_MS 
+        : false;
+      
+      res.json({ userId, lastActiveAt, isOnline });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Get today's active time for a user (auto-tracking only)
   app.get("/api/gamification/today-time/:userId", async (req, res) => {
     try {
