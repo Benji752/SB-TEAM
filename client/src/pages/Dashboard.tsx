@@ -63,7 +63,7 @@ export default function Dashboard() {
 
   const [manualData, setManualData] = useState<any>(null);
   const [isOnline, setIsOnline] = useState(false);
-  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
+  const [apiData, setApiData] = useState<any>(null);
 
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/model-stats"],
@@ -79,11 +79,28 @@ export default function Dashboard() {
     }
   };
 
+  const fetchStatus = async () => {
+    try {
+      const username = "wildgirlshow";
+      const targetUrl = `https://fr.stripchat.com/api/front/v2/models/username/${username}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        const data = await res.json();
+        setApiData(data);
+        setIsOnline(data?.model?.status === 'public');
+      }
+    } catch (e) {
+      console.error("Failed to fetch status", e);
+      setIsOnline(false);
+    }
+  };
+
   useEffect(() => {
     loadManualData();
-    const interval = setInterval(() => {
-      setImageTimestamp(Date.now());
-    }, 10000);
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 30000); // Check status every 30s
     return () => clearInterval(interval);
   }, []);
 
@@ -118,12 +135,9 @@ export default function Dashboard() {
   const displaySubscribers = manualData?.subscribers || 0;
   const displayStripScore = manualData?.stripScore || 0;
   const displayFavorites = manualData?.favorites || 0;
-  const viewersCount = 0;
-  const roomTitle = "WildgirlShow Live";
-
-  const username = "wildgirlshow";
-  const thumbUrl = `https://img.stripchat.com/access/thumbnails/${username}/${username}_thumb_large.jpg`;
-  const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(thumbUrl)}&output=jpg&t=${imageTimestamp}`;
+  const viewersCount = apiData?.model?.viewersCount || 0;
+  const roomTitle = apiData?.model?.topic || "WildgirlShow Live";
+  const avatarUrl = apiData?.model?.avatarUrl || "https://img.stripchat.com/access/avatars/wildgirlshow/wildgirlshow_avatar.jpg";
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -273,37 +287,28 @@ export default function Dashboard() {
           <Card className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
             <div className="relative h-full flex flex-col md:flex-row">
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
-                <img 
-                  src={proxyUrl}
-                  alt="Live Snapshot" 
-                  className={cn(
-                    "w-full h-full object-cover group-hover:scale-105 transition-transform duration-700",
-                    !isOnline && "hidden"
-                  )}
-                  onLoad={() => setIsOnline(true)}
-                  onError={() => setIsOnline(false)}
-                />
-                
-                {!isOnline && (
-                  <div className="relative w-full h-full flex items-center justify-center bg-[#050505]">
-                    <div className="relative w-full h-full">
-                      <div className="absolute inset-0 bg-gold/5 blur-3xl opacity-20" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-                        <div className="h-24 w-24 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center backdrop-blur-sm shadow-2xl">
-                          <Video size={32} className="text-white/10" />
-                        </div>
-                        <div className="text-center space-y-2">
-                          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 block">OFFLINE</span>
-                          <span className="text-xs font-bold text-white/40 uppercase tracking-widest">En attente du prochain live</span>
-                        </div>
-                      </div>
+                <div className="relative w-full h-full">
+                  <img 
+                    src={avatarUrl}
+                    alt="Profile Avatar" 
+                    className="w-full h-full object-cover scale-110 blur-xl opacity-30 pointer-events-none"
+                  />
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gold/20 blur-3xl rounded-full" />
+                      <Avatar className="h-48 w-48 border-4 border-white/10 shadow-2xl relative">
+                        <AvatarImage src={avatarUrl} className="object-cover" />
+                        <AvatarFallback className="bg-white/[0.02] text-white/20">
+                          <Users size={48} />
+                        </AvatarFallback>
+                      </Avatar>
                     </div>
                   </div>
-                )}
+                </div>
                 
-                {isOnline && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />}
-                
-                <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none">
+                {/* Overlay Badge */}
+                <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none z-10">
                   <div className={cn(
                     "h-2.5 w-2.5 rounded-full transition-all duration-500",
                     isOnline ? "bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.8)]" : "bg-gray-500"
@@ -314,7 +319,7 @@ export default function Dashboard() {
                 </div>
 
                 {isOnline && (
-                  <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                  <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 z-10">
                     <Eye size={14} className="text-gold" />
                     <span className="text-xs font-black text-white">{viewersCount} <span className="text-white/40 font-bold ml-1">VIEWERS</span></span>
                   </div>
