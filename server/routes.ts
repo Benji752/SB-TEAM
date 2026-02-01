@@ -873,18 +873,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         .limit(1);
       
       if (!profile.length) {
-        // First try to get role from profiles table
-        const userProfile = await db.select().from(profiles)
-          .where(eq(profiles.id, userId))
-          .limit(1);
-        
-        let userRole = userProfile.length ? userProfile[0].role?.toLowerCase() : null;
-        
-        // Fallback to session role
-        if (!userRole) {
-          const session = req.session as any;
-          userRole = session?.user?.role?.toLowerCase();
-        }
+        // Get role from session (profiles table uses text IDs)
+        const session = req.session as any;
+        const userRole = session?.user?.role?.toLowerCase() || 'staff';
         
         const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
         

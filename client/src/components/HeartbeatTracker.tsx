@@ -29,7 +29,9 @@ export function HeartbeatTracker() {
   }, []);
 
   useEffect(() => {
-    if (!user?.id || typeof user.id !== 'number') return;
+    // Accept both number and string IDs
+    const userId = typeof user?.id === 'number' ? user.id : parseInt(user?.id as string);
+    if (!userId || isNaN(userId)) return;
 
     const sendHeartbeat = async () => {
       const timeSinceLastActivity = Date.now() - lastActivityRef.current;
@@ -40,21 +42,23 @@ export function HeartbeatTracker() {
       }
 
       try {
-        await apiRequest("POST", "/api/gamification/heartbeat", { userId: user.id });
+        await apiRequest("POST", "/api/gamification/heartbeat", { userId });
         
+        // Invalidate queries to update UI immediately
         queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard"] });
-        queryClient.invalidateQueries({ queryKey: ["/api/gamification/profile", user.id] });
-        queryClient.invalidateQueries({ queryKey: ["/api/gamification/today-time", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["/api/gamification/profile", userId] });
+        queryClient.invalidateQueries({ queryKey: ["/api/gamification/today-time", userId] });
       } catch (error) {
-        // Silently ignore heartbeat failures (user may not be fully logged in yet)
+        // Silently ignore heartbeat failures
       }
     };
 
-    // Small delay to ensure session is fully established
+    // Send heartbeat immediately on connection (after small delay for session)
     const initialTimeout = setTimeout(() => {
       sendHeartbeat();
-    }, 1000);
+    }, 500);
 
+    // Then every 5 minutes
     const interval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
 
     return () => {
