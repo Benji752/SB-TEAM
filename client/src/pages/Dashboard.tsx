@@ -83,16 +83,18 @@ export default function Dashboard() {
     try {
       const username = "wildgirlshow";
       const targetUrl = `https://fr.stripchat.com/api/front/v2/models/username/${username}`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
       
       const res = await fetch(proxyUrl);
       if (res.ok) {
         const data = await res.json();
         setApiData(data);
         setIsOnline(data?.model?.status === 'public');
+      } else {
+        setIsOnline(false);
       }
     } catch (e) {
-      console.error("Failed to fetch status", e);
+      // Silent fail - avoid console errors
       setIsOnline(false);
     }
   };
@@ -137,7 +139,7 @@ export default function Dashboard() {
   const displayFavorites = manualData?.favorites || 0;
   const viewersCount = apiData?.model?.viewersCount || 0;
   const roomTitle = apiData?.model?.topic || "WildgirlShow Live";
-  const avatarUrl = apiData?.model?.avatarUrl || "https://img.stripchat.com/access/avatars/wildgirlshow/wildgirlshow_avatar.jpg";
+  const avatarUrl = "https://ui-avatars.com/api/?name=Wild+Girl&background=0A0A0A&color=C9A24D&size=256&bold=true";
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -296,11 +298,11 @@ export default function Dashboard() {
                   <div className="absolute inset-0 bg-black/40" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gold/20 blur-3xl rounded-full" />
-                      <Avatar className="h-48 w-48 border-4 border-white/10 shadow-2xl relative">
+                      <div className="absolute inset-0 bg-gold/10 blur-3xl rounded-full" />
+                      <Avatar className="h-48 w-48 border-4 border-white/5 shadow-2xl relative bg-[#050505]">
                         <AvatarImage src={avatarUrl} className="object-cover" />
-                        <AvatarFallback className="bg-white/[0.02] text-white/20">
-                          <Users size={48} />
+                        <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">
+                          WG
                         </AvatarFallback>
                       </Avatar>
                     </div>
