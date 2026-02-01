@@ -635,34 +635,36 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 
   // ========== GAMIFICATION ROUTES - SB HUNTER LEAGUE ==========
 
-  // Get leaderboard data - uses real profiles from database
+  // Get leaderboard data - team members only
   app.get("/api/gamification/leaderboard", async (req, res) => {
     try {
+      // Known team members (userId -> {name, role})
+      const TEAM_MEMBERS: Record<number, { name: string; role: string }> = {
+        1: { name: "Nico", role: "staff" },
+        2: { name: "Laura", role: "model" },
+      };
+      
       // Get all gamification profiles
       const allProfiles = await db.select()
         .from(gamificationProfiles)
         .orderBy(desc(gamificationProfiles.xpTotal));
       
-      // Get all real profiles from database
-      const allRealProfiles = await db.select().from(profiles);
-      const profilesMap = new Map(allRealProfiles.map(p => [String(p.id), p]));
-      
       // Determine online status: lastActiveAt within last 5 minutes
       const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
       const now = Date.now();
       
-      // Only include users that have real profiles in the database
+      // Filter to team members only and add data
       const leaderboard = allProfiles
-        .filter(p => profilesMap.has(String(p.userId)))
+        .filter(p => TEAM_MEMBERS[p.userId] !== undefined)
         .map(p => {
-          const realProfile = profilesMap.get(String(p.userId));
+          const teamMember = TEAM_MEMBERS[p.userId];
           const lastActive = p.lastActiveAt ? new Date(p.lastActiveAt).getTime() : 0;
           const isOnline = (now - lastActive) < ONLINE_THRESHOLD_MS;
           
           return {
             ...p,
-            username: realProfile?.username || `User ${p.userId}`,
-            role: realProfile?.role || null,
+            username: teamMember.name,
+            role: teamMember.role,
             isOnline
           };
         });
