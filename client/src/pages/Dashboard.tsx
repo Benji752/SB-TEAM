@@ -1,11 +1,10 @@
+import { cn } from "@/lib/utils";
 import { 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  LineChart,
-  Line,
   AreaChart,
   Area
 } from "recharts";
@@ -17,18 +16,14 @@ import {
   TrendingUp, 
   DollarSign, 
   MessageSquare,
-  ArrowUpRight,
-  ArrowDownRight,
-  HardDrive,
-  CheckSquare,
-  Loader2,
-  Activity,
-  Heart,
   Edit2,
   Eye,
   Video,
-  Clock,
-  ArrowRight
+  Activity,
+  Loader2,
+  ArrowRight,
+  CheckCircle,
+  CheckSquare
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
@@ -57,16 +52,15 @@ export default function Dashboard() {
   });
 
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/orders"], // Changed from /api/activities/orders to match the new API
-    select: (data: any) => data.slice(0, 5) // Take only first 5
+    queryKey: ["/api/orders"],
+    select: (data: any) => data.slice(0, 5)
   });
 
   const { data: recentTasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["tasks"], // Match useTasks queryKey
+    queryKey: ["tasks"],
     select: (data: any) => data.filter((t: any) => !t.is_done).slice(0, 5) 
   });
 
-  // Separate states for Manual (Supabase) and DB stats
   const [manualData, setManualData] = useState<any>(null);
   const [isOnline, setIsOnline] = useState(false);
   const [imageTimestamp, setImageTimestamp] = useState(Date.now());
@@ -75,7 +69,6 @@ export default function Dashboard() {
     queryKey: ["/api/model-stats"],
   });
 
-  // Load manual data from Supabase/DB
   const loadManualData = async () => {
     try {
       const res = await apiRequest("GET", "/api/model-stats/latest");
@@ -101,7 +94,7 @@ export default function Dashboard() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/model-stats"] });
-      setManualData(data); // Immediate update of local manual state
+      setManualData(data);
       setIsUpdateModalOpen(false);
       setUpdateData({ hourlyRevenue: "", subscribers: "", stripScore: "", favorites: "", isOnline: "false" });
     }
@@ -121,23 +114,12 @@ export default function Dashboard() {
     },
   });
 
-  // DISPLAY LOGIC (THE "BEST OF")
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
   const displaySubscribers = manualData?.subscribers || 0;
   const displayStripScore = manualData?.stripScore || 0;
   const displayFavorites = manualData?.favorites || 0;
-  const viewersCount = 0; // Removed since API is disabled
-  const avatarUrl = null; // We'll use a local fallback if needed or the profile system
+  const viewersCount = 0;
   const roomTitle = "WildgirlShow Live";
-
-  const [imageTimestamp, setImageTimestamp] = useState(Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setImageTimestamp(Date.now());
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -161,13 +143,6 @@ export default function Dashboard() {
     new_subscribers: 0,
     churn_rate: 0
   };
-
-  const statCards = [
-    { title: "Revenu Total", value: `${latestStats.revenue.toLocaleString()}€`, trend: "up", change: "+12.5%", icon: DollarSign },
-    { title: "Nouveaux Prospects", value: latestStats.new_subscribers.toString(), trend: "up", change: "+18%", icon: Users },
-    { title: "Messages", value: "156", trend: "down", change: "-5%", icon: MessageSquare },
-    { title: "Taux de Churn", value: `${(latestStats.churn_rate / 100).toFixed(1)}%`, trend: "down", change: "-0.5%", icon: TrendingUp },
-  ];
 
   const stripStats = [
     { label: "Revenu Horaire", value: `${displayHourlyRevenue} €`, icon: DollarSign },
@@ -291,10 +266,8 @@ export default function Dashboard() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-12">
-          {/* Now Playing Style Live Monitoring Card */}
           <Card className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
             <div className="relative h-full flex flex-col md:flex-row">
-              {/* Camera Section - Visual Detection Only */}
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
                 <img 
                   src={`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg?t=${imageTimestamp}`}
@@ -326,7 +299,6 @@ export default function Dashboard() {
                 
                 {isOnline && <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none" />}
                 
-                {/* Overlay Badge */}
                 <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none">
                   <div className={cn(
                     "h-2.5 w-2.5 rounded-full transition-all duration-500",
@@ -337,7 +309,6 @@ export default function Dashboard() {
                   </span>
                 </div>
 
-                {/* Viewers Counter on Image */}
                 {isOnline && (
                   <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
                     <Eye size={14} className="text-gold" />
@@ -346,7 +317,6 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* Info Section */}
               <div className="md:w-2/5 p-10 flex flex-col justify-between bg-white/[0.01]">
                 <div className="space-y-6">
                   <div>
@@ -388,7 +358,6 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          {/* Side Stats */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             {stripStats.slice(0, 2).map((stat, i) => (
               <Card key={i} className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
@@ -457,7 +426,6 @@ export default function Dashboard() {
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Recent Orders Column */}
           <Card className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
@@ -495,23 +463,23 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-lg font-black text-white">{order.amount} €</div>
-                      <Badge className={`${
-                        order.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
-                        order.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 
-                        'bg-red-500/10 text-red-500 border-red-500/20'
-                      } text-[8px] font-black uppercase tracking-widest px-2 py-1`}>
-                        {order.status === 'paid' ? 'Payé' : order.status === 'pending' ? 'En attente' : 'Annulé'}
+                      <Badge className={cn(
+                        "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-none",
+                        order.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
+                      )}>
+                        {order.status}
                       </Badge>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-white/20 text-[10px] font-black uppercase tracking-widest">Aucune commande récente</div>
+                <div className="text-center py-12 text-white/20 border border-dashed border-white/[0.08] rounded-2xl">
+                  Aucune commande récente.
+                </div>
               )}
             </div>
           </Card>
 
-          {/* Urgent Tasks Column */}
           <Card className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
@@ -520,12 +488,12 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Tâches Urgentes</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Actions requises</p>
+                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Priorités de l'agence</p>
                 </div>
               </div>
               <Link href="/tasks">
                 <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
-                  Voir tout <ArrowRight size={12} />
+                  Gérer <ArrowRight size={12} />
                 </Button>
               </Link>
             </div>
@@ -535,9 +503,12 @@ export default function Dashboard() {
                 <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
               ) : recentTasks && Array.isArray(recentTasks) && recentTasks.length > 0 ? (
                 recentTasks.map((task: any) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
+                  <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all group">
                     <div className="flex items-center gap-4">
-                      <div className={`h-2 w-2 rounded-full ${task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                      <div className={cn(
+                        "h-2 w-2 rounded-full",
+                        task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                      )} />
                       <div className="text-sm font-bold text-white uppercase tracking-tight">{task.title}</div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -546,10 +517,10 @@ export default function Dashboard() {
                         onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
                         disabled={updateTaskStatusMutation.isPending}
                       >
-                        <SelectTrigger className={`h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest ${
-                          task.is_done ? 'bg-emerald-500/10 text-emerald-500' : 
-                          'bg-red-500/10 text-red-500'
-                        }`}>
+                        <SelectTrigger className={cn(
+                          "h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest",
+                          task.is_done ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                        )}>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
