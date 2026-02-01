@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -438,6 +439,7 @@ export default function Leaderboard() {
   const { leaderboard, currentUser, currentUserId, isLoading: loadingLeaderboard } = useGamificationData();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
@@ -479,9 +481,11 @@ export default function Leaderboard() {
   });
 
   const handleResetSeason = () => {
-    if (window.confirm("ATTENTION: Cette action va remettre à zéro tous les XP, niveaux, et historiques de TOUS les utilisateurs. Cette action est irréversible. Êtes-vous sûr ?")) {
-      resetSeasonMutation.mutate();
-    }
+    setIsResetModalOpen(true);
+  };
+
+  const performReset = () => {
+    resetSeasonMutation.mutate();
   };
 
   const { data: activities = [] } = useQuery<XpActivity[]>({
@@ -623,6 +627,46 @@ export default function Leaderboard() {
           <RulesCard />
         </motion.div>
       </motion.div>
+
+      {/* Reset Season Modal */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1a1b1e] border border-red-500/30 rounded-xl p-6 max-w-md w-full shadow-2xl relative mx-4">
+            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-red-500" />
+              Zone de Danger
+            </h3>
+
+            <p className="text-gray-400 mb-6">
+              Vous êtes sur le point de réinitialiser <b className="text-white">toute la saison</b>. 
+              Tous les XP, niveaux et historiques seront effacés pour <b className="text-white">tous les utilisateurs</b>.
+              <br/><br/>
+              <span className="text-red-400">Cette action est irréversible.</span>
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setIsResetModalOpen(false)}
+                className="px-4 py-2 rounded-lg text-gray-300 hover:bg-white/10 transition"
+                data-testid="button-cancel-reset"
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={() => {
+                  performReset();
+                  setIsResetModalOpen(false);
+                }}
+                disabled={resetSeasonMutation.isPending}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition shadow-[0_0_15px_rgba(220,38,38,0.5)] disabled:opacity-50"
+                data-testid="button-confirm-reset"
+              >
+                {resetSeasonMutation.isPending ? "Réinitialisation..." : "Tout Effacer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

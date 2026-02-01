@@ -1,0 +1,57 @@
+"La logique du Reset fonctionne, mais l'alerte native window.confirm est très laide.
+
+Je veux remplacer cette alerte par une Modale React personnalisée (Dark Theme).
+
+1. DANS Leaderboard.tsx :
+
+Ajoute un état pour gérer l'ouverture : const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+
+Modifie le bouton 'Reset Saison' pour qu'il ne lance plus le fetch direct, mais fasse : setIsResetModalOpen(true).
+
+2. CRÉE LE COMPOSANT VISUEL (Popup) :
+
+Ajoute ce bloc JSX à la fin du return (juste avant la fermeture </div>) :
+
+JavaScript
+{isResetModalOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="bg-[#1a1b1e] border border-red-500/30 rounded-xl p-6 max-w-md w-full shadow-2xl relative">
+      {/* Titre */}
+      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+        ⚠️ Zone de Danger
+      </h3>
+
+      {/* Description */}
+      <p className="text-gray-400 mb-6">
+        Vous êtes sur le point de réinitialiser <b>toute la saison</b>. 
+        Tous les XP, niveaux et historiques seront effacés pour <b>tous les utilisateurs</b>.
+        <br/><br/>
+        Cette action est irréversible.
+      </p>
+      {/* Boutons */}
+      <div className="flex justify-end gap-3">
+        <button 
+          onClick={() => setIsResetModalOpen(false)}
+          className="px-4 py-2 rounded-lg text-gray-300 hover:bg-white/10 transition"
+        >
+          Annuler
+        </button>
+        <button 
+          onClick={() => {
+            performReset(); // Appelle la vraie fonction ici
+            setIsResetModalOpen(false);
+          }}
+          className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+        >
+          🔥 Tout Effacer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+```
+3. LOGIQUE :
+
+Déplace la logique de l'appel API (le fetch /api/dev/reset-season) dans une fonction performReset.
+
+Je veux une fenêtre sombre, classe, avec un effet de flou derrière, qui fait vraiment 'Pro'."
