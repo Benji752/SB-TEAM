@@ -647,12 +647,16 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const ADMIN_USER_ID = 3; // Adjust if needed
       
       // Get all gamification profiles
-      const profiles = await db.select()
+      const allProfiles = await db.select()
         .from(gamificationProfiles)
         .orderBy(desc(gamificationProfiles.xpTotal));
       
-      // Filter out admin and add team member data
-      const leaderboard = profiles
+      // Determine online status: lastActiveAt within last 5 minutes
+      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+      const now = Date.now();
+      
+      // Filter out admin and add team member data + online status
+      const leaderboard = allProfiles
         .filter(p => {
           const teamMember = TEAM_MEMBERS[p.userId];
           // Keep only known team members (exclude admin and unknown users)
@@ -660,10 +664,14 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         })
         .map(p => {
           const teamMember = TEAM_MEMBERS[p.userId];
+          const lastActive = p.lastActiveAt ? new Date(p.lastActiveAt).getTime() : 0;
+          const isOnline = (now - lastActive) < ONLINE_THRESHOLD_MS;
+          
           return {
             ...p,
             username: teamMember?.name || `User ${p.userId}`,
-            role: teamMember?.role || null
+            role: teamMember?.role || null,
+            isOnline
           };
         });
       
@@ -889,6 +897,12 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         }).returning();
         profile = newProfile;
       }
+      
+      // Update lastActiveAt timestamp (this determines online status)
+      const now = new Date();
+      await db.update(gamificationProfiles)
+        .set({ lastActiveAt: now, updatedAt: now })
+        .where(eq(gamificationProfiles.userId, userId));
       
       // Award 2 XP for being active
       const xpGained = 2;

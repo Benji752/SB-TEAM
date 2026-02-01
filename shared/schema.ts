@@ -220,6 +220,7 @@ export const gamificationProfiles = pgTable("gamification_profiles", {
   currentStreak: integer("current_streak").default(0).notNull(),
   roleMultiplier: doublePrecision("role_multiplier").default(1.0).notNull(),
   badges: text("badges").array().default([]),
+  lastActiveAt: timestamp("last_active_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

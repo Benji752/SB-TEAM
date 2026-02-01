@@ -15,7 +15,8 @@ interface GamificationProfile {
   badges: string[];
   role?: string | null;
   username?: string | null;
-  fullName?: string | null;
+  isOnline?: boolean;
+  lastActiveAt?: string | null;
 }
 
 interface XpActivity {
@@ -118,8 +119,15 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
         </div>
         
         <div className="flex items-center gap-6 relative z-10">
-          <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black shrink-0 bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] ring-4 ring-cyan-500/30`}>
-            {displayInfo.avatar}
+          <div className="relative shrink-0">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] ring-4 ring-cyan-500/30`}>
+              {displayInfo.avatar}
+            </div>
+            <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
+              profile.isOnline 
+                ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
+                : 'bg-gray-500'
+            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -223,8 +231,15 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
             {getRankIcon()}
           </div>
           
-          <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black shrink-0 ${getAvatarStyle()}`}>
-            {displayInfo.avatar}
+          <div className="relative shrink-0">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black ${getAvatarStyle()}`}>
+              {displayInfo.avatar}
+            </div>
+            <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
+              profile.isOnline 
+                ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
+                : 'bg-gray-500'
+            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">
