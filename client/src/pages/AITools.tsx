@@ -359,7 +359,7 @@ export default function AITools() {
                 variant="ghost"
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
-                className="text-white/40 hover:text-gold hover:bg-gold/10 rounded-xl h-12 w-12 shrink-0"
+                className="rounded-xl"
                 data-testid="button-upload-image"
               >
                 <Paperclip size={20} />
@@ -377,7 +377,8 @@ export default function AITools() {
               <Button
                 onClick={sendMessage}
                 disabled={isLoading || (!inputMessage.trim() && !selectedImage)}
-                className="bg-gold hover:bg-gold/90 text-black h-12 w-12 rounded-xl shrink-0"
+                size="icon"
+                className="bg-gold text-black rounded-xl"
                 data-testid="button-send-message"
               >
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
@@ -441,7 +442,8 @@ export default function AITools() {
                   <Button
                     onClick={handleQuickGenerate}
                     disabled={isGeneratingQuick}
-                    className="w-full bg-gold/20 hover:bg-gold/30 text-gold border border-gold/30 text-xs h-9 rounded-lg"
+                    variant="outline"
+                    className="w-full text-xs rounded-lg"
                     data-testid="button-quick-generate"
                   >
                     {isGeneratingQuick ? (
