@@ -1005,6 +1005,34 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
+  // Get all users presence status (bulk)
+  app.get("/api/user/presence-all", async (req, res) => {
+    try {
+      const allProfiles = await db.select({
+        userId: gamificationProfiles.userId,
+        lastActiveAt: gamificationProfiles.lastActiveAt
+      }).from(gamificationProfiles);
+      
+      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
+      const now = Date.now();
+      
+      const presenceMap = allProfiles.reduce((acc, profile) => {
+        const isOnline = profile.lastActiveAt 
+          ? (now - new Date(profile.lastActiveAt).getTime()) < ONLINE_THRESHOLD_MS 
+          : false;
+        acc[profile.userId] = {
+          lastActiveAt: profile.lastActiveAt,
+          isOnline
+        };
+        return acc;
+      }, {} as Record<number, { lastActiveAt: Date | null; isOnline: boolean }>);
+      
+      res.json(presenceMap);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Get today's active time for a user (auto-tracking only)
   app.get("/api/gamification/today-time/:userId", async (req, res) => {
     try {

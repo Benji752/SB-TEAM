@@ -7,6 +7,8 @@ interface PresenceData {
   isOnline: boolean;
 }
 
+type PresenceMap = Record<number, { lastActiveAt: string | null; isOnline: boolean }>;
+
 export function useUserPresence(userId: number | null | undefined) {
   const { data, isLoading, error } = useQuery<PresenceData>({
     queryKey: ['/api/user/presence', userId],
@@ -25,21 +27,27 @@ export function useUserPresence(userId: number | null | undefined) {
   };
 }
 
-export function useMultipleUserPresence(userIds: number[]) {
-  const results = userIds.map(userId => {
-    const { data } = useQuery<PresenceData>({
-      queryKey: ['/api/user/presence', userId],
-      enabled: !!userId,
-      refetchInterval: 30000,
-      staleTime: 15000,
-    });
-    
-    return {
-      userId,
-      isOnline: data?.lastActiveAt ? isUserOnline(data.lastActiveAt) : false,
-      lastActiveAt: data?.lastActiveAt || null
-    };
+export function useAllUsersPresence() {
+  const { data, isLoading, error } = useQuery<PresenceMap>({
+    queryKey: ['/api/user/presence-all'],
+    refetchInterval: 30000,
+    staleTime: 15000,
   });
 
-  return results;
+  const getPresence = (userId: number) => {
+    if (!data || !data[userId]) {
+      return { isOnline: false, lastActiveAt: null };
+    }
+    return {
+      isOnline: isUserOnline(data[userId].lastActiveAt),
+      lastActiveAt: data[userId].lastActiveAt
+    };
+  };
+
+  return {
+    getPresence,
+    presenceMap: data || {},
+    isLoading,
+    error
+  };
 }

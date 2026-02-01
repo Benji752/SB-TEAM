@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Loader2, Calendar as CalendarIcon, Mail, X } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { useAllUsersPresence } from "@/hooks/useUserPresence";
 
 interface Profile {
   id: string;
@@ -20,6 +21,7 @@ export default function TeamPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+  const { getPresence } = useAllUsersPresence();
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -80,7 +82,14 @@ export default function TeamPage() {
                     {profile.username?.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute bottom-0 right-0 w-5 h-5 bg-[#10B981] border-4 border-[#0A0A0A] rounded-full shadow-lg" />
+                <div 
+                  className={`absolute bottom-0 right-0 w-5 h-5 border-4 border-[#0A0A0A] rounded-full shadow-lg ${
+                    getPresence(Number(profile.id)).isOnline 
+                      ? 'bg-[#10B981]' 
+                      : 'bg-gray-500'
+                  }`}
+                  title={getPresence(Number(profile.id)).isOnline ? 'En ligne' : 'Hors ligne'}
+                />
               </div>
 
               <div className="space-y-2">
