@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Loader2, Send } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { useQuery } from "@tanstack/react-query";
+
+interface LeaderboardEntry {
+  userId: number;
+  username: string;
+  isOnline: boolean;
+}
 
 export default function Messages() {
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -16,6 +23,20 @@ export default function Messages() {
   const [messageText, setMessageText] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fetch online status from gamification leaderboard (heartbeat-based)
+  const { data: leaderboard = [] } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["/api/gamification/leaderboard"],
+    refetchInterval: 5000, // Refresh every 5 seconds for real-time status
+  });
+
+  // Build username -> isOnline map from leaderboard
+  const onlineStatusMap: Record<string, boolean> = {};
+  leaderboard.forEach(entry => {
+    if (entry.username) {
+      onlineStatusMap[entry.username.toLowerCase()] = entry.isOnline;
+    }
+  });
 
   useEffect(() => {
     async function init() {
@@ -32,7 +53,7 @@ export default function Messages() {
     }
     init();
 
-    // Auto-refresh profiles every 10 seconds for online status
+    // Auto-refresh profiles every 10 seconds
     const interval = setInterval(() => {
       if (currentUser) {
         fetchProfiles(currentUser.id);
@@ -173,7 +194,7 @@ export default function Messages() {
                         {profile.username?.[0]?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    {profile.is_online && (
+                    {onlineStatusMap[profile.username?.toLowerCase()] && (
                       <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg z-10" />
                     )}
                   </div>
@@ -201,16 +222,16 @@ export default function Messages() {
                       {selectedUser.username?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  {selectedUser.is_online && (
+                  {onlineStatusMap[selectedUser.username?.toLowerCase()] && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#10B981] border-2 border-[#050505] rounded-full shadow-lg z-10" />
                   )}
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${selectedUser.is_online ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
-                    <p className={`text-[10px] uppercase tracking-widest font-bold ${selectedUser.is_online ? 'text-[#10B981]' : 'text-gray-500'}`}>
-                      {selectedUser.is_online ? 'En ligne' : 'Hors ligne'}
+                    <div className={`w-1.5 h-1.5 rounded-full ${onlineStatusMap[selectedUser.username?.toLowerCase()] ? 'bg-[#10B981]' : 'bg-gray-500'}`} />
+                    <p className={`text-[10px] uppercase tracking-widest font-bold ${onlineStatusMap[selectedUser.username?.toLowerCase()] ? 'text-[#10B981]' : 'text-gray-500'}`}>
+                      {onlineStatusMap[selectedUser.username?.toLowerCase()] ? 'En ligne' : 'Hors ligne'}
                     </p>
                   </div>
                 </div>
