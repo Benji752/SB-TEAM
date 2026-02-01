@@ -203,6 +203,103 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     res.json(statsArr);
   });
 
+  // AI Chat with Vision (GPT-4o)
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message, image, history } = req.body;
+
+      if (!message && !image) {
+        return res.status(400).json({ error: "Message ou image requis" });
+      }
+
+      // Server-side image size validation (max 20MB base64)
+      if (image && image.length > 28 * 1024 * 1024) {
+        return res.status(400).json({ error: "Image trop volumineuse (max 20MB)" });
+      }
+
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const systemPrompt = `Tu es l'IA principale de l'agence SB Digital. Tes compétences :
+
+**Expert technique** : Tu sais résoudre les bugs Stripchat, OBS, StreamMaster, Proxies et API. Tu donnes des solutions précises et étape par étape.
+
+**Coach Visuel** : Tu sais analyser les photos uploadées (lumière, pose, cadrage, qualité, potentiel de vente) et donner une note sur 10 avec des conseils d'amélioration détaillés.
+
+**Copywriter** : Tu rédiges des posts engageants pour les réseaux sociaux (Instagram, OnlyFans, Twitter, TikTok).
+
+Ton ton est professionnel, direct et encourageant. Tu utilises des emojis avec modération. Tu structures tes réponses avec des titres en gras (**texte**) pour plus de clarté.
+
+Quand on te montre une photo, analyse TOUJOURS :
+1. La qualité technique (lumière, netteté, cadrage)
+2. L'attractivité visuelle (pose, expression, ambiance)
+3. Le potentiel commercial (adapté pour miniature Stripchat, post Instagram, etc.)
+4. Donne une note /10 et 3 conseils d'amélioration`;
+
+      // Build messages array
+      const messages: any[] = [
+        { role: "system", content: systemPrompt }
+      ];
+
+      // Add conversation history (last 10 messages, preserving images)
+      if (history && Array.isArray(history)) {
+        for (const msg of history.slice(-10)) {
+          if (msg.role === "user") {
+            // Preserve image context if present
+            if (msg.image) {
+              messages.push({ 
+                role: "user", 
+                content: [
+                  { type: "text", text: msg.content || "Analyse cette image" },
+                  { type: "image_url", image_url: { url: msg.image, detail: "low" } }
+                ]
+              });
+            } else {
+              messages.push({ role: "user", content: msg.content });
+            }
+          } else if (msg.role === "assistant") {
+            messages.push({ role: "assistant", content: msg.content });
+          }
+        }
+      }
+
+      // Build user message content
+      const userContent: any[] = [];
+
+      if (message) {
+        userContent.push({ type: "text", text: message });
+      }
+
+      if (image) {
+        // Image is base64 data URL
+        userContent.push({
+          type: "image_url",
+          image_url: {
+            url: image,
+            detail: "high"
+          }
+        });
+      }
+
+      messages.push({ role: "user", content: userContent });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages,
+        max_tokens: 1500,
+        temperature: 0.7
+      });
+
+      const content = response.choices[0]?.message?.content || "Je n'ai pas pu générer de réponse.";
+
+      res.json({ response: content });
+    } catch (error: any) {
+      console.error("AI chat error:", error.message);
+      res.status(500).json({ error: "Erreur IA: " + error.message });
+    }
+  });
+
   // AI Content Generation
   app.post("/api/ai/generate", async (req, res) => {
     try {
