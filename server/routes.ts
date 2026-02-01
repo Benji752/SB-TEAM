@@ -635,42 +635,34 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 
   // ========== GAMIFICATION ROUTES - SB HUNTER LEAGUE ==========
 
-  // Get leaderboard data - EXCLUDE admin (referee doesn't play)
+  // Get leaderboard data - uses real profiles from database
   app.get("/api/gamification/leaderboard", async (req, res) => {
     try {
-      // Mapping of known team members (userId -> {name, role})
-      const TEAM_MEMBERS: Record<number, { name: string; role: string }> = {
-        1: { name: "Nico", role: "staff" },
-        2: { name: "Laura", role: "model" },
-      };
-      // Admin userId (to exclude) - based on session or known ID
-      const ADMIN_USER_ID = 3; // Adjust if needed
-      
       // Get all gamification profiles
       const allProfiles = await db.select()
         .from(gamificationProfiles)
         .orderBy(desc(gamificationProfiles.xpTotal));
       
+      // Get all real profiles from database
+      const allRealProfiles = await db.select().from(profiles);
+      const profilesMap = new Map(allRealProfiles.map(p => [String(p.id), p]));
+      
       // Determine online status: lastActiveAt within last 5 minutes
       const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
       const now = Date.now();
       
-      // Filter out admin and add team member data + online status
+      // Only include users that have real profiles in the database
       const leaderboard = allProfiles
-        .filter(p => {
-          const teamMember = TEAM_MEMBERS[p.userId];
-          // Keep only known team members (exclude admin and unknown users)
-          return teamMember !== undefined;
-        })
+        .filter(p => profilesMap.has(String(p.userId)))
         .map(p => {
-          const teamMember = TEAM_MEMBERS[p.userId];
+          const realProfile = profilesMap.get(String(p.userId));
           const lastActive = p.lastActiveAt ? new Date(p.lastActiveAt).getTime() : 0;
           const isOnline = (now - lastActive) < ONLINE_THRESHOLD_MS;
           
           return {
             ...p,
-            username: teamMember?.name || `User ${p.userId}`,
-            role: teamMember?.role || null,
+            username: realProfile?.username || `User ${p.userId}`,
+            role: realProfile?.role || null,
             isOnline
           };
         });
