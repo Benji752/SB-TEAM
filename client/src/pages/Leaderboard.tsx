@@ -1,9 +1,13 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User, AlertTriangle } from "lucide-react";
 import { useGamificationData, LeaderboardUser } from "@/hooks/useGamificationData";
+import { useAuth } from "@/hooks/use-auth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface GamificationProfile {
   id: number;
@@ -431,6 +435,46 @@ function RulesCard() {
 
 export default function Leaderboard() {
   const { leaderboard, currentUser, currentUserId, isLoading: loadingLeaderboard } = useGamificationData();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
+
+  const resetSeasonMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/gamification/reset");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erreur lors de la réinitialisation");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Saison réinitialisée",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard-view"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/activity"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/today-time"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/shift"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/gamification/leads"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de réinitialiser la saison",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleResetSeason = () => {
+    if (window.confirm("ATTENTION: Cette action va remettre à zéro tous les XP, niveaux, et historiques de TOUS les utilisateurs. Cette action est irréversible. Êtes-vous sûr ?")) {
+      resetSeasonMutation.mutate();
+    }
+  };
 
   const { data: activities = [] } = useQuery<XpActivity[]>({
     queryKey: ["/api/gamification/activity"],
@@ -484,7 +528,7 @@ export default function Leaderboard() {
         animate="visible"
         className="space-y-8"
       >
-        <motion.div variants={itemVariants} className="flex items-center justify-between">
+        <motion.div variants={itemVariants} className="flex items-center justify-between gap-4 flex-wrap">
           <div className="relative">
             <motion.div 
               className="absolute -inset-4 bg-gradient-to-r from-gold/20 via-transparent to-purple-500/20 blur-2xl"
@@ -505,6 +549,19 @@ export default function Leaderboard() {
               </div>
             </h1>
           </div>
+          
+          {isAdmin && (
+            <Button
+              variant="destructive"
+              onClick={handleResetSeason}
+              disabled={resetSeasonMutation.isPending}
+              className="font-bold shadow-lg"
+              data-testid="button-reset-season"
+            >
+              <AlertTriangle size={16} className="mr-2" />
+              {resetSeasonMutation.isPending ? "Réinitialisation..." : "Reset Saison"}
+            </Button>
+          )}
         </motion.div>
 
         {myProfile && (

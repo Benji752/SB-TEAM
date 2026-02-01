@@ -52,6 +52,11 @@ Preferred communication style: Simple, everyday language.
 - **Night Owl Bonus**: +50 XP for actions between 00:00-06:00
 - **Leaderboard**: E-Sport themed rankings with XP progress bars and "Temps passé aujourd'hui" tracking
 - **Database Tables**: gamification_profiles, hunter_leads, work_sessions, xp_activity_log
+- **Admin Season Reset**: POST `/api/gamification/reset` - Admin-only endpoint that:
+  - Resets all gamification_profiles: xpTotal=0, level=1, currentStreak=0
+  - Clears xp_activity_log, hunter_leads, and work_sessions tables
+  - Requires admin role verification via session
+  - Button visible only to admins on Leaderboard page with confirmation dialog
 
 ### Online Status System (Single Source of Truth) - REFACTORED Feb 2026
 - **SQL View**: `gamification_leaderboard_view` - calculates `seconds_since_active` server-side using PostgreSQL NOW()

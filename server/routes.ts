@@ -1288,4 +1288,44 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       res.status(500).json({ error: error.message });
     }
   });
+
+  // ADMIN ONLY: Reset Season - Clear all XP and reset levels
+  app.post("/api/gamification/reset", async (req, res) => {
+    try {
+      const session = req.session as any;
+      const userRole = session?.user?.role?.toLowerCase();
+      
+      // Security check: Only admin can reset
+      if (userRole !== 'admin') {
+        return res.status(403).json({ error: "Accès refusé. Seuls les administrateurs peuvent réinitialiser la saison." });
+      }
+      
+      // Reset all gamification profiles: XP to 0, level to 1
+      await db.update(gamificationProfiles)
+        .set({
+          xpTotal: 0,
+          level: 1,
+          currentStreak: 0
+        });
+      
+      // Clear XP activity log
+      await db.delete(xpActivityLog);
+      
+      // Clear hunter leads
+      await db.delete(hunterLeads);
+      
+      // Clear work sessions
+      await db.delete(workSessions);
+      
+      console.log(`[ADMIN] Season reset by user role: ${userRole}`);
+      
+      res.json({ 
+        success: true, 
+        message: "Saison réinitialisée avec succès. Tous les XP, niveaux et historiques ont été remis à zéro." 
+      });
+    } catch (error: any) {
+      console.error("[ADMIN] Reset season error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
 }
