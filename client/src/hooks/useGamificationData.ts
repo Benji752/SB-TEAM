@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useRef, useState } from "react";
 
 const ONLINE_THRESHOLD_SECONDS = 300;
-const HEARTBEAT_INTERVAL = 60 * 1000;
+const HEARTBEAT_INTERVAL = 10 * 60 * 1000; // Every 10 minutes for +10 XP presence
 const ACTIVITY_THRESHOLD = 5 * 60 * 1000;
 
 function uuidToInt(uuid: string): number {

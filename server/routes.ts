@@ -9,12 +9,17 @@ import OpenAI from "openai";
 import { z } from "zod";
 
 // ========== GAMIFICATION HELPERS ==========
-const XP_PER_LEAD = 100;
-const XP_PER_30_MIN = 10;
+// SAISON MENSUELLE - Objectif Niveau 300 (Formule linéaire: 100 XP = 1 niveau)
+const XP_PER_LEAD = 150;           // Déclaration de leads approuvés
+const XP_PER_PRESENCE = 10;        // Toutes les 10 minutes de présence
+const XP_PER_ORDER_CREATE = 75;    // Création de commande
+const XP_PER_ORDER_PAID = 75;      // Commande payée (total: 150 XP)
+const XP_LOGIN_BONUS = 50;         // Bonus première connexion du jour
 const NIGHT_OWL_BONUS = 50;
 
+// Nouvelle formule linéaire: Level = Floor(XP / 100) + 1
 function calculateLevel(xp: number): number {
-  return Math.floor(Math.sqrt(xp / 100)) + 1;
+  return Math.floor(xp / 100) + 1;
 }
 
 function isNightOwlTime(date?: Date): boolean {
@@ -185,10 +190,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
           }).returning();
         }
         
-        // Add +10 XP
-        const xpGained = 10;
+        // Add XP for creating order
+        const xpGained = XP_PER_ORDER_CREATE;
         const newXp = profile.xpTotal + xpGained;
-        const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
+        const newLevel = calculateLevel(newXp);
         
         await db.update(gamificationProfiles)
           .set({ xpTotal: newXp, level: newLevel })
@@ -237,10 +242,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
           }).returning();
         }
         
-        // Add +100 XP bonus
-        const xpGained = 100;
+        // Add XP bonus for paid order
+        const xpGained = XP_PER_ORDER_PAID;
         const newXp = profile.xpTotal + xpGained;
-        const newLevel = Math.floor(Math.sqrt(newXp / 100)) + 1;
+        const newLevel = calculateLevel(newXp);
         
         await db.update(gamificationProfiles)
           .set({ xpTotal: newXp, level: newLevel })
@@ -251,7 +256,7 @@ export async function registerRoutes(_httpServer: any, app: Express) {
           userId: creatorId,
           actionType: "order_paid",
           xpGained,
-          description: `Commande ${currentOrder.clientName} payée ! Jackpot`,
+          description: `Commande ${currentOrder.clientName} payée ! Jackpot +${XP_PER_ORDER_PAID} XP`,
         });
       }
       
@@ -792,8 +797,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         });
       }
       
-      // Award 2 XP for presence
-      await awardXP(userId, 4, "presence", "Présence active");
+      // Award XP for presence (10 XP per ping, configured for 10-minute intervals)
+      await awardXP(userId, XP_PER_PRESENCE, "presence", `Présence active +${XP_PER_PRESENCE} XP`);
       
       res.json({ success: true, timestamp: now.toISOString() });
     } catch (error: any) {
@@ -937,7 +942,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         .limit(1);
       
       const multiplier = profile.length ? profile[0].roleMultiplier : 1.0;
-      let pointsEarned = Math.floor(durationMinutes / 30) * XP_PER_30_MIN * multiplier;
+      let pointsEarned = Math.floor(durationMinutes / 10) * XP_PER_PRESENCE * multiplier;
       
       // Night owl bonus - based on shift START time, not end time
       const shiftStartTime = new Date(session.startTime);
@@ -991,7 +996,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 
   // ========== AUTO-TRACKING HEARTBEAT ==========
   
-  // Heartbeat - auto-track presence (+2 XP every 5 minutes)
+  // Heartbeat - auto-track presence (+10 XP every 10 minutes) + Daily login bonus
   app.post("/api/gamification/heartbeat", async (req, res) => {
     try {
       const schema = z.object({ 
@@ -1037,8 +1042,27 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         .set(updateData)
         .where(eq(gamificationProfiles.userId, userId));
       
-      // Award 2 XP for being active
-      const xpGained = 2;
+      // Check for daily login bonus (+50 XP first connection of the day)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todayLoginCheck = await db.select().from(xpActivityLog)
+        .where(and(
+          eq(xpActivityLog.userId, userId),
+          eq(xpActivityLog.actionType, "daily_login"),
+          gte(xpActivityLog.createdAt, today)
+        ))
+        .limit(1);
+      
+      let loginBonusAwarded = false;
+      if (!todayLoginCheck.length) {
+        // Award daily login bonus
+        await awardXP(userId, XP_LOGIN_BONUS, "daily_login", `Bonus connexion quotidienne +${XP_LOGIN_BONUS} XP`);
+        loginBonusAwarded = true;
+      }
+      
+      // Award XP for presence (10 XP per 10-minute heartbeat)
+      const xpGained = XP_PER_PRESENCE;
       const multiplier = profile[0].roleMultiplier || 1.0;
       const finalXp = Math.floor(xpGained * multiplier);
       

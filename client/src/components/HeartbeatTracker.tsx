@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 
-const HEARTBEAT_INTERVAL = 60 * 1000; // Every 60 seconds
+const HEARTBEAT_INTERVAL = 10 * 60 * 1000; // Every 10 minutes for +10 XP presence
 const ACTIVITY_THRESHOLD = 5 * 60 * 1000; // 5 minutes inactivity threshold
 
 function uuidToInt(uuid: string): number {
