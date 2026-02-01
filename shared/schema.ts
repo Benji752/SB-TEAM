@@ -207,3 +207,68 @@ export const aiChatHistory = pgTable("ai_chat_history", {
 export const insertAiChatHistorySchema = createInsertSchema(aiChatHistory).omit({ id: true, createdAt: true });
 export type AiChatHistory = typeof aiChatHistory.$inferSelect;
 export type InsertAiChatHistory = z.infer<typeof insertAiChatHistorySchema>;
+
+// ========== SB HUNTER LEAGUE - Gamification ==========
+
+// Gamification Profiles
+export const gamificationProfiles = pgTable("gamification_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  xpTotal: integer("xp_total").default(0).notNull(),
+  level: integer("level").default(1).notNull(),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  roleMultiplier: doublePrecision("role_multiplier").default(1.0).notNull(),
+  badges: text("badges").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertGamificationProfileSchema = createInsertSchema(gamificationProfiles).omit({ id: true, createdAt: true, updatedAt: true });
+export type GamificationProfile = typeof gamificationProfiles.$inferSelect;
+export type InsertGamificationProfile = z.infer<typeof insertGamificationProfileSchema>;
+
+// Hunter Leads (Client hunting tracking)
+export const hunterLeads = pgTable("hunter_leads", {
+  id: serial("id").primaryKey(),
+  clientUsername: text("client_username").notNull(),
+  platform: text("platform").notNull(),
+  finderId: integer("finder_id").notNull(),
+  status: text("status", { enum: ["pending", "approved", "rejected"] }).default("pending").notNull(),
+  xpAwarded: integer("xp_awarded").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  validatedAt: timestamp("validated_at"),
+});
+
+export const insertHunterLeadSchema = createInsertSchema(hunterLeads).omit({ id: true, createdAt: true, validatedAt: true, xpAwarded: true });
+export type HunterLead = typeof hunterLeads.$inferSelect;
+export type InsertHunterLead = z.infer<typeof insertHunterLeadSchema>;
+
+// Work Sessions (Time tracking / Pointeuse)
+export const workSessions = pgTable("work_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  durationMinutes: integer("duration_minutes").default(0),
+  pointsEarned: integer("points_earned").default(0),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertWorkSessionSchema = createInsertSchema(workSessions).omit({ id: true, createdAt: true, endTime: true, durationMinutes: true, pointsEarned: true });
+export type WorkSession = typeof workSessions.$inferSelect;
+export type InsertWorkSession = z.infer<typeof insertWorkSessionSchema>;
+
+// XP Activity Log (for history display)
+export const xpActivityLog = pgTable("xp_activity_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  actionType: text("action_type").notNull(),
+  xpGained: integer("xp_gained").notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertXpActivityLogSchema = createInsertSchema(xpActivityLog).omit({ id: true, createdAt: true });
+export type XpActivityLog = typeof xpActivityLog.$inferSelect;
+export type InsertXpActivityLog = z.infer<typeof insertXpActivityLogSchema>;

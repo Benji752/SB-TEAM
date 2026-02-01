@@ -18,6 +18,7 @@ import Models from "@/pages/Models";
 import Projects from "@/pages/Projects";
 import Landing from "@/pages/Landing";
 import AITools from "@/pages/AITools";
+import Leaderboard from "@/pages/Leaderboard";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useEffect, useState } from "react";
 import { apiRequest } from "./lib/queryClient";
@@ -260,6 +261,9 @@ export default function App() {
               </Route>
               <Route path="/logs">
                 <LogsPage />
+              </Route>
+              <Route path="/leaderboard">
+                <Leaderboard />
               </Route>
               <Route component={NotFound} />
             </Switch>

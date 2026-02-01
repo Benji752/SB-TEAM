@@ -1,0 +1,75 @@
+"On implémente un système de Gamification complet appelé 'SB HUNTER LEAGUE' pour mettre en compétition le Staff (Nico) et la Modèle (WildGirl).
+
+OBJECTIF : Récompenser la recherche de clients (Leads) et le temps de travail, avec un équilibrage car c'est plus dur pour le staff.
+
+1. BASE DE DONNÉES (SUPABASE) : Crée (ou mets à jour) ces tables :
+
+gamification_profiles (Lié à users) :
+
+xp_total (int), level (int), current_streak (int).
+
+role_multiplier (float) : Mets 1.0 par défaut pour les modèles, et 2.0 pour le staff (admin/support).
+
+hunter_leads (Table de chasse) :
+
+id, client_username, platform, finder_id (qui l'a trouvé), status ('pending', 'approved', 'rejected').
+
+work_sessions (Pointeuse) :
+
+user_id, start_time, end_time, duration_minutes, points_earned.
+
+2. LOGIQUE DES POINTS (Le Cerveau) : Crée une Server Action ou une fonction utilitaire calculatePoints(actionType, userId) :
+
+Règle de Base : Récupère le role_multiplier de l'user.
+
+Action 'Nouveau Lead' : Base 100 XP * Multiplicateur. (Staff = 200XP, Modèle = 100XP).
+
+Action 'Connexion' : 10 XP toutes les 30 min de travail.
+
+Bonus 'Oiseau de Nuit' : Si l'action est entre 00h00 et 06h00 -> Ajoute +50 XP fixes.
+
+Système de Niveaux : Niveau = racine carrée de (XP / 100).
+
+3. INTERFACE & FONCTIONNALITÉS :
+
+A. La Pointeuse (Sidebar ou Header) :
+
+Un bouton '🟢 START SHIFT' / '🔴 STOP SHIFT'.
+
+Un compteur temps réel : 'Session : 1h12'.
+
+Quand on stop, ça enregistre dans work_sessions et ajoute les XP.
+
+B. Le Formulaire de Chasse (Dashboard) :
+
+Bouton '🎯 DÉCLARER UNE PRISE'.
+
+Champs : Nom du Client + Plateforme.
+
+Envoie dans hunter_leads avec status 'pending'.
+
+C. Le Leaderboard (Page Leaderboard.jsx) :
+
+Design 'E-Sport' / Jeu Vidéo.
+
+Affiche le TOP 3 avec des avatars, des barres de progression XP fluides (Framer Motion).
+
+Affiche le niveau actuel et les badges (ex: '🌙 Night Owl').
+
+Liste l'historique récent : 'Nico a trouvé @fan123 (+200 XP)'.
+
+D. Validation (Admin uniquement) :
+
+Sur le Dashboard Admin, affiche une liste 'Leads à valider'.
+
+Bouton ✅ Valider (Déclenche le gain d'XP).
+
+Bouton ❌ Refuser (Pas de points).
+
+4. VISUEL :
+
+Utilise framer-motion pour les barres d'XP.
+
+Si quelqu'un passe un niveau, fais une petite animation de confettis (si possible).
+
+Je veux que tout soit fonctionnel : je clique sur Start Shift, ça compte. Je déclare un lead, je le valide, je vois les points monter."

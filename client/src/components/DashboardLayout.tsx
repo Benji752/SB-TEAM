@@ -14,7 +14,8 @@ import {
   MessageSquare,
   Users,
   Briefcase,
-  Sparkles
+  Sparkles,
+  Trophy
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = [
     { label: "Tableau de bord", icon: LayoutDashboard, href: "/", testId: "link-dashboard" },
+    { label: "Hunter League", icon: Trophy, href: "/leaderboard", testId: "link-leaderboard" },
     { label: "IA Studio", icon: Sparkles, href: "/ai-studio", testId: "link-ai-studio" },
     { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects" },
     { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders" },

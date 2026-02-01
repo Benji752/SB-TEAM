@@ -66,6 +66,7 @@ import { useState, useEffect } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LeadValidation } from "@/components/LeadValidation";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -593,6 +594,13 @@ export default function Dashboard() {
               )}
             </div>
           </MotionCard>
+
+          {/* Lead Validation for Admin */}
+          {user?.role === 'admin' && (
+            <motion.div variants={cardVariants}>
+              <LeadValidation />
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </DashboardLayout>

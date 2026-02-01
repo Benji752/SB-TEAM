@@ -1,11 +1,54 @@
 import { Express } from "express";
 import { setupAuth } from "./auth";
 import axios from "axios";
-import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory } from "@shared/schema";
+import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory, gamificationProfiles, hunterLeads, workSessions, xpActivityLog, insertHunterLeadSchema, insertWorkSessionSchema } from "@shared/schema";
 import { db } from "./db";
-import { desc, gte, eq, ne, sql } from "drizzle-orm";
+import { desc, gte, eq, ne, sql, and, isNull } from "drizzle-orm";
 import { storage } from "./storage";
 import OpenAI from "openai";
+import { z } from "zod";
+
+// ========== GAMIFICATION HELPERS ==========
+const XP_PER_LEAD = 100;
+const XP_PER_30_MIN = 10;
+const NIGHT_OWL_BONUS = 50;
+
+function calculateLevel(xp: number): number {
+  return Math.floor(Math.sqrt(xp / 100)) + 1;
+}
+
+function isNightOwlTime(date?: Date): boolean {
+  const checkDate = date || new Date();
+  const hour = checkDate.getHours();
+  return hour >= 0 && hour < 6;
+}
+
+async function awardXP(userId: number, xpAmount: number, actionType: string, description: string) {
+  const profile = await db.select().from(gamificationProfiles).where(eq(gamificationProfiles.userId, userId)).limit(1);
+  
+  if (!profile.length) return null;
+  
+  const newXpTotal = (profile[0].xpTotal || 0) + xpAmount;
+  const newLevel = calculateLevel(newXpTotal);
+  const oldLevel = profile[0].level;
+  
+  await db.update(gamificationProfiles)
+    .set({ 
+      xpTotal: newXpTotal, 
+      level: newLevel,
+      updatedAt: new Date()
+    })
+    .where(eq(gamificationProfiles.userId, userId));
+  
+  await db.insert(xpActivityLog).values({
+    userId,
+    actionType,
+    xpGained: xpAmount,
+    description
+  });
+  
+  return { newXpTotal, newLevel, leveledUp: newLevel > oldLevel };
+}
 
 export async function registerRoutes(_httpServer: any, app: Express) {
   setupAuth(app);
@@ -504,6 +547,325 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     } catch (error: any) {
       console.error("AI generation error:", error.message);
       res.status(500).json({ error: "Erreur de génération IA: " + error.message });
+    }
+  });
+
+  // ========== GAMIFICATION ROUTES - SB HUNTER LEAGUE ==========
+
+  // Get leaderboard data
+  app.get("/api/gamification/leaderboard", async (req, res) => {
+    try {
+      const leaderboard = await db.select({
+        id: gamificationProfiles.id,
+        userId: gamificationProfiles.userId,
+        xpTotal: gamificationProfiles.xpTotal,
+        level: gamificationProfiles.level,
+        currentStreak: gamificationProfiles.currentStreak,
+        roleMultiplier: gamificationProfiles.roleMultiplier,
+        badges: gamificationProfiles.badges
+      })
+      .from(gamificationProfiles)
+      .orderBy(desc(gamificationProfiles.xpTotal));
+      
+      res.json(leaderboard);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user's gamification profile
+  app.get("/api/gamification/profile/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const profile = await db.select().from(gamificationProfiles)
+        .where(eq(gamificationProfiles.userId, userId))
+        .limit(1);
+      
+      if (!profile.length) {
+        // First, try to get role from profiles table (persisted role)
+        const userProfile = await db.select().from(profiles)
+          .where(eq(profiles.id, userId))
+          .limit(1);
+        
+        let userRole = userProfile.length ? userProfile[0].role?.toLowerCase() : null;
+        
+        // Fallback to session role if no profile found
+        if (!userRole) {
+          const session = req.session as any;
+          userRole = session?.user?.role?.toLowerCase();
+        }
+        
+        // Staff/Admin get 2.0x multiplier, Models get 1.0x
+        const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
+        
+        const newProfile = await db.insert(gamificationProfiles).values({
+          userId,
+          xpTotal: 0,
+          level: 1,
+          currentStreak: 0,
+          roleMultiplier
+        }).returning();
+        return res.json(newProfile[0]);
+      }
+      
+      res.json(profile[0]);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get XP activity log
+  app.get("/api/gamification/activity", async (req, res) => {
+    try {
+      const activities = await db.select()
+        .from(xpActivityLog)
+        .orderBy(desc(xpActivityLog.createdAt))
+        .limit(20);
+      
+      res.json(activities);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ========== WORK SESSION (POINTEUSE) ==========
+
+  // Start shift
+  app.post("/api/gamification/shift/start", async (req, res) => {
+    try {
+      const schema = z.object({ userId: z.number() });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body", details: result.error });
+      }
+      const { userId } = result.data;
+      
+      // Check if there's already an active session
+      const activeSession = await db.select().from(workSessions)
+        .where(and(
+          eq(workSessions.userId, userId),
+          eq(workSessions.isActive, true)
+        ))
+        .limit(1);
+      
+      if (activeSession.length) {
+        return res.status(400).json({ error: "Shift already active" });
+      }
+      
+      const session = await db.insert(workSessions).values({
+        userId,
+        startTime: new Date(),
+        isActive: true
+      }).returning();
+      
+      res.json(session[0]);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Stop shift
+  app.post("/api/gamification/shift/stop", async (req, res) => {
+    try {
+      const schema = z.object({ userId: z.number() });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body", details: result.error });
+      }
+      const { userId } = result.data;
+      
+      const activeSession = await db.select().from(workSessions)
+        .where(and(
+          eq(workSessions.userId, userId),
+          eq(workSessions.isActive, true)
+        ))
+        .limit(1);
+      
+      if (!activeSession.length) {
+        return res.status(400).json({ error: "No active shift" });
+      }
+      
+      const session = activeSession[0];
+      const endTime = new Date();
+      const durationMinutes = Math.floor((endTime.getTime() - new Date(session.startTime).getTime()) / 60000);
+      
+      // Calculate XP: 10 XP per 30 minutes
+      const profile = await db.select().from(gamificationProfiles)
+        .where(eq(gamificationProfiles.userId, userId))
+        .limit(1);
+      
+      const multiplier = profile.length ? profile[0].roleMultiplier : 1.0;
+      let pointsEarned = Math.floor(durationMinutes / 30) * XP_PER_30_MIN * multiplier;
+      
+      // Night owl bonus - based on shift START time, not end time
+      const shiftStartTime = new Date(session.startTime);
+      if (isNightOwlTime(shiftStartTime)) {
+        pointsEarned += NIGHT_OWL_BONUS;
+      }
+      
+      // Update session
+      await db.update(workSessions)
+        .set({
+          endTime,
+          durationMinutes,
+          pointsEarned: Math.floor(pointsEarned),
+          isActive: false
+        })
+        .where(eq(workSessions.id, session.id));
+      
+      // Award XP
+      if (pointsEarned > 0) {
+        const hours = Math.floor(durationMinutes / 60);
+        const mins = durationMinutes % 60;
+        await awardXP(userId, Math.floor(pointsEarned), "work_session", `Session de travail: ${hours}h${mins}m`);
+      }
+      
+      res.json({ 
+        durationMinutes, 
+        pointsEarned: Math.floor(pointsEarned),
+        nightOwlBonus: isNightOwlTime()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get active session
+  app.get("/api/gamification/shift/active/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const activeSession = await db.select().from(workSessions)
+        .where(and(
+          eq(workSessions.userId, userId),
+          eq(workSessions.isActive, true)
+        ))
+        .limit(1);
+      
+      res.json(activeSession.length ? activeSession[0] : null);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // ========== HUNTER LEADS ==========
+
+  // Declare a new lead
+  app.post("/api/gamification/leads", async (req, res) => {
+    try {
+      const schema = insertHunterLeadSchema.extend({
+        clientUsername: z.string().min(1, "Client username required"),
+        platform: z.string().min(1, "Platform required"),
+        finderId: z.number()
+      });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body", details: result.error });
+      }
+      const { clientUsername, platform, finderId } = result.data;
+      
+      const lead = await db.insert(hunterLeads).values({
+        clientUsername,
+        platform,
+        finderId,
+        status: "pending"
+      }).returning();
+      
+      res.json(lead[0]);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get all pending leads (Admin)
+  app.get("/api/gamification/leads/pending", async (req, res) => {
+    try {
+      const pendingLeads = await db.select()
+        .from(hunterLeads)
+        .where(eq(hunterLeads.status, "pending"))
+        .orderBy(desc(hunterLeads.createdAt));
+      
+      res.json(pendingLeads);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Validate/Reject a lead (Admin)
+  app.patch("/api/gamification/leads/:id/validate", async (req, res) => {
+    try {
+      const leadId = parseInt(req.params.id);
+      const schema = z.object({ approved: z.boolean() });
+      const result = schema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid request body", details: result.error });
+      }
+      const { approved } = result.data;
+      
+      const lead = await db.select().from(hunterLeads)
+        .where(eq(hunterLeads.id, leadId))
+        .limit(1);
+      
+      if (!lead.length) {
+        return res.status(404).json({ error: "Lead not found" });
+      }
+      
+      if (approved) {
+        // Get finder's multiplier
+        const profile = await db.select().from(gamificationProfiles)
+          .where(eq(gamificationProfiles.userId, lead[0].finderId))
+          .limit(1);
+        
+        const multiplier = profile.length ? profile[0].roleMultiplier : 1.0;
+        let xpAwarded = XP_PER_LEAD * multiplier;
+        
+        // Night owl bonus - based on lead CREATION time, not validation time
+        const leadCreatedAt = lead[0].createdAt ? new Date(lead[0].createdAt) : new Date();
+        if (isNightOwlTime(leadCreatedAt)) {
+          xpAwarded += NIGHT_OWL_BONUS;
+        }
+        
+        // Update lead
+        await db.update(hunterLeads)
+          .set({
+            status: "approved",
+            xpAwarded: Math.floor(xpAwarded),
+            validatedAt: new Date()
+          })
+          .where(eq(hunterLeads.id, leadId));
+        
+        // Award XP
+        await awardXP(
+          lead[0].finderId, 
+          Math.floor(xpAwarded), 
+          "lead_approved", 
+          `Lead validé: @${lead[0].clientUsername} (${lead[0].platform})`
+        );
+        
+        res.json({ status: "approved", xpAwarded: Math.floor(xpAwarded) });
+      } else {
+        await db.update(hunterLeads)
+          .set({ status: "rejected", validatedAt: new Date() })
+          .where(eq(hunterLeads.id, leadId));
+        
+        res.json({ status: "rejected", xpAwarded: 0 });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user's leads
+  app.get("/api/gamification/leads/user/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const leads = await db.select()
+        .from(hunterLeads)
+        .where(eq(hunterLeads.finderId, userId))
+        .orderBy(desc(hunterLeads.createdAt));
+      
+      res.json(leads);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 }
