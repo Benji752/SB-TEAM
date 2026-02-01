@@ -2,7 +2,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star } from "lucide-react";
+import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface GamificationProfile {
   id: number;
@@ -42,10 +43,12 @@ function getDisplayName(profile: GamificationProfile) {
   return fallback || { name: `User ${profile.userId}`, avatar: "?" };
 }
 
-function getRoleLabel(role?: string | null) {
-  if (role === 'admin') return 'Admin';
-  if (role === 'staff') return 'Staff';
-  return 'Staff';
+function getRoleLabel(role?: string | null, multiplier?: number) {
+  if (role === 'admin') return { label: 'Admin', color: 'bg-gradient-to-r from-red-500/30 to-orange-500/30 text-orange-300 border-orange-400/40' };
+  if (role === 'staff') return { label: 'Staff', color: 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-300 border-purple-400/40' };
+  if (role === 'model') return { label: 'Model', color: 'bg-gradient-to-r from-pink-500/30 to-rose-500/30 text-pink-300 border-pink-400/40' };
+  if (multiplier && multiplier > 1) return { label: 'Staff', color: 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-300 border-purple-400/40' };
+  return { label: 'Member', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' };
 }
 
 const containerVariants = {
@@ -94,9 +97,85 @@ function XpProgressBar({ xp, level }: { xp: number; level: number }) {
   );
 }
 
-function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationProfile; rank: number; todayTime?: TodayTime }) {
+function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfile; rank: number; todayTime?: TodayTime }) {
   const displayInfo = getDisplayName(profile);
-  const roleLabel = getRoleLabel(profile.role);
+  const roleInfo = getRoleLabel(profile.role, profile.roleMultiplier);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 100 }}
+    >
+      <Card className="bg-gradient-to-br from-cyan-900/30 via-[#0A0A0A] to-blue-900/20 border-2 border-cyan-400/50 rounded-2xl p-6 relative overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
+        
+        <div className="flex items-center gap-2 mb-4">
+          <User size={18} className="text-cyan-400" />
+          <h3 className="text-cyan-400 font-black uppercase tracking-widest text-sm">Mon Score Actuel</h3>
+          <span className="ml-auto text-xs px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded-full border border-cyan-500/30">
+            Rang #{rank}
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-6 relative z-10">
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black shrink-0 bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_30px_rgba(34,211,238,0.5)] ring-4 ring-cyan-500/30`}>
+            {displayInfo.avatar}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="text-2xl font-black text-white tracking-tight">{displayInfo.name}</h3>
+              <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${roleInfo.color} border shadow-lg`}>
+                {roleInfo.label} {profile.roleMultiplier > 1 && (
+                  <span className="text-pink-400 ml-1">{profile.roleMultiplier}x</span>
+                )}
+              </span>
+            </div>
+            <XpProgressBar xp={profile.xpTotal} level={profile.level} />
+          </div>
+          
+          <div className="text-right shrink-0">
+            <motion.div 
+              key={profile.xpTotal}
+              initial={{ scale: 1.3, color: "#22d3ee" }}
+              animate={{ scale: 1, color: "#c9a24d" }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-gold to-amber-400 bg-clip-text text-transparent"
+            >
+              {profile.xpTotal.toLocaleString()}
+            </motion.div>
+            <div className="text-xs text-white/50 uppercase tracking-widest font-semibold">XP Total</div>
+          </div>
+        </div>
+        
+        <div className="flex gap-2 mt-5 flex-wrap">
+          {todayTime && todayTime.todayMinutes > 0 && (
+            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-cyan-400 rounded-full flex items-center gap-1.5 border border-cyan-500/30 font-medium">
+              <Timer size={12} /> Aujourd'hui: {todayTime.formatted}
+            </span>
+          )}
+          {profile.currentStreak > 0 && (
+            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-400 rounded-full flex items-center gap-1.5 border border-orange-500/30 font-medium">
+              <Flame size={12} className="text-orange-400" /> {profile.currentStreak} streak
+            </span>
+          )}
+          {profile.badges?.includes("night_owl") && (
+            <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400 rounded-full flex items-center gap-1.5 border border-purple-500/30 font-medium">
+              <Moon size={12} /> Night Owl
+            </span>
+          )}
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile: GamificationProfile; rank: number; todayTime?: TodayTime; isCurrentUser?: boolean }) {
+  const displayInfo = getDisplayName(profile);
+  const roleInfo = getRoleLabel(profile.role, profile.roleMultiplier);
   
   const getRankIcon = () => {
     switch (rank) {
@@ -108,6 +187,7 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
   };
 
   const getCardStyle = () => {
+    if (isCurrentUser) return "bg-gradient-to-br from-cyan-900/20 via-[#0A0A0A] to-blue-900/10 border-2 border-cyan-500/40 shadow-[0_0_30px_rgba(34,211,238,0.15)]";
     switch (rank) {
       case 1: return "bg-gradient-to-br from-yellow-900/30 via-[#0A0A0A] to-amber-900/20 border-2 border-yellow-500/60 shadow-[0_0_40px_rgba(234,179,8,0.3),inset_0_1px_0_rgba(255,255,255,0.1)]";
       case 2: return "bg-gradient-to-br from-gray-800/30 via-[#0A0A0A] to-gray-700/20 border-2 border-gray-400/40 shadow-[0_0_30px_rgba(156,163,175,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]";
@@ -117,6 +197,7 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
   };
 
   const getAvatarStyle = () => {
+    if (isCurrentUser) return "bg-gradient-to-br from-cyan-300 via-cyan-400 to-blue-600 text-black shadow-[0_0_20px_rgba(34,211,238,0.4)] ring-4 ring-cyan-500/30";
     switch (rank) {
       case 1: return "bg-gradient-to-br from-yellow-300 via-yellow-400 to-amber-600 text-black shadow-[0_0_30px_rgba(234,179,8,0.5)] ring-4 ring-yellow-500/30";
       case 2: return "bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500 text-black shadow-[0_0_20px_rgba(156,163,175,0.4)] ring-4 ring-gray-400/30";
@@ -152,24 +233,24 @@ function LeaderboardCard({ profile, rank, todayTime }: { profile: GamificationPr
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <h3 className="text-2xl font-black text-white tracking-tight">{displayInfo.name}</h3>
-              <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
-                profile.roleMultiplier > 1 
-                  ? "bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-300 border border-purple-400/40 shadow-[0_0_10px_rgba(168,85,247,0.3)]" 
-                  : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-              }`}>
-                {roleLabel} {profile.roleMultiplier > 1 && (
+              <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${roleInfo.color} border shadow-lg`}>
+                {roleInfo.label} {profile.roleMultiplier > 1 && (
                   <span className="text-pink-400 ml-1">{profile.roleMultiplier}x</span>
                 )}
               </span>
+              {isCurrentUser && (
+                <span className="text-xs px-2 py-1 bg-cyan-500/20 text-cyan-400 rounded-full border border-cyan-500/30">Vous</span>
+              )}
             </div>
             <XpProgressBar xp={profile.xpTotal} level={profile.level} />
           </div>
           
           <div className="text-right shrink-0">
             <motion.div 
+              key={profile.xpTotal}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
               className="text-4xl font-black bg-gradient-to-r from-gold via-yellow-300 to-amber-400 bg-clip-text text-transparent"
-              animate={{ textShadow: ["0 0 20px rgba(234,179,8,0.5)", "0 0 40px rgba(234,179,8,0.8)", "0 0 20px rgba(234,179,8,0.5)"] }}
-              transition={{ duration: 2, repeat: Infinity }}
             >
               {profile.xpTotal.toLocaleString()}
             </motion.div>
@@ -233,7 +314,7 @@ function ActivityFeed({ activities }: { activities: XpActivity[] }) {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-gold/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(234,179,8,0.1),inset_0_1px_0_rgba(255,255,255,0.05)]">
+    <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-gold/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(234,179,8,0.1),inset_0_1px_0_rgba(255,255,255,0.05)] relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
       
       <h3 className="text-white font-black uppercase tracking-widest text-sm mb-5 flex items-center gap-3">
@@ -339,12 +420,16 @@ function RulesCard() {
 }
 
 export default function Leaderboard() {
+  const { user } = useAuth();
+  
   const { data: leaderboard = [], isLoading: loadingLeaderboard } = useQuery<GamificationProfile[]>({
     queryKey: ["/api/gamification/leaderboard"],
+    refetchInterval: 5000,
   });
 
   const { data: activities = [] } = useQuery<XpActivity[]>({
     queryKey: ["/api/gamification/activity"],
+    refetchInterval: 5000,
   });
 
   const { data: todayTime1 } = useQuery<TodayTime>({
@@ -358,6 +443,10 @@ export default function Leaderboard() {
   const todayTimes: Record<number, TodayTime> = {};
   if (todayTime1) todayTimes[1] = todayTime1;
   if (todayTime2) todayTimes[2] = todayTime2;
+
+  const currentUserId = typeof user?.id === 'number' ? user.id : parseInt(user?.id as string) || null;
+  const myProfile = leaderboard.find(p => p.userId === currentUserId);
+  const myRank = myProfile ? leaderboard.findIndex(p => p.userId === currentUserId) + 1 : 0;
 
   return (
     <DashboardLayout>
@@ -383,12 +472,18 @@ export default function Leaderboard() {
                   SB HUNTER LEAGUE
                 </span>
                 <p className="text-white/40 text-sm font-medium mt-1 tracking-wide">
-                  Classement Staff - XP automatique via commandes
+                  Classement Global - XP automatique via commandes
                 </p>
               </div>
             </h1>
           </div>
         </motion.div>
+
+        {myProfile && (
+          <motion.div variants={itemVariants}>
+            <MyScoreCard profile={myProfile} rank={myRank} todayTime={todayTimes[myProfile.userId]} />
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <motion.div variants={itemVariants} className="lg:col-span-2 space-y-4">
@@ -419,6 +514,7 @@ export default function Leaderboard() {
                       profile={profile} 
                       rank={index + 1} 
                       todayTime={todayTimes[profile.userId]}
+                      isCurrentUser={profile.userId === currentUserId}
                     />
                   ))}
               </motion.div>

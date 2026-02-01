@@ -635,10 +635,10 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 
   // ========== GAMIFICATION ROUTES - SB HUNTER LEAGUE ==========
 
-  // Get leaderboard data - only staff/admin roles
+  // Get leaderboard data - all roles
   app.get("/api/gamification/leaderboard", async (req, res) => {
     try {
-      // Join with profiles to get role and filter to only admin/staff
+      // Join with profiles to get role - show everyone
       const leaderboard = await db.select({
         id: gamificationProfiles.id,
         userId: gamificationProfiles.userId,
@@ -652,9 +652,6 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       })
       .from(gamificationProfiles)
       .leftJoin(profiles, sql`${gamificationProfiles.userId}::text = ${profiles.id}`)
-      .where(
-        sql`${profiles.role} IN ('admin', 'staff') OR ${profiles.role} IS NULL`
-      )
       .orderBy(desc(gamificationProfiles.xpTotal));
       
       res.json(leaderboard);
