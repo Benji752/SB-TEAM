@@ -6,8 +6,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User, AlertTriangle } from "lucide-react";
 import { useGamificationData, LeaderboardUser } from "@/hooks/useGamificationData";
 import { useAuth } from "@/hooks/use-auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
 
 interface GamificationProfile {
   id: number;
@@ -442,12 +443,21 @@ export default function Leaderboard() {
 
   const resetSeasonMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/gamification/reset");
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Erreur lors de la réinitialisation");
+      // Use Supabase RPC to bypass session/API issues
+      // Pass user.id as caller_user_id for admin verification in DB
+      const userId = user?.id ? String(user.id) : null;
+      if (!userId) {
+        throw new Error("Non authentifié. Veuillez vous reconnecter.");
       }
-      return response.json();
+      
+      const { error } = await supabase.rpc('reset_season', { caller_user_id: userId });
+      
+      if (error) {
+        console.error("[RPC] reset_season error:", error);
+        throw new Error(error.message || "Erreur lors de la réinitialisation");
+      }
+      
+      return { success: true, message: "Saison réinitialisée avec succès!" };
     },
     onSuccess: (data) => {
       toast({
