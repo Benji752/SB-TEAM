@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 
-const HEARTBEAT_INTERVAL = 5 * 60 * 1000;
-const ACTIVITY_THRESHOLD = 30 * 1000;
+const HEARTBEAT_INTERVAL = 60 * 1000; // Every 60 seconds
+const ACTIVITY_THRESHOLD = 5 * 60 * 1000; // 5 minutes inactivity threshold
 
 export function HeartbeatTracker() {
   const { user } = useAuth();
@@ -54,16 +54,17 @@ export function HeartbeatTracker() {
       }
     };
 
-    // Send heartbeat immediately on connection (after small delay for session)
-    const initialTimeout = setTimeout(() => {
-      sendHeartbeat();
-    }, 500);
+    // Send heartbeat IMMEDIATELY on mount - no delay!
+    console.log('💓 Heartbeat immédiat envoyé pour userId:', userId);
+    sendHeartbeat();
 
-    // Then every 5 minutes
-    const interval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+    // Then every 60 seconds
+    const interval = setInterval(() => {
+      console.log('💓 Heartbeat périodique envoyé pour userId:', userId);
+      sendHeartbeat();
+    }, HEARTBEAT_INTERVAL);
 
     return () => {
-      clearTimeout(initialTimeout);
       clearInterval(interval);
     };
   }, [user?.id]);

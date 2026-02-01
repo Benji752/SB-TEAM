@@ -953,6 +953,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         return res.status(400).json({ error: "Invalid request body" });
       }
       const { userId } = result.data;
+      console.log(`✅ Ping reçu pour user ${userId}`);
       
       // Update lastActiveAt in gamification_profiles
       const updated = await db.update(gamificationProfiles)
@@ -1039,8 +1040,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         lastActiveAt: gamificationProfiles.lastActiveAt
       }).from(gamificationProfiles);
       
-      // SERVER-SIDE AUTHORITY: 5 minutes threshold, calculated here ONLY
-      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+      // SERVER-SIDE AUTHORITY: 15 minutes threshold for network tolerance
+      const ONLINE_THRESHOLD_MS = 15 * 60 * 1000; // 15 minutes
       const now = Date.now();
       
       const presenceMap = allProfiles.reduce((acc, profile) => {

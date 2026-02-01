@@ -12,6 +12,7 @@ export function useHeartbeat(userId: number | null | undefined) {
 
     const sendPing = async () => {
       try {
+        console.log('💓 Ping envoyé');
         await apiRequest('POST', '/api/user/ping', { userId });
         lastPingRef.current = Date.now();
         // Invalidate presence queries immediately for instant status update
