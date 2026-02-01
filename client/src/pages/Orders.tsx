@@ -69,7 +69,7 @@ export default function Orders() {
       clientName: "",
       serviceType: "Vidéo",
       amount: 0,
-      status: "paid",
+      status: "pending",
     },
   });
 
