@@ -3,10 +3,7 @@ import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Trophy, Crown, Medal, Zap, Moon, Target, Clock, TrendingUp, Timer, ShoppingCart, CheckCircle, Flame, Star, User } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
-// SERVER-SIDE AUTHORITY: isOnline comes directly from the API, no client calculation
-
-const ONLINE_THRESHOLD_SECONDS = 3600; // 1 hour tolerance for timezone issues
+import { useGamificationData, LeaderboardUser } from "@/hooks/useGamificationData";
 
 interface GamificationProfile {
   id: number;
@@ -18,8 +15,9 @@ interface GamificationProfile {
   badges: string[];
   role?: string | null;
   username?: string | null;
-  secondsSinceLastPing?: number | null;  // TIMEAGO approach
-  lastActiveAt?: string | null;
+  seconds_since_active?: number;
+  isOnline?: boolean;
+  isCurrentUser?: boolean;
 }
 
 interface XpActivity {
@@ -236,10 +234,10 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
               {displayInfo.avatar}
             </div>
             <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              isCurrentUser || (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS)
+              profile.isOnline
                 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
                 : 'bg-gray-500'
-            }`} title={isCurrentUser || (profile.secondsSinceLastPing !== null && profile.secondsSinceLastPing !== undefined && profile.secondsSinceLastPing < ONLINE_THRESHOLD_SECONDS) ? 'En ligne' : 'Hors ligne'} />
+            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -432,12 +430,7 @@ function RulesCard() {
 }
 
 export default function Leaderboard() {
-  const { user } = useAuth();
-  
-  const { data: leaderboard = [], isLoading: loadingLeaderboard } = useQuery<GamificationProfile[]>({
-    queryKey: ["/api/gamification/leaderboard"],
-    refetchInterval: 5000,
-  });
+  const { leaderboard, currentUser, currentUserId, isLoading: loadingLeaderboard } = useGamificationData();
 
   const { data: activities = [] } = useQuery<XpActivity[]>({
     queryKey: ["/api/gamification/activity"],
@@ -456,9 +449,32 @@ export default function Leaderboard() {
   if (todayTime1) todayTimes[1] = todayTime1;
   if (todayTime2) todayTimes[2] = todayTime2;
 
-  const currentUserId = typeof user?.id === 'number' ? user.id : parseInt(user?.id as string) || null;
-  const myProfile = leaderboard.find(p => p.userId === currentUserId);
-  const myRank = myProfile ? leaderboard.findIndex(p => p.userId === currentUserId) + 1 : 0;
+  const myProfile = currentUser ? {
+    id: currentUser.id,
+    userId: currentUser.user_id,
+    xpTotal: currentUser.xp,
+    level: currentUser.level,
+    currentStreak: currentUser.current_streak,
+    roleMultiplier: currentUser.role_multiplier,
+    badges: currentUser.badges || [],
+    username: currentUser.username,
+    isOnline: currentUser.isOnline,
+    isCurrentUser: true
+  } as GamificationProfile : null;
+  const myRank = currentUser ? leaderboard.findIndex(u => u.user_id === currentUser.user_id) + 1 : 0;
+  
+  const mappedLeaderboard: GamificationProfile[] = leaderboard.map(u => ({
+    id: u.id,
+    userId: u.user_id,
+    xpTotal: u.xp,
+    level: u.level,
+    currentStreak: u.current_streak,
+    roleMultiplier: u.role_multiplier,
+    badges: u.badges || [],
+    username: u.username,
+    isOnline: u.isOnline,
+    isCurrentUser: u.isCurrentUser
+  }));
 
   return (
     <DashboardLayout>
@@ -520,13 +536,13 @@ export default function Leaderboard() {
                 animate="visible"
                 className="space-y-5"
               >
-                {leaderboard.map((profile, index) => (
+                {mappedLeaderboard.map((profile, index) => (
                     <LeaderboardCard 
                       key={profile.id} 
                       profile={profile} 
                       rank={index + 1} 
                       todayTime={todayTimes[profile.userId]}
-                      isCurrentUser={profile.userId === currentUserId}
+                      isCurrentUser={profile.isCurrentUser}
                     />
                   ))}
               </motion.div>

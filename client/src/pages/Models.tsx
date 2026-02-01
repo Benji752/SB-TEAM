@@ -6,7 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Loader2, Calendar as CalendarIcon, Mail, X } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useAllUsersPresence } from "@/hooks/useUserPresence";
+import { useGamificationData } from "@/hooks/useGamificationData";
+
+function uuidToInt(uuid: string): number {
+  let hash = 0;
+  for (let i = 0; i < uuid.length; i++) {
+    const char = uuid.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
 
 interface Profile {
   id: string;
@@ -21,7 +31,7 @@ export default function TeamPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
-  const { getPresence } = useAllUsersPresence();
+  const { isUserOnline } = useGamificationData();
 
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -84,11 +94,11 @@ export default function TeamPage() {
                 </Avatar>
                 <div 
                   className={`absolute bottom-0 right-0 w-5 h-5 border-4 border-[#0A0A0A] rounded-full shadow-lg ${
-                    getPresence(profile.id).isOnline 
+                    isUserOnline(uuidToInt(profile.id)) 
                       ? 'bg-[#10B981]' 
                       : 'bg-gray-500'
                   }`}
-                  title={getPresence(profile.id).isOnline ? 'En ligne' : 'Hors ligne'}
+                  title={isUserOnline(uuidToInt(profile.id)) ? 'En ligne' : 'Hors ligne'}
                 />
               </div>
 
