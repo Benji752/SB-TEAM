@@ -67,9 +67,12 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LeadValidation } from "@/components/LeadValidation";
+import { useGamificationData } from "@/hooks/useGamificationData";
+import { Trophy, Crown } from "lucide-react";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { leaderboard } = useGamificationData();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [updateData, setUpdateData] = useState({ 
     hourlyRevenue: "", 
@@ -475,6 +478,39 @@ export default function Dashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          </div>
+        </MotionCard>
+
+        {/* Hunter League Mini Widget */}
+        <MotionCard 
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-gradient-to-r from-[#0A0A0A] to-[#1a1a2e] border border-purple-500/20 rounded-[2rem] p-6 hover:border-purple-500/40 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                <Crown className="w-6 h-6 text-black" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">SB Hunter League</p>
+                <h3 className="text-xl font-black text-white tracking-tight">
+                  {leaderboard[0]?.username || 'En attente...'}
+                </h3>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/30">#1 Leader</p>
+              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">
+                {leaderboard[0]?.xp || 0} XP
+              </p>
+            </div>
+            <Link href="/leaderboard">
+              <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10">
+                <Trophy className="w-5 h-5" />
+              </Button>
+            </Link>
           </div>
         </MotionCard>
 
