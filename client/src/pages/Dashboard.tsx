@@ -83,7 +83,7 @@ export default function Dashboard() {
     loadManualData();
     const interval = setInterval(() => {
       setImageTimestamp(Date.now());
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -120,6 +120,11 @@ export default function Dashboard() {
   const displayFavorites = manualData?.favorites || 0;
   const viewersCount = 0;
   const roomTitle = "WildgirlShow Live";
+
+  const username = "wildgirlshow";
+  const targetUrl = `https://img.stripchat.com/access/snapshots/${username}/${username}_snapshot.jpg`;
+  const proxyUrlBase = `https://images.weserv.nl/?url=${encodeURIComponent(targetUrl)}&maxage=0&output=jpg`;
+  const proxyUrl = `${proxyUrlBase}&t=${imageTimestamp}`;
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
     time: format(new Date(s.createdAt), "HH:mm"),
@@ -270,7 +275,7 @@ export default function Dashboard() {
             <div className="relative h-full flex flex-col md:flex-row">
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
                 <img 
-                  src={`https://wsrv.nl/?url=${encodeURIComponent(`https://img.stripchat.com/access/snapshots/wildgirlshow/wildgirlshow_snapshot.jpg`)}&t=${imageTimestamp}`}
+                  src={proxyUrl}
                   alt="Live Snapshot" 
                   className={cn(
                     "w-full h-full object-cover group-hover:scale-105 transition-transform duration-700",
