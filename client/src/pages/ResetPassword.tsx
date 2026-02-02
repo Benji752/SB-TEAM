@@ -63,7 +63,7 @@ export default function ResetPassword() {
       });
       
       setTimeout(() => {
-        window.location.href = "/landing";
+        window.location.href = "/";
       }, 3000);
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue.");
