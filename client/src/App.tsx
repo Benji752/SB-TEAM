@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "./lib/queryClient";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 function InactivityHandler() {
   const [user, setUser] = useState<any>(null);
@@ -276,6 +277,7 @@ export default function App() {
           </>
         )}
         <Toaster />
+        <SpeedInsights />
       </TooltipProvider>
     </QueryClientProvider>
   );
