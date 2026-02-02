@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2, Eye, EyeOff, Users, User } from "lucide-react";
+import { MessageSquare, Loader2, Eye, EyeOff, Users, User, ArrowLeft } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useGamificationData } from "@/hooks/useGamificationData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +35,7 @@ export default function Messages() {
   const [chatMode, setChatMode] = useState<'dm' | 'group'>('group');
   const [groupMessages, setGroupMessages] = useState<any[]>([]);
   const [isLoadingGroupMessages, setIsLoadingGroupMessages] = useState(false);
+  const [mobileView, setMobileView] = useState<'contacts' | 'chat'>('chat');
   const scrollRef = useRef<HTMLDivElement>(null);
   const groupScrollRef = useRef<HTMLDivElement>(null);
   
@@ -259,11 +260,11 @@ export default function Messages() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-12rem)] flex gap-6">
-        <Card className="w-96 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
-          <div className="p-6 border-b border-white/[0.05]">
+      <div className="h-[calc(100vh-8rem)] md:h-[calc(100vh-12rem)] flex flex-col md:flex-row gap-4 md:gap-6">
+        <Card className={`w-full md:w-96 flex flex-col glass-card border-none rounded-2xl md:rounded-3xl overflow-hidden bg-white/[0.02] ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-4 md:p-6 border-b border-white/[0.05]">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">Messages</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-white">Messages</h2>
               {isAdmin && chatMode === 'dm' && (
                 <Button
                   size="icon"
@@ -297,7 +298,7 @@ export default function Messages() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setChatMode('dm')}
+                onClick={() => { setChatMode('dm'); setMobileView('contacts'); }}
                 className={`flex-1 gap-2 ${chatMode === 'dm' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
               >
                 <User size={16} />
@@ -347,7 +348,7 @@ export default function Messages() {
               profiles.map((profile) => (
                 <div 
                   key={profile.id} 
-                  onClick={() => setSelectedUser(profile)}
+                  onClick={() => { setSelectedUser(profile); setMobileView('chat'); }}
                   className={`p-4 flex items-center gap-4 cursor-pointer transition-all rounded-2xl border border-transparent ${
                     selectedUser?.id === profile.id ? 'bg-gold/10 border-gold/20' : 'hover:bg-white/[0.03]'
                   }`}
@@ -390,17 +391,25 @@ export default function Messages() {
           )}
         </Card>
 
-        <Card className="flex-1 flex flex-col glass-card border-none rounded-3xl overflow-hidden bg-white/[0.02]">
+        <Card className={`flex-1 flex flex-col glass-card border-none rounded-2xl md:rounded-3xl overflow-hidden bg-white/[0.02] ${mobileView === 'contacts' ? 'hidden md:flex' : 'flex'}`}>
           {/* Mode Chat Groupe */}
           {chatMode === 'group' ? (
             <>
-              <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-gradient-to-r from-gold/10 to-transparent">
+              <div className="p-4 md:p-6 border-b border-white/[0.05] flex items-center gap-3 md:gap-4 bg-gradient-to-r from-gold/10 to-transparent">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileView('contacts')}
+                  className="md:hidden text-white/60"
+                >
+                  <ArrowLeft size={20} />
+                </Button>
                 <div className="h-10 w-10 bg-gold/20 rounded-full flex items-center justify-center border border-gold/30">
                   <Users size={20} className="text-gold" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white">Chat Équipe SB Digital</h3>
-                  <p className="text-xs text-muted-foreground">Tous les membres de l'équipe</p>
+                  <h3 className="font-bold text-white text-sm md:text-base">Chat Équipe SB Digital</h3>
+                  <p className="text-[10px] md:text-xs text-muted-foreground">Tous les membres</p>
                 </div>
               </div>
 
@@ -513,7 +522,15 @@ export default function Messages() {
             </>
           ) : selectedUser && !adminViewMode ? (
             <>
-              <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-white/[0.01]">
+              <div className="p-4 md:p-6 border-b border-white/[0.05] flex items-center gap-3 md:gap-4 bg-white/[0.01]">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileView('contacts')}
+                  className="md:hidden text-white/60"
+                >
+                  <ArrowLeft size={20} />
+                </Button>
                 <div className="relative z-0">
                   <Avatar className="h-10 w-10 border border-white/10 overflow-hidden">
                     <AvatarImage 
@@ -593,9 +610,17 @@ export default function Messages() {
                 <h3 className="text-xl font-bold text-white mb-2">
                   {adminViewMode ? "Sélectionnez deux utilisateurs" : "Sélectionnez une conversation"}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   {adminViewMode ? "Choisissez deux membres pour voir leur conversation." : "Choisissez un membre pour commencer à discuter."}
                 </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setMobileView('contacts')}
+                  className="md:hidden border-gold/30 text-gold"
+                >
+                  <Users size={16} className="mr-2" />
+                  Voir les contacts
+                </Button>
               </div>
             </div>
           )}

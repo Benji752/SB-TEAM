@@ -69,15 +69,15 @@ export default function ResourcesPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 space-y-8 bg-[#050505] min-h-screen">
-        <div className="flex items-center justify-between">
+      <div className="p-4 md:p-8 space-y-6 md:space-y-8 bg-[#050505] min-h-screen">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Ressources / Liens</h1>
-            <p className="text-white/60">Templates, liens de paiement et informations utiles.</p>
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white mb-1 md:mb-2">Ressources / Liens</h1>
+            <p className="text-white/60 text-sm md:text-base">Templates, liens de paiement et informations utiles.</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gold hover:bg-gold/90 text-black font-bold gap-2 px-6 h-11">
+              <Button className="bg-gold hover:bg-gold/90 text-black font-bold gap-2 px-4 md:px-6 h-11 w-full md:w-auto">
                 <Plus className="w-5 h-5" />
                 Ajouter une ressource
               </Button>

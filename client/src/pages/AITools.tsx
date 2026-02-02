@@ -247,17 +247,18 @@ export default function AITools() {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-120px)] flex gap-6">
+      <div className="h-[calc(100vh-8rem)] md:h-[calc(100vh-120px)] flex flex-col md:flex-row gap-4 md:gap-6">
         {/* Zone de Chat Principale */}
-        <div className="flex-1 flex flex-col bg-[#0A0A0A] rounded-[2rem] border border-white/[0.05] overflow-hidden">
+        <div className="flex-1 flex flex-col bg-[#0A0A0A] rounded-2xl md:rounded-[2rem] border border-white/[0.05] overflow-hidden min-h-0">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-white/[0.05] flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gold to-gold/60 flex items-center justify-center">
-              <Bot size={20} className="text-black" />
+          <div className="px-4 md:px-6 py-3 md:py-4 border-b border-white/[0.05] flex items-center gap-3">
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-gold to-gold/60 flex items-center justify-center shrink-0">
+              <Bot size={18} className="text-black md:hidden" />
+              <Bot size={20} className="text-black hidden md:block" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-white font-bold">NOVA</h2>
-              <p className="text-white/40 text-xs">Intelligence d'élite • Vision GPT-4o • Données temps réel</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-white font-bold text-sm md:text-base">NOVA</h2>
+              <p className="text-white/40 text-[10px] md:text-xs truncate">Intelligence • Vision GPT-4o</p>
             </div>
             <Button
               variant="ghost"
@@ -414,8 +415,8 @@ export default function AITools() {
           </div>
         </div>
 
-        {/* Sidebar Outils Rapides */}
-        <div className="w-80 shrink-0">
+        {/* Sidebar Outils Rapides - Hidden on mobile */}
+        <div className="hidden md:block w-80 shrink-0">
           <Card className="bg-[#0A0A0A] border-white/[0.05] rounded-[2rem] p-6 h-full">
             <div className="space-y-6">
               <div className="flex items-center gap-2">
