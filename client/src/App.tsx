@@ -204,7 +204,7 @@ export default function App() {
   }, [session?.user?.id]);
 
   const [location] = useLocation();
-  const isResetPasswordPage = location === "/reset-password";
+  const isResetPasswordPage = location === "/reset-password" || location.startsWith("/reset-password");
 
   if (loading) {
     return (
