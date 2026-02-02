@@ -81,24 +81,15 @@ async function initializeApp() {
 
 appReady = initializeApp();
 
-// Only start the server if not running on Vercel (serverless)
-const isVercel = process.env.VERCEL === "1" || process.env.VERCEL === "true";
-
-if (!isVercel) {
+// Si on n'est PAS sur Vercel (donc sur Replit ou en local), on lance le port
+if (process.env.NODE_ENV !== 'production') {
   (async () => {
     await appReady;
 
-    // Setup Vite in development, static serving in production
-    if (process.env.NODE_ENV === "production") {
-      serveStatic(app);
-    } else {
-      const { setupVite } = await import("./vite");
-      await setupVite(httpServer, app);
-    }
+    const { setupVite } = await import("./vite");
+    await setupVite(httpServer, app);
 
-    // ALWAYS serve the app on the port specified in the environment variable PORT
-    // Other ports are firewalled. Default to 5000 if not specified.
-    const port = parseInt(process.env.PORT || "5000", 10);
+    const port = 5000;
     httpServer.listen(
       {
         port,
@@ -106,12 +97,12 @@ if (!isVercel) {
         reusePort: true,
       },
       () => {
-        log(`serving on port ${port}`);
+        log(`Serveur démarré sur le port ${port}`);
       },
     );
   })();
 }
 
-// Export for Vercel serverless
+// Très important pour Vercel : on exporte l'application
 export { app, appReady };
 export default app;
