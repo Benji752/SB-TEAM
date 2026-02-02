@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -15,7 +16,9 @@ import {
   Users,
   Briefcase,
   Sparkles,
-  Trophy
+  Trophy,
+  Menu,
+  X
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -40,6 +43,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   console.log('Sidebar loaded');
   const [location] = useLocation();
   const { logout, user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async (e?: React.MouseEvent) => {
     if (e) {
@@ -129,10 +133,108 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   console.log('User Role:', user?.role);
 
   return (
-    <div className="flex min-h-screen bg-[#050505]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#050505]">
       <HeartbeatTracker />
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-white/[0.08] flex flex-col fixed inset-y-0 bg-[#050505] z-50">
+      
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#050505] border-b border-white/[0.08] z-50 flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
+            <span className="text-black font-black text-xl italic">S</span>
+          </div>
+          <span className="text-lg font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          data-testid="button-mobile-menu"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </Button>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="md:hidden fixed inset-0 bg-black/80 z-40"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="md:hidden fixed top-16 left-0 bottom-0 w-72 bg-[#050505] border-r border-white/[0.08] z-50 overflow-y-auto"
+            >
+              <nav className="p-4 space-y-1">
+                {menuItems.map((item) => (
+                  <Link key={item.href} href={item.href}>
+                    <div 
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-testid={`mobile-${item.testId}`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
+                      location === item.href 
+                        ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                        : "text-white/40 hover:text-white hover:bg-white/[0.03]"
+                    }`}>
+                      <item.icon size={20} className={location === item.href ? "text-black" : "group-hover:text-gold"} />
+                      <span className="text-sm font-bold uppercase tracking-widest">{item.label}</span>
+                    </div>
+                  </Link>
+                ))}
+                
+                {isAdmin && (
+                  <Link href="/logs">
+                    <div 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
+                      location === "/logs" 
+                        ? "bg-gold text-black" 
+                        : "text-white/40 hover:text-white hover:bg-white/[0.03]"
+                    }`}>
+                      <Clock size={20} className={location === "/logs" ? "text-black" : "group-hover:text-gold"} />
+                      <span className="text-sm font-bold uppercase tracking-widest">Logs</span>
+                    </div>
+                  </Link>
+                )}
+              </nav>
+              
+              <div className="p-4 border-t border-white/[0.08] mt-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <Avatar className="h-10 w-10 border border-white/10">
+                    <AvatarImage src={user?.avatarUrl || user?.avatar_url} />
+                    <AvatarFallback className="bg-[#0A0A0A] text-gold uppercase">
+                      {user?.username?.substring(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <span className="text-sm font-bold text-white block">{user?.username}</span>
+                    <span className="text-[10px] text-gold font-black uppercase tracking-widest">{user?.role}</span>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start gap-3 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                  onClick={(e) => { handleLogout(e); setMobileMenuOpen(false); }}
+                >
+                  <LogOut size={18} />
+                  Déconnexion
+                </Button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 border-r border-white/[0.08] flex-col fixed inset-y-0 bg-[#050505] z-50">
         <div className="p-8">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
@@ -234,8 +336,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 min-h-screen">
-        <div className="max-w-[1600px] mx-auto p-10">
+      <main className="flex-1 ml-0 md:ml-64 min-h-screen pt-16 md:pt-0">
+        <div className="max-w-[1600px] mx-auto p-4 md:p-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={location}

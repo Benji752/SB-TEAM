@@ -219,10 +219,10 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-10 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-2">SB <span className="text-gold">Dashboard</span></h1>
-            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-xs">Monitoring Stripchat : WildgirlShow</p>
+            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic mb-2">SB <span className="text-gold">Dashboard</span></h1>
+            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">Monitoring Stripchat : WildgirlShow</p>
           </div>
           <div className="flex gap-4">
             <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {

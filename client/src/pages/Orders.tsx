@@ -135,19 +135,19 @@ export default function Orders() {
   return (
     <DashboardLayout>
       <div className="space-y-8 py-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic mb-2">
+            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic mb-2">
               Gestion des <span className="text-gold">Commandes</span>
             </h1>
-            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-xs">
+            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">
               Suivi du chiffre d'affaires et des prestations
             </p>
           </div>
 
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
+              <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-4 md:px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)] w-full md:w-auto">
                 <Plus size={16} /> Nouvelle Commande
               </Button>
             </DialogTrigger>
@@ -246,6 +246,7 @@ export default function Orders() {
         </div>
 
         <Card className="bg-[#0A0A0A] border-white/[0.05] rounded-[2rem] overflow-hidden">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-white/[0.02]">
               <TableRow className="border-white/[0.05] hover:bg-transparent">
@@ -324,6 +325,7 @@ export default function Orders() {
               )}
             </TableBody>
           </Table>
+          </div>
         </Card>
       </div>
     </DashboardLayout>

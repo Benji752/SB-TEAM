@@ -120,22 +120,22 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 100 }}
     >
-      <Card className="bg-gradient-to-br from-cyan-900/30 via-[#0A0A0A] to-blue-900/20 border-2 border-cyan-400/50 rounded-2xl p-6 relative overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
+      <Card className="bg-gradient-to-br from-cyan-900/30 via-[#0A0A0A] to-blue-900/20 border-2 border-cyan-400/50 rounded-2xl p-4 md:p-6 relative overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
         
         <div className="flex items-center gap-2 mb-4">
           <User size={18} className="text-cyan-400" />
-          <h3 className="text-cyan-400 font-black uppercase tracking-widest text-sm">Mon Score Actuel</h3>
+          <h3 className="text-cyan-400 font-black uppercase tracking-widest text-xs md:text-sm">Mon Score Actuel</h3>
           <span className="ml-auto text-xs px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded-full border border-cyan-500/30">
             Rang #{rank}
           </span>
         </div>
         
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="relative shrink-0">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black ${
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 relative z-10">
+          <div className="relative shrink-0 self-center md:self-auto">
+            <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-2xl md:text-3xl font-black ${
               profile.level >= 50 
                 ? "bg-gradient-to-br from-sky-300 via-blue-400 to-indigo-600 text-white shadow-[0_0_40px_rgba(56,189,248,0.7)] ring-4 ring-sky-400/60 animate-pulse"
                 : profile.level >= 10
@@ -144,13 +144,13 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
             }`}>
               {displayInfo.avatar}
             </div>
-            <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" title="En ligne" />
+            <div className="absolute bottom-1 right-1 w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-black bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" title="En ligne" />
           </div>
           
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="text-2xl font-black text-white tracking-tight">{displayInfo.name}</h3>
-              <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${roleInfo.color} border shadow-lg`}>
+          <div className="flex-1 min-w-0 w-full md:w-auto">
+            <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center md:justify-start">
+              <h3 className="text-xl md:text-2xl font-black text-white tracking-tight">{displayInfo.name}</h3>
+              <span className={`text-xs px-2 md:px-3 py-1 rounded-full font-bold uppercase tracking-wider ${roleInfo.color} border shadow-lg`}>
                 {roleInfo.label} {profile.roleMultiplier > 1 && (
                   <span className="text-pink-400 ml-1">{profile.roleMultiplier}x</span>
                 )}
@@ -159,13 +159,13 @@ function MyScoreCard({ profile, rank, todayTime }: { profile: GamificationProfil
             <XpProgressBar xp={profile.xpTotal} level={profile.level} />
           </div>
           
-          <div className="text-right shrink-0">
+          <div className="text-center md:text-right shrink-0 w-full md:w-auto">
             <motion.div 
               key={profile.xpTotal}
               initial={{ scale: 1.3, color: "#22d3ee" }}
               animate={{ scale: 1, color: "#c9a24d" }}
               transition={{ duration: 0.5 }}
-              className="text-4xl font-black bg-gradient-to-r from-cyan-400 via-gold to-amber-400 bg-clip-text text-transparent"
+              className="text-3xl md:text-4xl font-black bg-gradient-to-r from-cyan-400 via-gold to-amber-400 bg-clip-text text-transparent"
             >
               {profile.xpTotal.toLocaleString()}
             </motion.div>
@@ -247,7 +247,7 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ type: "spring", stiffness: 300 }}
     >
-      <Card className={`${getCardStyle()} rounded-2xl p-6 relative overflow-hidden`}>
+      <Card className={`${getCardStyle()} rounded-2xl p-4 md:p-6 relative overflow-hidden`}>
         {rank === 1 && (
           <>
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
@@ -256,23 +256,30 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
           </>
         )}
         
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="w-14 flex justify-center shrink-0">
-            {getRankIcon()}
-          </div>
-          
-          <div className="relative shrink-0">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black ${getAvatarStyle()}`}>
-              {displayInfo.avatar}
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 relative z-10">
+          <div className="flex items-center gap-3 md:gap-6 w-full md:w-auto">
+            <div className="w-10 md:w-14 flex justify-center shrink-0">
+              {getRankIcon()}
             </div>
-            <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-2 border-black ${
-              profile.isOnline
-                ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
-                : 'bg-gray-500'
-            }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
+            
+            <div className="relative shrink-0">
+              <div className={`w-14 h-14 md:w-20 md:h-20 rounded-full flex items-center justify-center text-xl md:text-3xl font-black ${getAvatarStyle()}`}>
+                {displayInfo.avatar}
+              </div>
+              <div className={`absolute bottom-0 right-0 md:bottom-1 md:right-1 w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-black ${
+                profile.isOnline
+                  ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' 
+                  : 'bg-gray-500'
+              }`} title={profile.isOnline ? 'En ligne' : 'Hors ligne'} />
+            </div>
+            
+            <div className="flex-1 min-w-0 md:hidden">
+              <h3 className="text-lg font-black text-white tracking-tight truncate">{displayInfo.name}</h3>
+              <div className="text-xl font-black text-gold">{profile.xpTotal.toLocaleString()} XP</div>
+            </div>
           </div>
           
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 hidden md:block">
             <div className="flex items-center gap-3 flex-wrap">
               <h3 className="text-2xl font-black text-white tracking-tight">{displayInfo.name}</h3>
               <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider ${roleInfo.color} border shadow-lg`}>
@@ -287,7 +294,7 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
             <XpProgressBar xp={profile.xpTotal} level={profile.level} />
           </div>
           
-          <div className="text-right shrink-0">
+          <div className="text-right shrink-0 hidden md:block">
             <motion.div 
               key={profile.xpTotal}
               initial={{ scale: 1.2 }}
@@ -300,7 +307,7 @@ function LeaderboardCard({ profile, rank, todayTime, isCurrentUser }: { profile:
           </div>
         </div>
         
-        <div className="flex gap-2 mt-5 ml-20 flex-wrap">
+        <div className="flex gap-2 mt-3 md:mt-5 md:ml-20 flex-wrap">
           {todayTime && todayTime.todayMinutes > 0 && (
             <motion.span 
               initial={{ scale: 0 }}
@@ -712,15 +719,15 @@ export default function Leaderboard() {
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 3, repeat: Infinity }}
             />
-            <h1 className="text-4xl font-black text-white flex items-center gap-4 relative">
-              <div className="p-3 bg-gradient-to-br from-gold/30 to-amber-600/20 rounded-xl border border-gold/30 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                <Trophy className="text-gold" size={36} />
+            <h1 className="text-2xl md:text-4xl font-black text-white flex items-center gap-3 md:gap-4 relative">
+              <div className="p-2 md:p-3 bg-gradient-to-br from-gold/30 to-amber-600/20 rounded-xl border border-gold/30 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                <Trophy className="text-gold w-6 h-6 md:w-9 md:h-9" />
               </div>
               <div>
                 <span className="bg-gradient-to-r from-gold via-yellow-300 to-amber-400 bg-clip-text text-transparent">
                   SB HUNTER LEAGUE
                 </span>
-                <p className="text-white/40 text-sm font-medium mt-1 tracking-wide">
+                <p className="text-white/40 text-xs md:text-sm font-medium mt-1 tracking-wide">
                   Classement Global - XP automatique via commandes
                 </p>
               </div>
