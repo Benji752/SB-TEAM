@@ -7,17 +7,27 @@ export function useTickets() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: tickets, isLoading } = useQuery({
+  const { data: tickets = [], isLoading } = useQuery({
     queryKey: ["tickets"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('tickets')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.warn("[useTickets] Supabase error:", error.message);
+          return [];
+        }
+        return data || [];
+      } catch (error) {
+        console.error("[useTickets] Error:", error);
+        return [];
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

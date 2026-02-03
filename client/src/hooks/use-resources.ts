@@ -5,17 +5,27 @@ import { supabase } from "@/lib/supabaseClient";
 export function useResources() {
   const queryClient = useQueryClient();
 
-  const { data: resources, isLoading } = useQuery({
+  const { data: resources = [], isLoading } = useQuery({
     queryKey: ["resources"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('resources')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('resources')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.warn("[useResources] Supabase error:", error.message);
+          return [];
+        }
+        return data || [];
+      } catch (error) {
+        console.error("[useResources] Error:", error);
+        return [];
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

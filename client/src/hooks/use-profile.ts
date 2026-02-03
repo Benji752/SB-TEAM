@@ -6,12 +6,22 @@ export function useProfile() {
   return useQuery({
     queryKey: [api.profiles.me.path],
     queryFn: async () => {
-      const res = await fetch(api.profiles.me.path, { credentials: "include" });
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error("Failed to fetch profile");
-      return api.profiles.me.responses[200].parse(await res.json());
+      try {
+        const res = await fetch(api.profiles.me.path, { credentials: "include" });
+        if (res.status === 404 || res.status === 204) return null;
+        if (!res.ok) {
+          console.warn(`[useProfile] Fallback: status ${res.status}`);
+          return null;
+        }
+        const data = await res.json();
+        return data || null;
+      } catch (error) {
+        console.error("[useProfile] Error:", error);
+        return null;
+      }
     },
     retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 

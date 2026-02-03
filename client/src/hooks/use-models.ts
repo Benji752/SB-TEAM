@@ -5,14 +5,24 @@ export function useModels() {
   return useQuery({
     queryKey: ["supabase-models"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'model')
-        .order('username', { ascending: true });
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'model')
+          .order('username', { ascending: true });
+        
+        if (error) {
+          console.warn("[useModels] Supabase error:", error.message);
+          return [];
+        }
+        return data || [];
+      } catch (error) {
+        console.error("[useModels] Error:", error);
+        return [];
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }

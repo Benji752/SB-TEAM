@@ -34,6 +34,7 @@ export type InsertAuthLog = z.infer<typeof insertAuthLogSchema>;
 
 export const insertProfileSchema = createInsertSchema(profiles);
 export type Profile = typeof profiles.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type User = typeof users.$inferSelect;
 
 // Models (The Talent)

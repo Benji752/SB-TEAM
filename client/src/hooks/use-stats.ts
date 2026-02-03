@@ -5,9 +5,20 @@ export function useStats() {
   return useQuery({
     queryKey: [api.stats.get.path],
     queryFn: async () => {
-      const res = await fetch(api.stats.get.path, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch stats");
-      return api.stats.get.responses[200].parse(await res.json());
+      try {
+        const res = await fetch(api.stats.get.path, { credentials: "include" });
+        if (!res.ok || res.status === 204) {
+          console.warn(`[useStats] Fallback: status ${res.status}`);
+          return [];
+        }
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error("[useStats] Error:", error);
+        return [];
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }

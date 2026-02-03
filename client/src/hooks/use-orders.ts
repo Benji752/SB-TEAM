@@ -5,17 +5,27 @@ import { useEffect } from "react";
 export function useOrders() {
   const queryClient = useQueryClient();
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders = [], isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('client_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('client_requests')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.warn("[useOrders] Supabase error:", error.message);
+          return [];
+        }
+        return data || [];
+      } catch (error) {
+        console.error("[useOrders] Error:", error);
+        return [];
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

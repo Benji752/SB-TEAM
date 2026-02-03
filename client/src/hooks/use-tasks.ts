@@ -5,17 +5,27 @@ import { supabase } from "@/lib/supabaseClient";
 export function useTasks() {
   const queryClient = useQueryClient();
 
-  const { data: tasks, isLoading } = useQuery({
+  const { data: tasks = [], isLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.warn("[useTasks] Supabase error:", error.message);
+          return [];
+        }
+        return data || [];
+      } catch (error) {
+        console.error("[useTasks] Error:", error);
+        return [];
+      }
     },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

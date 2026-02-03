@@ -3,8 +3,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useRef, useState } from "react";
 
-const ONLINE_THRESHOLD_SECONDS = 900; // 15 minutes - matches 10-minute heartbeat + buffer
-const HEARTBEAT_INTERVAL = 10 * 60 * 1000; // Every 10 minutes for +10 XP presence
+const ONLINE_THRESHOLD_SECONDS = 900;
+const HEARTBEAT_INTERVAL = 10 * 60 * 1000;
 const ACTIVITY_THRESHOLD = 5 * 60 * 1000;
 
 function uuidToInt(uuid: string): number {
@@ -54,6 +54,20 @@ export function useGamificationData() {
 
   const { data: leaderboard = [], isLoading, error, refetch } = useQuery<LeaderboardUser[]>({
     queryKey: ["/api/gamification/leaderboard-view"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/gamification/leaderboard-view", { credentials: "include" });
+        if (!res.ok || res.status === 204) {
+          console.warn(`[useGamificationData] Fallback: status ${res.status}`);
+          return [];
+        }
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error("[useGamificationData] Error:", error);
+        return [];
+      }
+    },
     select: (data: any[]) => {
       return data.map((u) => ({
         ...u,
@@ -62,15 +76,22 @@ export function useGamificationData() {
       }));
     },
     refetchInterval: 30000,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   const pingMutation = useMutation({
     mutationFn: async () => {
       if (!currentUserId) return;
-      return apiRequest("POST", "/api/gamification/ping", { 
-        userId: currentUserId,
-        username: currentUsername
-      });
+      try {
+        return apiRequest("POST", "/api/gamification/ping", { 
+          userId: currentUserId,
+          username: currentUsername
+        });
+      } catch (error) {
+        console.warn("[useGamificationData] Ping failed:", error);
+        return null;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gamification/leaderboard-view"] });
