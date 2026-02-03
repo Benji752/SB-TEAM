@@ -6,6 +6,11 @@ import { createServer } from "http";
 const app = express();
 const httpServer = createServer(app);
 
+// Log MOCK_AUTH status at startup
+if (process.env.MOCK_AUTH === 'true' || process.env.NODE_ENV === 'production') {
+  console.log("🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin");
+}
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;

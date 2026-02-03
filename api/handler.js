@@ -27431,8 +27431,8 @@ async function registerRoutes(_httpServer, app2) {
   });
   app2.post("/api/orders", async (req, res) => {
     try {
-      const sessionUserId = req.session?.userId;
-      const rawCreatorId = sessionUserId || req.body.createdBy;
+      const currentUser = getCurrentUser(req);
+      const rawCreatorId = currentUser?.id || req.body.createdBy;
       const creatorId = rawCreatorId ? typeof rawCreatorId === "number" ? rawCreatorId : parseInt(String(rawCreatorId), 10) : null;
       const orderData = { ...req.body, createdBy: creatorId || null };
       const order = await storage.createOrder(orderData);
@@ -27922,8 +27922,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         const userProfile = await db.select().from(profiles).where(eq2(profiles.id, userId)).limit(1);
         let userRole = userProfile.length ? userProfile[0].role?.toLowerCase() : null;
         if (!userRole) {
-          const session2 = req.session;
-          userRole = session2?.user?.role?.toLowerCase();
+          const currentUser = getCurrentUser(req);
+          userRole = currentUser?.role?.toLowerCase();
         }
         const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
         const newProfile = await db.insert(gamificationProfiles).values({
@@ -28062,8 +28062,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const { userId, username } = result.data;
       let profile = await db.select().from(gamificationProfiles).where(eq2(gamificationProfiles.userId, userId)).limit(1);
       if (!profile.length) {
-        const session2 = req.session;
-        const userRole = session2?.user?.role?.toLowerCase() || "staff";
+        const currentUser = getCurrentUser(req);
+        const userRole = currentUser?.role?.toLowerCase() || "staff";
         const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
         const newProfile = await db.insert(gamificationProfiles).values({
           userId,
@@ -28138,8 +28138,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       console.log(`\u2705 Ping re\xE7u pour user ${userId}`);
       const updated = await db.update(gamificationProfiles).set({ lastActiveAt: /* @__PURE__ */ new Date() }).where(eq2(gamificationProfiles.userId, userId)).returning();
       if (!updated.length) {
-        const session2 = req.session;
-        const userRole = session2?.user?.role?.toLowerCase() || "staff";
+        const currentUser = getCurrentUser(req);
+        const userRole = currentUser?.role?.toLowerCase() || "staff";
         const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
         await db.insert(gamificationProfiles).values({
           userId,
@@ -28323,28 +28323,25 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   });
   app2.post("/api/gamification/reset", async (req, res) => {
     try {
-      const session2 = req.session;
-      const sessionUser = session2?.user;
-      let userId = null;
-      if (sessionUser?.id) {
-        userId = String(sessionUser.id);
-      }
-      if (!userId && req.user?.id) {
-        userId = String(req.user.id);
-      }
-      console.log(`[ADMIN] Reset attempt - userId: ${userId}, sessionUser:`, sessionUser);
+      const currentUser = getCurrentUser(req);
+      const userId = currentUser?.id ? String(currentUser.id) : null;
+      const userRole = currentUser?.role?.toLowerCase() || null;
+      console.log(`[ADMIN] Reset attempt - userId: ${userId}, role: ${userRole}, mockAuth: ${isMockAuthEnabled()}`);
       if (!userId) {
         return res.status(401).json({ error: "Non authentifi\xE9. Veuillez vous reconnecter." });
       }
-      const profileResult = await db.execute(sql`
-        SELECT role FROM profiles WHERE id = ${userId}
-      `);
-      const userRole = profileResult.rows?.[0]?.role?.toLowerCase() || null;
-      console.log(`[ADMIN] DB role check - userId: ${userId}, dbRole: ${userRole}`);
-      if (userRole !== "admin") {
+      let finalRole = userRole;
+      if (!isMockAuthEnabled()) {
+        const profileResult = await db.execute(sql`
+          SELECT role FROM profiles WHERE id = ${userId}
+        `);
+        finalRole = profileResult.rows?.[0]?.role?.toLowerCase() || null;
+      }
+      console.log(`[ADMIN] DB role check - userId: ${userId}, dbRole: ${finalRole}`);
+      if (finalRole !== "admin") {
         return res.status(403).json({
           error: "Acc\xE8s refus\xE9. Seuls les administrateurs peuvent r\xE9initialiser la saison.",
-          debug: { userId, userRole }
+          debug: { userId, finalRole }
         });
       }
       const cleanupResult = await db.execute(sql`
@@ -28407,6 +28404,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
 import { createServer } from "http";
 var app = express();
 var httpServer = createServer(app);
+if (process.env.MOCK_AUTH === "true" || true) {
+  console.log("\u{1F510} MOCK_AUTH ENABLED \u2014 tenant sb-tenant injected, admin user: Benjamin");
+}
 app.use(
   express.json({
     verify: (req, _res, buf) => {

@@ -172,9 +172,9 @@ export async function registerRoutes(_httpServer: any, app: Express) {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      // Get creator from session (more reliable than trusting req.body)
-      const sessionUserId = (req.session as any)?.userId;
-      const rawCreatorId = sessionUserId || req.body.createdBy;
+      // Get creator from current user (MOCK_AUTH compatible)
+      const currentUser = getCurrentUser(req);
+      const rawCreatorId = currentUser?.id || req.body.createdBy;
       const creatorId = rawCreatorId ? (typeof rawCreatorId === 'number' ? rawCreatorId : parseInt(String(rawCreatorId), 10)) : null;
       
       // Create order with createdBy from session if available
@@ -861,10 +861,10 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         
         let userRole = userProfile.length ? userProfile[0].role?.toLowerCase() : null;
         
-        // Fallback to session role if no profile found
+        // Fallback to session role or mock user role if no profile found
         if (!userRole) {
-          const session = req.session as any;
-          userRole = session?.user?.role?.toLowerCase();
+          const currentUser = getCurrentUser(req);
+          userRole = currentUser?.role?.toLowerCase();
         }
         
         // Staff/Admin get 2.0x multiplier, Models get 1.0x
@@ -1057,9 +1057,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         .limit(1);
       
       if (!profile.length) {
-        // Get role from session (profiles table uses text IDs)
-        const session = req.session as any;
-        const userRole = session?.user?.role?.toLowerCase() || 'staff';
+        // Get role from current user (MOCK_AUTH compatible)
+        const currentUser = getCurrentUser(req);
+        const userRole = currentUser?.role?.toLowerCase() || 'staff';
         
         const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
         
@@ -1169,8 +1169,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       
       if (!updated.length) {
         // Create profile if doesn't exist
-        const session = req.session as any;
-        const userRole = session?.user?.role?.toLowerCase() || 'staff';
+        const currentUser = getCurrentUser(req);
+        const userRole = currentUser?.role?.toLowerCase() || 'staff';
         const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
         
         await db.insert(gamificationProfiles).values({
@@ -1433,41 +1433,34 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   // ADMIN ONLY: Reset Season - Clear all XP and reset levels
   app.post("/api/gamification/reset", async (req, res) => {
     try {
-      const session = req.session as any;
-      const sessionUser = session?.user;
+      // MOCK_AUTH: Get user from helper (bypasses DB lookup)
+      const currentUser = getCurrentUser(req);
+      const userId = currentUser?.id ? String(currentUser.id) : null;
+      const userRole = currentUser?.role?.toLowerCase() || null;
       
-      // Get userId from session (demo login stores id in session.user.id)
-      let userId: string | null = null;
-      
-      // Method 1: From demo session
-      if (sessionUser?.id) {
-        userId = String(sessionUser.id);
-      }
-      
-      // Method 2: From req.user (Replit Auth)
-      if (!userId && (req as any).user?.id) {
-        userId = String((req as any).user.id);
-      }
-      
-      console.log(`[ADMIN] Reset attempt - userId: ${userId}, sessionUser:`, sessionUser);
+      console.log(`[ADMIN] Reset attempt - userId: ${userId}, role: ${userRole}, mockAuth: ${isMockAuthEnabled()}`);
       
       if (!userId) {
         return res.status(401).json({ error: "Non authentifié. Veuillez vous reconnecter." });
       }
       
-      // MANDATORY DB CHECK: Query profiles table directly for role verification
-      const profileResult = await db.execute(sql`
-        SELECT role FROM profiles WHERE id = ${userId}
-      `);
+      // In MOCK_AUTH mode, skip DB role check (trust the mock user)
+      let finalRole = userRole;
+      if (!isMockAuthEnabled()) {
+        // MANDATORY DB CHECK: Query profiles table directly for role verification
+        const profileResult = await db.execute(sql`
+          SELECT role FROM profiles WHERE id = ${userId}
+        `);
+        finalRole = (profileResult.rows?.[0] as any)?.role?.toLowerCase() || null;
+      }
       
-      const userRole = (profileResult.rows?.[0] as any)?.role?.toLowerCase() || null;
-      console.log(`[ADMIN] DB role check - userId: ${userId}, dbRole: ${userRole}`);
+      console.log(`[ADMIN] DB role check - userId: ${userId}, dbRole: ${finalRole}`);
       
       // Security check: Only admin can reset
-      if (userRole !== 'admin') {
+      if (finalRole !== 'admin') {
         return res.status(403).json({ 
           error: "Accès refusé. Seuls les administrateurs peuvent réinitialiser la saison.",
-          debug: { userId, userRole }
+          debug: { userId, finalRole }
         });
       }
       
