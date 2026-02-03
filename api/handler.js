@@ -16473,6 +16473,8 @@ function setupAuth(app2) {
       if (!req.session.user) {
         req.session.user = MOCK_ADMIN_USER;
       }
+      req.user = req.session.user || MOCK_ADMIN_USER;
+      req.isAuthenticated = () => true;
       next();
     });
   }

@@ -1,4 +1,4 @@
-import { Express } from "express";
+import { Express, Request } from "express";
 import session from "express-session";
 
 const MOCK_ADMIN_USER = {
@@ -8,6 +8,7 @@ const MOCK_ADMIN_USER = {
   firstName: "Benjamin",
   lastName: "Admin"
 };
+
 
 export function setupAuth(app: Express) {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -21,12 +22,20 @@ export function setupAuth(app: Express) {
     })
   );
 
-  // En production (Vercel), injecter automatiquement le mock user
+  // En production (Vercel), injecter automatiquement le mock user et simuler Passport
   if (isProduction) {
-    app.use((req, _res, next) => {
+    app.use((req: Request, _res, next) => {
+      // Injecter le mock user dans la session
       if (!(req.session as any).user) {
         (req.session as any).user = MOCK_ADMIN_USER;
       }
+      
+      // Simuler req.user (utilisé par Passport)
+      req.user = (req.session as any).user || MOCK_ADMIN_USER;
+      
+      // Simuler req.isAuthenticated() (utilisé par Passport)
+      req.isAuthenticated = () => true;
+      
       next();
     });
   }
