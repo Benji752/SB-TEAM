@@ -1,0 +1,378 @@
+j'ai ça: 
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: undefined
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: undefined
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: undefined
+rasqphyhnbkfdtubtnxk.supabase.co/rest/v1/agency_stats?select=*&order=month.asc:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: undefined
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 💓 Heartbeat immédiat envoyé pour userId: 1
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/model-stats/latest:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:164 Failed to load manual data Error: 500: {"error":"Tenant or user not found"}
+    at C3 (index-Bw9a2zrC.js:8:96589)
+    at async Vi (index-Bw9a2zrC.js:8:96790)
+    at async _ (index-Bw9a2zrC.js:164:14273)
+_ @ index-Bw9a2zrC.js:164Understand this error
+api/gamification/leaderboard-view:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/model-stats:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/orders:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/gamification/heartbeat:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 💓 Heartbeat failed silently
+api/gamification/ping:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/gamification/leads/pending:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 💓 Heartbeat immédiat envoyé pour userId: 1
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/gamification/ping:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+api/gamification/heartbeat:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 💓 Heartbeat failed silently
+api/gamification/today-time/1:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+api/gamification/today-time/2:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+activity:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+api/gamification/leaderboard-view:1  Failed to load resource: the server responded with a status of 500 ()Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
+(anonymous) @ index-Bw9a2zrC.js:8
+i @ index-Bw9a2zrC.js:8
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8Understand this error
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
+(anonymous) @ index-Bw9a2zrC.js:8
+i @ index-Bw9a2zrC.js:8
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8Understand this error
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
+(anonymous) @ index-Bw9a2zrC.js:8
+i @ index-Bw9a2zrC.js:8
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8Understand this error
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
+(anonymous) @ index-Bw9a2zrC.js:8
+i @ index-Bw9a2zrC.js:8
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8Understand this error
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
+(anonymous) @ index-Bw9a2zrC.js:8
+i @ index-Bw9a2zrC.js:8
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8Understand this error
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:119 Sidebar loaded
+index-Bw9a2zrC.js:119 User Role: admin
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
+(anonymous) @ index-Bw9a2zrC.js:8
+i @ index-Bw9a2zrC.js:8
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+setInterval
+#y @ index-Bw9a2zrC.js:8
+#b @ index-Bw9a2zrC.js:8
+onQueryUpdate @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+batch @ index-Bw9a2zrC.js:8
+#i @ index-Bw9a2zrC.js:8
+a @ index-Bw9a2zrC.js:8
+m @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8
+Promise.catch
+x @ index-Bw9a2zrC.js:8
+start @ index-Bw9a2zrC.js:8
+fetch @ index-Bw9a2zrC.js:8
+#d @ index-Bw9a2zrC.js:8
+(anonymous) @ index-Bw9a2zrC.js:8Understand this error
+index-Bw9a2zrC.js:8  GET https://dashboard-sb-team.vercel.app/api/gamification/activity 500 (Internal Server Error)
