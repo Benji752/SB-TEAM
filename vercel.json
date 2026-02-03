@@ -1,17 +1,13 @@
 {
+  "buildCommand": "npm run build && node scripts/build-vercel.mjs",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/index.ts": {
-      "includeFiles": "server/**"
-    }
-  }
+  ]
 }
