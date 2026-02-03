@@ -1,15 +1,35 @@
 import { Express } from "express";
 import session from "express-session";
 
+const MOCK_ADMIN_USER = {
+  id: 1,
+  username: "Benjamin",
+  role: "admin",
+  firstName: "Benjamin",
+  lastName: "Admin"
+};
+
 export function setupAuth(app: Express) {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   app.use(
     session({
-      secret: "demo-secret-key",
+      secret: process.env.SESSION_SECRET || "demo-secret-key",
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: false },
+      cookie: { secure: isProduction },
     })
   );
+
+  // En production (Vercel), injecter automatiquement le mock user
+  if (isProduction) {
+    app.use((req, _res, next) => {
+      if (!(req.session as any).user) {
+        (req.session as any).user = MOCK_ADMIN_USER;
+      }
+      next();
+    });
+  }
 
   app.post("/api/login-demo", (req, res) => {
     const { role } = req.body;
@@ -32,6 +52,11 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    // En production, toujours retourner le mock user
+    if (process.env.NODE_ENV === 'production') {
+      return res.json((req.session as any).user || MOCK_ADMIN_USER);
+    }
+    
     if ((req.session as any).user) {
       res.json((req.session as any).user);
     } else {
