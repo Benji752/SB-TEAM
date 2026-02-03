@@ -129,16 +129,19 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       const recentOrders = await storage.getRecentOrders(5);
       res.json(recentOrders);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Activities orders error:", error);
+      res.json([]);
     }
   });
 
-  app.get("/api/activities/orders", async (req, res) => {
+  // Fallback for agency_stats (used by Dashboard chart)
+  app.get("/api/agency-stats", async (req, res) => {
     try {
-      const recentOrders = await storage.getRecentOrders(5);
-      res.json(recentOrders);
+      const stats = await db.select().from(agencyStats).orderBy(agencyStats.month);
+      res.json(stats);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Agency stats error:", error);
+      res.json([]);
     }
   });
 
@@ -160,7 +163,8 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       const allOrders = await storage.getAllOrders();
       res.json(allOrders);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Orders error:", error);
+      res.json([]); // Return empty array instead of error
     }
   });
 
@@ -387,17 +391,23 @@ export async function registerRoutes(_httpServer: any, app: Express) {
         .limit(1);
       res.json(lastStatsArr[0] || null);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Model stats latest error:", error);
+      res.json(null); // Return null instead of error
     }
   });
 
   // History for charts
   app.get("/api/model-stats", async (req, res) => {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const statsArr = await db.select().from(modelStats)
-      .where(gte(modelStats.createdAt, twentyFourHoursAgo))
-      .orderBy(modelStats.createdAt);
-    res.json(statsArr);
+    try {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const statsArr = await db.select().from(modelStats)
+        .where(gte(modelStats.createdAt, twentyFourHoursAgo))
+        .orderBy(modelStats.createdAt);
+      res.json(statsArr);
+    } catch (error: any) {
+      console.error("Model stats error:", error);
+      res.json([]); // Return empty array instead of error
+    }
   });
 
   // Get AI Chat History
@@ -753,7 +763,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       res.json(result.rows);
     } catch (error: any) {
       console.error("Leaderboard view error:", error);
-      res.status(500).json({ error: error.message });
+      res.json([]); // Return empty array instead of error
     }
   });
 
@@ -804,7 +814,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       res.json({ success: true, timestamp: now.toISOString() });
     } catch (error: any) {
       console.error("Ping error:", error);
-      res.status(500).json({ error: error.message });
+      res.json({ success: false, timestamp: new Date().toISOString() }); // Don't crash
     }
   });
 
@@ -1104,7 +1114,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       
       res.json({ xpGained: finalXp, message: "Heartbeat recorded" });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Heartbeat error:", error);
+      res.json({ xpGained: 0, message: "Heartbeat failed silently" }); // Don't crash
     }
   });
 
@@ -1253,7 +1264,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         formatted: `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`
       });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Today time error:", error);
+      res.json({ userId: parseInt(req.params.userId), todayMinutes: 0, formatted: "0h 0m" });
     }
   });
 
@@ -1296,7 +1308,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       
       res.json(pendingLeads);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Pending leads error:", error);
+      res.json([]); // Return empty array instead of error
     }
   });
 

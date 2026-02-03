@@ -27367,15 +27367,17 @@ async function registerRoutes(_httpServer, app2) {
       const recentOrders = await storage.getRecentOrders(5);
       res.json(recentOrders);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Activities orders error:", error);
+      res.json([]);
     }
   });
-  app2.get("/api/activities/orders", async (req, res) => {
+  app2.get("/api/agency-stats", async (req, res) => {
     try {
-      const recentOrders = await storage.getRecentOrders(5);
-      res.json(recentOrders);
+      const stats = await db.select().from(agencyStats).orderBy(agencyStats.month);
+      res.json(stats);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Agency stats error:", error);
+      res.json([]);
     }
   });
   app2.get("/api/activities/tasks", async (req, res) => {
@@ -27391,7 +27393,8 @@ async function registerRoutes(_httpServer, app2) {
       const allOrders = await storage.getAllOrders();
       res.json(allOrders);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Orders error:", error);
+      res.json([]);
     }
   });
   app2.post("/api/orders", async (req, res) => {
@@ -27556,13 +27559,19 @@ async function registerRoutes(_httpServer, app2) {
       const lastStatsArr = await db.select().from(modelStats).orderBy(desc2(modelStats.createdAt)).limit(1);
       res.json(lastStatsArr[0] || null);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Model stats latest error:", error);
+      res.json(null);
     }
   });
   app2.get("/api/model-stats", async (req, res) => {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1e3);
-    const statsArr = await db.select().from(modelStats).where(gte(modelStats.createdAt, twentyFourHoursAgo)).orderBy(modelStats.createdAt);
-    res.json(statsArr);
+    try {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1e3);
+      const statsArr = await db.select().from(modelStats).where(gte(modelStats.createdAt, twentyFourHoursAgo)).orderBy(modelStats.createdAt);
+      res.json(statsArr);
+    } catch (error) {
+      console.error("Model stats error:", error);
+      res.json([]);
+    }
   });
   app2.get("/api/ai/chat/history", async (req, res) => {
     try {
@@ -27810,7 +27819,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       res.json(result.rows);
     } catch (error) {
       console.error("Leaderboard view error:", error);
-      res.status(500).json({ error: error.message });
+      res.json([]);
     }
   });
   app2.post("/api/gamification/ping", async (req, res) => {
@@ -27845,7 +27854,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       res.json({ success: true, timestamp: now.toISOString() });
     } catch (error) {
       console.error("Ping error:", error);
-      res.status(500).json({ error: error.message });
+      res.json({ success: false, timestamp: (/* @__PURE__ */ new Date()).toISOString() });
     }
   });
   app2.get("/api/gamification/profile/:userId", async (req, res) => {
@@ -28053,7 +28062,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       }
       res.json({ xpGained: finalXp, message: "Heartbeat recorded" });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Heartbeat error:", error);
+      res.json({ xpGained: 0, message: "Heartbeat failed silently" });
     }
   });
   app2.post("/api/user/ping", async (req, res) => {
@@ -28157,7 +28167,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         formatted: `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Today time error:", error);
+      res.json({ userId: parseInt(req.params.userId), todayMinutes: 0, formatted: "0h 0m" });
     }
   });
   app2.post("/api/gamification/leads", async (req, res) => {
@@ -28188,7 +28199,8 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const pendingLeads = await db.select().from(hunterLeads).where(eq2(hunterLeads.status, "pending")).orderBy(desc2(hunterLeads.createdAt));
       res.json(pendingLeads);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Pending leads error:", error);
+      res.json([]);
     }
   });
   app2.patch("/api/gamification/leads/:id/validate", async (req, res) => {
