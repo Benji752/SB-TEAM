@@ -12,7 +12,7 @@ await esbuild.build({
   platform: 'node',
   target: 'node18',
   format: 'esm',
-  outfile: resolve(rootDir, 'api/index.js'),
+  outfile: resolve(rootDir, 'api/handler.js'),
   external: [
     'express',
     'drizzle-orm',
@@ -38,4 +38,4 @@ await esbuild.build({
   }
 });
 
-console.log('Build completed: api/index.js');
+console.log('Build completed: api/handler.js');
