@@ -2,15 +2,32 @@ import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 
 // Mock admin user for MOCK_AUTH mode
-const MOCK_ADMIN_USER = {
-  id: 1,
-  username: "Benjamin",
-  email: "admin@sb-digital.fr",
-  role: "admin",
-  firstName: "Benjamin",
-  lastName: "Admin",
-  tenantId: "sb-tenant"
-};
+// Uses UUID for display but also provides numeric ID for gamification tables
+function getMockAdminUser() {
+  return {
+    id: process.env.MOCK_USER_ID || "mock-admin-uuid-001",
+    numericId: parseInt(process.env.MOCK_USER_NUMERIC_ID || "1", 10),
+    username: "Benjamin",
+    email: "admin@sb-digital.fr",
+    role: "admin",
+    firstName: "Benjamin",
+    lastName: "Admin",
+    tenantId: "sb-tenant"
+  };
+}
+
+function getMockModelUser() {
+  return {
+    id: process.env.MOCK_MODEL_ID || "mock-model-uuid-002",
+    numericId: parseInt(process.env.MOCK_MODEL_NUMERIC_ID || "2", 10),
+    username: "Laura",
+    email: "laura@sb-digital.fr",
+    role: "model",
+    firstName: "Laura",
+    lastName: "Model",
+    tenantId: "sb-tenant"
+  };
+}
 
 // Check if MOCK_AUTH mode is enabled
 export function isMockAuthEnabled(): boolean {
@@ -25,13 +42,15 @@ export function getMockTenant(): string {
 // Middleware to inject mock authentication
 export function mockAuthMiddleware(req: Request, _res: Response, next: NextFunction) {
   if (isMockAuthEnabled()) {
+    const mockUser = getMockAdminUser();
+    
     // Inject mock user
     if (!(req.session as any).user) {
-      (req.session as any).user = MOCK_ADMIN_USER;
+      (req.session as any).user = mockUser;
     }
     
     // Simulate req.user (used by Passport)
-    req.user = (req.session as any).user || MOCK_ADMIN_USER;
+    req.user = (req.session as any).user || mockUser;
     
     // Simulate req.isAuthenticated() (used by Passport)
     (req as any).isAuthenticated = () => true;
@@ -44,7 +63,7 @@ export function requireAuth(req: Request, res: Response): boolean {
   if (isMockAuthEnabled()) {
     // Always authenticated in mock mode
     if (!req.user) {
-      req.user = MOCK_ADMIN_USER;
+      req.user = getMockAdminUser();
     }
     return true;
   }
@@ -56,12 +75,41 @@ export function requireAuth(req: Request, res: Response): boolean {
   return true;
 }
 
+// Type for user with string or number id
+export interface AuthUser {
+  id: string | number;
+  numericId?: number;
+  username: string;
+  email: string;
+  role: string;
+  firstName?: string;
+  lastName?: string;
+  tenantId?: string;
+}
+
 // Get current user (with mock fallback)
-export function getCurrentUser(req: Request): typeof MOCK_ADMIN_USER {
+export function getCurrentUser(req: Request): AuthUser {
   if (isMockAuthEnabled()) {
-    return (req.user as any) || MOCK_ADMIN_USER;
+    return (req.user as any) || getMockAdminUser();
   }
-  return (req.user as any) || (req.session as any)?.user || MOCK_ADMIN_USER;
+  return (req.user as any) || (req.session as any)?.user || getMockAdminUser();
+}
+
+// Helper to get user ID as string (for UUID compatibility)
+export function getUserIdAsString(req: Request): string {
+  const user = getCurrentUser(req);
+  return String(user.id);
+}
+
+// Helper to get numeric user ID (for gamification tables that use integer)
+export function getUserNumericId(req: Request): number {
+  const user = getCurrentUser(req);
+  // If user has numericId, use it; otherwise try to parse id or fallback to 1
+  if ((user as any).numericId) {
+    return (user as any).numericId;
+  }
+  const parsed = parseInt(String(user.id), 10);
+  return isNaN(parsed) ? 1 : parsed;
 }
 
 export function setupAuth(app: Express) {
@@ -83,19 +131,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login-demo", (req, res) => {
     const { role } = req.body;
     
-    // Assign correct userId based on role for presence tracking
-    const userId = role === "model" ? 2 : 1;
-    const firstName = role === "model" ? "Laura" : "Benjamin";
-    
-    const user = { 
-      id: userId, 
-      username: firstName, 
-      email: role === "model" ? "laura@sb-digital.fr" : "admin@sb-digital.fr",
-      role,
-      firstName,
-      lastName: role === "model" ? "Model" : "Admin",
-      tenantId: "sb-tenant"
-    };
+    const user = role === "model" ? getMockModelUser() : getMockAdminUser();
     (req.session as any).user = user;
     req.user = user;
     res.json(user);
@@ -104,7 +140,9 @@ export function setupAuth(app: Express) {
   app.get("/api/user", (req, res) => {
     // In mock auth mode, always return a valid user
     if (isMockAuthEnabled()) {
-      return res.json(getCurrentUser(req));
+      const user = getCurrentUser(req);
+      console.log(`[MOCK_AUTH] GET /api/user returning: id=${user.id}, numericId=${(user as any).numericId}, role=${user.role}`);
+      return res.json(user);
     }
     
     if ((req.session as any).user) {

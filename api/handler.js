@@ -16451,24 +16451,40 @@ import express from "express";
 
 // server/auth.ts
 import session from "express-session";
-var MOCK_ADMIN_USER = {
-  id: 1,
-  username: "Benjamin",
-  email: "admin@sb-digital.fr",
-  role: "admin",
-  firstName: "Benjamin",
-  lastName: "Admin",
-  tenantId: "sb-tenant"
-};
+function getMockAdminUser() {
+  return {
+    id: process.env.MOCK_USER_ID || "mock-admin-uuid-001",
+    numericId: parseInt(process.env.MOCK_USER_NUMERIC_ID || "1", 10),
+    username: "Benjamin",
+    email: "admin@sb-digital.fr",
+    role: "admin",
+    firstName: "Benjamin",
+    lastName: "Admin",
+    tenantId: "sb-tenant"
+  };
+}
+function getMockModelUser() {
+  return {
+    id: process.env.MOCK_MODEL_ID || "mock-model-uuid-002",
+    numericId: parseInt(process.env.MOCK_MODEL_NUMERIC_ID || "2", 10),
+    username: "Laura",
+    email: "laura@sb-digital.fr",
+    role: "model",
+    firstName: "Laura",
+    lastName: "Model",
+    tenantId: "sb-tenant"
+  };
+}
 function isMockAuthEnabled() {
   return process.env.MOCK_AUTH === "true" || true;
 }
 function mockAuthMiddleware(req, _res, next) {
   if (isMockAuthEnabled()) {
+    const mockUser = getMockAdminUser();
     if (!req.session.user) {
-      req.session.user = MOCK_ADMIN_USER;
+      req.session.user = mockUser;
     }
-    req.user = req.session.user || MOCK_ADMIN_USER;
+    req.user = req.session.user || mockUser;
     req.isAuthenticated = () => true;
   }
   next();
@@ -16476,7 +16492,7 @@ function mockAuthMiddleware(req, _res, next) {
 function requireAuth(req, res) {
   if (isMockAuthEnabled()) {
     if (!req.user) {
-      req.user = MOCK_ADMIN_USER;
+      req.user = getMockAdminUser();
     }
     return true;
   }
@@ -16488,9 +16504,17 @@ function requireAuth(req, res) {
 }
 function getCurrentUser(req) {
   if (isMockAuthEnabled()) {
-    return req.user || MOCK_ADMIN_USER;
+    return req.user || getMockAdminUser();
   }
-  return req.user || req.session?.user || MOCK_ADMIN_USER;
+  return req.user || req.session?.user || getMockAdminUser();
+}
+function getUserNumericId(req) {
+  const user = getCurrentUser(req);
+  if (user.numericId) {
+    return user.numericId;
+  }
+  const parsed = parseInt(String(user.id), 10);
+  return isNaN(parsed) ? 1 : parsed;
 }
 function setupAuth(app2) {
   app2.use(
@@ -16507,24 +16531,16 @@ function setupAuth(app2) {
   app2.use(mockAuthMiddleware);
   app2.post("/api/login-demo", (req, res) => {
     const { role } = req.body;
-    const userId = role === "model" ? 2 : 1;
-    const firstName = role === "model" ? "Laura" : "Benjamin";
-    const user = {
-      id: userId,
-      username: firstName,
-      email: role === "model" ? "laura@sb-digital.fr" : "admin@sb-digital.fr",
-      role,
-      firstName,
-      lastName: role === "model" ? "Model" : "Admin",
-      tenantId: "sb-tenant"
-    };
+    const user = role === "model" ? getMockModelUser() : getMockAdminUser();
     req.session.user = user;
     req.user = user;
     res.json(user);
   });
   app2.get("/api/user", (req, res) => {
     if (isMockAuthEnabled()) {
-      return res.json(getCurrentUser(req));
+      const user = getCurrentUser(req);
+      console.log(`[MOCK_AUTH] GET /api/user returning: id=${user.id}, numericId=${user.numericId}, role=${user.role}`);
+      return res.json(user);
     }
     if (req.session.user) {
       res.json(req.session.user);
@@ -27584,9 +27600,9 @@ async function registerRoutes(_httpServer, app2) {
   app2.post("/api/auth-logs", async (req, res) => {
     try {
       const { eventType, reason } = req.body;
-      const user = getCurrentUser(req);
+      const numericId = getUserNumericId(req);
       const [log2] = await db.insert(authLogs).values({
-        userId: user.id,
+        userId: numericId,
         eventType,
         reason
       }).returning();
@@ -27600,8 +27616,8 @@ async function registerRoutes(_httpServer, app2) {
     try {
       if (!requireAuth(req, res)) return;
       const { avatarUrl } = req.body;
-      const user = getCurrentUser(req);
-      await db.update(profiles).set({ avatarUrl }).where(eq2(profiles.userId, user.id));
+      const numericId = getUserNumericId(req);
+      await db.update(profiles).set({ avatarUrl }).where(eq2(profiles.userId, numericId));
       res.json({ success: true });
     } catch (error) {
       console.error("Avatar update error:", error);
@@ -27674,8 +27690,9 @@ async function registerRoutes(_httpServer, app2) {
       let userRole = "admin";
       try {
         const user = getCurrentUser(req);
+        const numericId = getUserNumericId(req);
         if (user) {
-          const userProfile = await db.select().from(profiles).where(eq2(profiles.userId, user.id)).limit(1);
+          const userProfile = await db.select().from(profiles).where(eq2(profiles.userId, numericId)).limit(1);
           if (userProfile[0]) {
             userName = userProfile[0].username || user.username || "Boss";
             userRole = userProfile[0].role || "admin";

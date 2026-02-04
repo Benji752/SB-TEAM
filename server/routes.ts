@@ -1,5 +1,5 @@
 import { Express } from "express";
-import { setupAuth, isMockAuthEnabled, getCurrentUser, requireAuth } from "./auth";
+import { setupAuth, isMockAuthEnabled, getCurrentUser, requireAuth, getUserNumericId } from "./auth";
 import axios from "axios";
 import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory, gamificationProfiles, hunterLeads, workSessions, xpActivityLog, insertHunterLeadSchema, insertWorkSessionSchema } from "@shared/schema";
 import { db } from "./db";
@@ -374,10 +374,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   app.post("/api/auth-logs", async (req, res) => {
     try {
       const { eventType, reason } = req.body;
-      const user = getCurrentUser(req);
+      const numericId = getUserNumericId(req);
       
       const [log] = await db.insert(authLogs).values({
-        userId: user.id,
+        userId: numericId,
         eventType,
         reason
       }).returning();
@@ -393,11 +393,11 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     try {
       if (!requireAuth(req, res)) return;
       const { avatarUrl } = req.body;
-      const user = getCurrentUser(req);
+      const numericId = getUserNumericId(req);
       
       await db.update(profiles)
         .set({ avatarUrl })
-        .where(eq(profiles.userId, user.id));
+        .where(eq(profiles.userId, numericId));
         
       res.json({ success: true });
     } catch (error: any) {
@@ -530,10 +530,11 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       
       try {
         const user = getCurrentUser(req);
+        const numericId = getUserNumericId(req);
         if (user) {
           // Get profile for display name
           const userProfile = await db.select().from(profiles)
-            .where(eq(profiles.userId, user.id))
+            .where(eq(profiles.userId, numericId))
             .limit(1);
           
           if (userProfile[0]) {
