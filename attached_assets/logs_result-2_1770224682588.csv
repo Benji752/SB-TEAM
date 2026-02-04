@@ -1,0 +1,1372 @@
+TimeUTC,timestampInMs,requestPath,requestMethod,requestQueryString,responseStatusCode,requestId,requestUserAgent,level,environment,branch,vercelCache,type,function,host,deploymentDomain,deploymentId,durationMs,region,maxMemoryUsed,memorySize,message,projectId,traceId,sessionId,invocationId,instanceId,concurrency
+2026-02-04 17:02:05,1770224525116,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/favicon.png,GET,,401,m58nw-1770224525116-0dc890155624,vercel-favicon/1.0,,production,main,,static,/favicon.png,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,1,sfo1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:59,1770224519793,dashboard-sb-team.vercel.app/api/orders,GET,,200,2cmkf-1770224519530-e2acd96a2fa0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20513:12)
+    at async file:///var/task/api/handler.js:27425:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:59,1770224519793,dashboard-sb-team.vercel.app/api/orders,GET,,200,2cmkf-1770224519530-e2acd96a2fa0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:59 PM [express] GET /api/orders 200 in 189ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:59,1770224519530,dashboard-sb-team.vercel.app/api/orders,GET,,200,2cmkf-1770224519530-e2acd96a2fa0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,195,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSN2D71QNA06RAQZY45JRZ,S0dAjoY6xBuj,1
+2026-02-04 17:01:59,1770224519459,dashboard-sb-team.vercel.app/api/orders,POST,,200,2cmkf-1770224519203-4976da0cf3f2,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Order create error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createOrder (file:///var/task/api/handler.js:20516:24)
+    at async file:///var/task/api/handler.js:27438:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:59,1770224519460,dashboard-sb-team.vercel.app/api/orders,POST,,200,2cmkf-1770224519203-4976da0cf3f2,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:59 PM [express] POST /api/orders 200 in 189ms :: {""id"":0,""error"":""Failed to create order""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:59,1770224519203,dashboard-sb-team.vercel.app/api/orders,POST,,200,2cmkf-1770224519203-4976da0cf3f2,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,196,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSN22MJ6ARNRGMZY86E9V4,S0dAjoY6xBuj,1
+2026-02-04 17:01:55,1770224515584,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,8m2nq-1770224515327-47b701e8d8e4,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:55,1770224515585,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,8m2nq-1770224515327-47b701e8d8e4,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:55 PM [express] POST /api/gamification/heartbeat 200 in 190ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:55,1770224515327,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,8m2nq-1770224515327-47b701e8d8e4,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,197,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMY9MGB02JKDFVKHQYS3K,S0dAjoY6xBuj,1
+2026-02-04 17:01:53,1770224513571,dashboard-sb-team.vercel.app/api/ai/chat,POST,,200,2cmkf-1770224513308-fbf09633abb5,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,AI chat error: Tenant or user not found,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:53,1770224513572,dashboard-sb-team.vercel.app/api/ai/chat,POST,,200,2cmkf-1770224513308-fbf09633abb5,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:53 PM [express] POST /api/ai/chat 200 in 191ms :: {""response"":""Désolé, je rencontre des difficultés techniques. Réessayez dans quelques instants.""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:53,1770224513308,dashboard-sb-team.vercel.app/api/ai/chat,POST,,200,2cmkf-1770224513308-fbf09633abb5,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,198,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMWAMPFKMBBQ1NJPRM3C9,S0dAjoY6xBuj,1
+2026-02-04 17:01:50,1770224510724,dashboard-sb-team.vercel.app/api/ai/chat/history,GET,,200,n28qv-1770224510468-98a1756a1fa0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"AI chat history error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27632:27 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:50,1770224510726,dashboard-sb-team.vercel.app/api/ai/chat/history,GET,,200,n28qv-1770224510468-98a1756a1fa0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:50 PM [express] GET /api/ai/chat/history 200 in 192ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:50,1770224510468,dashboard-sb-team.vercel.app/api/ai/chat/history,GET,,200,n28qv-1770224510468-98a1756a1fa0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,197,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMSHNADZMPATHWZPM7EVF,S0dAjoY6xBuj,1
+2026-02-04 17:01:50,1770224510719,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,zf9j4-1770224510467-f8e9cf5b608a,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:50,1770224510719,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,zf9j4-1770224510467-f8e9cf5b608a,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:50 PM [express] POST /api/gamification/heartbeat 200 in 188ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:50,1770224510467,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,zf9j4-1770224510467-f8e9cf5b608a,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,195,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMSHPDRTMSG1V3091NQN4,p0XCviknUGJh,1
+2026-02-04 17:01:49,1770224509108,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,304,zts4k-1770224508856-13719a9defbd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Activity error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27946:32 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:49,1770224509109,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,304,zts4k-1770224508856-13719a9defbd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:49 PM [express] GET /api/gamification/activity 200 in 189ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:48,1770224508856,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,304,zts4k-1770224508856-13719a9defbd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,196,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMQZ8ZRCWKXYZ1J8NNJ7N,p0XCviknUGJh,1
+2026-02-04 17:01:44,1770224504117,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,pcgjf-1770224503866-fa1f687ec194,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:44,1770224504118,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,pcgjf-1770224503866-fa1f687ec194,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:44 PM [express] GET /api/gamification/leaderboard-view 200 in 188ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503866,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,pcgjf-1770224503866-fa1f687ec194,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,195,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMK38GG78RTJBPDTGHAP7,p0XCviknUGJh,1
+2026-02-04 17:01:43,1770224503806,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,pcgjf-1770224503541-5ea128704463,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27894:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503808,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,pcgjf-1770224503541-5ea128704463,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:43 PM [express] POST /api/gamification/ping 200 in 190ms :: {""success"":false,""timestamp"":""2026-02-04T17:01:43.806Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503541,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,pcgjf-1770224503541-5ea128704463,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,207,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMJS6AXVHSARQ57EK2X16,K2LgwryKIpBf,1
+2026-02-04 17:01:43,1770224503838,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,200,dfdzn-1770224503541-d6b44cebc378,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28223:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503840,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,200,dfdzn-1770224503541-d6b44cebc378,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:43 PM [express] GET /api/gamification/today-time/1 200 in 190ms :: {""userId"":1,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503541,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,200,dfdzn-1770224503541-d6b44cebc378,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,227,iad1,268,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMJSK3MJW3PY7PA5QSDMK,p0XCviknUGJh,1
+2026-02-04 17:01:43,1770224503835,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,d6czd-1770224503541-0f3a4dd5c340,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503836,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,d6czd-1770224503541-0f3a4dd5c340,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:43 PM [express] POST /api/gamification/heartbeat 200 in 188ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503541,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,d6czd-1770224503541-0f3a4dd5c340,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,191,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMJS7R249AG0WF9M61Q67,S0dAjoY6xBuj,2
+2026-02-04 17:01:43,1770224503798,dashboard-sb-team.vercel.app/api/gamification/today-time/2,GET,,200,c7dq7-1770224503541-cf90a79f98ea,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28223:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503800,dashboard-sb-team.vercel.app/api/gamification/today-time/2,GET,,200,c7dq7-1770224503541-cf90a79f98ea,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:43 PM [express] GET /api/gamification/today-time/2 200 in 187ms :: {""userId"":2,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503541,dashboard-sb-team.vercel.app/api/gamification/today-time/2,GET,,200,c7dq7-1770224503541-cf90a79f98ea,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,198,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMJS6AXVHSARQ58SM3DND,peGjaXBCixXS,1
+2026-02-04 17:01:43,1770224503793,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,200,c7dq7-1770224503541-38af92d3e6cf,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Activity error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27946:32 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503794,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,200,c7dq7-1770224503541-38af92d3e6cf,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:43 PM [express] GET /api/gamification/activity 200 in 188ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:43,1770224503541,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,200,c7dq7-1770224503541-38af92d3e6cf,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,190,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMJS7R249AG0WF9M61Q67,S0dAjoY6xBuj,2
+2026-02-04 17:01:40,1770224500492,dashboard-sb-team.vercel.app/api/gamification/leads/pending,GET,,200,c6kl2-1770224500224-bc1de4da52ec,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Pending leads error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28265:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:40,1770224500493,dashboard-sb-team.vercel.app/api/gamification/leads/pending,GET,,200,c6kl2-1770224500224-bc1de4da52ec,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:40 PM [express] GET /api/gamification/leads/pending 200 in 189ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:40,1770224500224,dashboard-sb-team.vercel.app/api/gamification/leads/pending,GET,,200,c6kl2-1770224500224-bc1de4da52ec,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,194,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMFHV0HPEAFT7GA36CFCX,K2LgwryKIpBf,1
+2026-02-04 17:01:39,1770224499252,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,c7dq7-1770224499006-c952964af788,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:39,1770224499255,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,c7dq7-1770224499006-c952964af788,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:39 PM [express] GET /api/gamification/leaderboard-view 200 in 189ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:39,1770224499006,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,c7dq7-1770224499006-c952964af788,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,196,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMEBCWF2JMSZK9T3YZJC9,S0dAjoY6xBuj,1
+2026-02-04 17:01:38,1770224498936,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,fcpm9-1770224498676-131c50f7b104,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27894:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498937,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,fcpm9-1770224498676-131c50f7b104,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:38 PM [express] POST /api/gamification/ping 200 in 194ms :: {""success"":false,""timestamp"":""2026-02-04T17:01:38.935Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498676,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,fcpm9-1770224498676-131c50f7b104,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,210,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV0RMQ2NF1TAHS2871F,peGjaXBCixXS,4
+2026-02-04 17:01:38,1770224498928,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,c7dq7-1770224498675-9acaab379f93,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498929,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,c7dq7-1770224498675-9acaab379f93,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:38 PM [express] POST /api/gamification/heartbeat 200 in 190ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498675,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,c7dq7-1770224498675-9acaab379f93,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,205,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV3BR43KT2FSX77QYP2,p0XCviknUGJh,3
+2026-02-04 17:01:39,1770224499002,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,pcgjf-1770224498565-2dda4bf66ced,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Model stats latest error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27613:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:39,1770224499005,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,pcgjf-1770224498565-2dda4bf66ced,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:39 PM [express] GET /api/model-stats/latest 200 in 188ms,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498565,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,pcgjf-1770224498565-2dda4bf66ced,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,195,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDZTG1F63EPEHTM6MYD2,S0dAjoY6xBuj,1
+2026-02-04 17:01:38,1770224498801,dashboard-sb-team.vercel.app/api/orders,GET,,200,n9cgn-1770224498565-a1c91a3df99b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20513:12)
+    at async file:///var/task/api/handler.js:27425:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498803,dashboard-sb-team.vercel.app/api/orders,GET,,200,n9cgn-1770224498565-a1c91a3df99b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:38 PM [express] GET /api/orders 200 in 188ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498565,dashboard-sb-team.vercel.app/api/orders,GET,,200,n9cgn-1770224498565-a1c91a3df99b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,190,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV0RMQ2NF1TAHS2871F,peGjaXBCixXS,4
+2026-02-04 17:01:38,1770224498870,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,jh2fn-1770224498565-9f6a2f14cc29,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498871,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,jh2fn-1770224498565-9f6a2f14cc29,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:38 PM [express] GET /api/gamification/leaderboard-view 200 in 189ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498565,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,jh2fn-1770224498565-9f6a2f14cc29,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,191,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV3BR43KT2FSX77QYP2,p0XCviknUGJh,3
+2026-02-04 17:01:39,1770224499943,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,qtz2f-1770224498564-2e54e06ccc45,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:39,1770224499943,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,qtz2f-1770224498564-2e54e06ccc45,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:40,1770224500149,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,qtz2f-1770224498564-2e54e06ccc45,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Model stats error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27623:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:40,1770224500180,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,qtz2f-1770224498564-2e54e06ccc45,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:40 PM [express] GET /api/model-stats 200 in 208ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498564,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,qtz2f-1770224498564-2e54e06ccc45,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,1407,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDXSXQYK3M3KHTJ475SN,K2LgwryKIpBf,1
+2026-02-04 17:01:38,1770224498617,dashboard-sb-team.vercel.app/api/user,GET,,304,fcpm9-1770224498564-582620227182,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:38 PM [express] GET /api/user 200 in 1ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498564,dashboard-sb-team.vercel.app/api/user,GET,,304,fcpm9-1770224498564-582620227182,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,4,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV3BR43KT2FSX77QYP2,p0XCviknUGJh,2
+2026-02-04 17:01:38,1770224498794,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,sj5jh-1770224498479-0477072e27c0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27894:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498796,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,sj5jh-1770224498479-0477072e27c0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:38 PM [express] POST /api/gamification/ping 200 in 207ms :: {""success"":false,""timestamp"":""2026-02-04T17:01:38.794Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498479,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,sj5jh-1770224498479-0477072e27c0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,262,iad1,311,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDTYYSXGM67MRAP4EZHD,S0dAjoY6xBuj,1
+2026-02-04 17:01:38,1770224498752,dashboard-sb-team.vercel.app/api/orders,GET,,200,p9xpx-1770224498477-858c0fd74250,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20513:12)
+    at async file:///var/task/api/handler.js:27425:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498753,dashboard-sb-team.vercel.app/api/orders,GET,,200,p9xpx-1770224498477-858c0fd74250,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:38 PM [express] GET /api/orders 200 in 209ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498477,dashboard-sb-team.vercel.app/api/orders,GET,,200,p9xpx-1770224498477-858c0fd74250,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,212,iad1,313,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV3BR43KT2FSX77QYP2,p0XCviknUGJh,3
+2026-02-04 17:01:38,1770224498549,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,nw9cw-1770224498477-e781674d1e9d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498549,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,nw9cw-1770224498477-e781674d1e9d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498800,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,nw9cw-1770224498477-e781674d1e9d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Model stats error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27623:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498831,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,nw9cw-1770224498477-e781674d1e9d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:38 PM [express] GET /api/model-stats 200 in 216ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498477,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,nw9cw-1770224498477-e781674d1e9d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,1583,iad1,303,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV2PRW300KZ5P452EAT,VAOsf1L1ZWCY,1
+2026-02-04 17:01:38,1770224498784,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,ln5dc-1770224498477-94a0cb5eb8ea,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Model stats latest error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27613:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498786,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,ln5dc-1770224498477-94a0cb5eb8ea,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:38 PM [express] GET /api/model-stats/latest 200 in 221ms,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498477,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,ln5dc-1770224498477-94a0cb5eb8ea,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,224,iad1,312,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV0RMQ2NF1TAHS2871F,peGjaXBCixXS,4
+2026-02-04 17:01:38,1770224498870,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,m4vm6-1770224498474-6047fefffb98,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498872,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,m4vm6-1770224498474-6047fefffb98,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,5:01:38 PM [express] GET /api/gamification/leaderboard-view 200 in 189ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498474,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,m4vm6-1770224498474-6047fefffb98,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,192,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDV0RMQ2NF1TAHS2871F,peGjaXBCixXS,4
+2026-02-04 17:01:38,1770224498575,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fsdx5-1770224498474-f7e88a60a224,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498575,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fsdx5-1770224498474-f7e88a60a224,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498813,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fsdx5-1770224498474-f7e88a60a224,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498846,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fsdx5-1770224498474-f7e88a60a224,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:38 PM [express] POST /api/gamification/heartbeat 200 in 210ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:38,1770224498474,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fsdx5-1770224498474-f7e88a60a224,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,1556,iad1,341,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSMDVBA82Z08VM6QVQXR2Q,F1XmQxnAPeeS,1
+2026-02-04 17:01:21,1770224481929,dashboard-sb-team.vercel.app/api/user,GET,,200,kvhzl-1770224481584-d6bfafa177a0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:21 PM [express] GET /api/user 200 in 2ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:21,1770224481584,dashboard-sb-team.vercel.app/api/user,GET,,200,kvhzl-1770224481584-d6bfafa177a0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,11,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSKXK1EAPAJHCQWY1PGYRZ,S0dAjoY6xBuj,1
+2026-02-04 17:01:00,1770224460862,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,vqffp-1770224460806-1bc673215e5d,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:00 PM [express] GET /api/user 200 in 1ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460806,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,vqffp-1770224460806-1bc673215e5d,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,7,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSK919ABXXC9A9WQ4T9X9R,p0XCviknUGJh,1
+2026-02-04 17:01:00,1770224460641,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,gtwqc-1770224460587-2e805c279ade,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,,function,,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:00 PM [express] GET /api/user 200 in 2ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460587,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,gtwqc-1770224460587-2e805c279ade,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,7,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSK8TFMA24VKKAH5MY1CTS,p0XCviknUGJh,1
+2026-02-04 17:01:01,1770224461841,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,92g89-1770224460487-b3ff3a00b95b,vercel-screenshot/1.0,info,production,main,,function,,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:01,1770224461841,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,92g89-1770224460487-b3ff3a00b95b,vercel-screenshot/1.0,info,production,main,,function,,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:01,1770224461880,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,92g89-1770224460487-b3ff3a00b95b,vercel-screenshot/1.0,info,production,main,,function,,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:01 PM [express] GET /api/user 200 in 8ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460487,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,92g89-1770224460487-b3ff3a00b95b,vercel-screenshot/1.0,,production,main,,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,1238,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSK8QC4GJZ0E0WDX2765NN,S0dAjoY6xBuj,1
+2026-02-04 17:01:00,1770224460629,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,j5rzl-1770224460430-daa26152aa10,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:00 PM [express] GET /api/user 200 in 1ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460430,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,j5rzl-1770224460430-daa26152aa10,vercel-screenshot/1.0,,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,7,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSK8NJWEAYCVG08RM6E3SX,p0XCviknUGJh,1
+2026-02-04 17:01:00,1770224460572,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,6d7hs-1770224460294-cbdc677ab462,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460572,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,6d7hs-1770224460294-cbdc677ab462,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460615,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,6d7hs-1770224460294-cbdc677ab462,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:00 PM [express] GET /api/user 200 in 9ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460294,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,6d7hs-1770224460294-cbdc677ab462,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,48,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSK8M1Q1VD81G3W5EXAAEF,p0XCviknUGJh,1
+2026-02-04 17:01:01,1770224461753,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,fp8xp-1770224460266-665193c9b56c,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:01,1770224461753,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,fp8xp-1770224460266-665193c9b56c,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:01,1770224461792,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,fp8xp-1770224460266-665193c9b56c,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,,,,,"5:01:01 PM [express] GET /api/user 200 in 9ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 17:01:00,1770224460266,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,fp8xp-1770224460266-665193c9b56c,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-r69odz1da-savonas-projects-0cd29dae.vercel.app,dpl_hW9fAHcuywnapj5NqBD3miHgfeE9,1197,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMSK8KV19GNWM60XSZPBKTK,peGjaXBCixXS,1
+2026-02-04 16:55:46,1770224146132,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,n28qv-1770224144477-0f30d9a0d4b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app,dpl_9Lf8E4w5tNvAUi7SpPsEKJZY5KdJ,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:55:46,1770224146168,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,n28qv-1770224144477-0f30d9a0d4b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app,dpl_9Lf8E4w5tNvAUi7SpPsEKJZY5KdJ,,,,,"4:55:46 PM [express] GET /api/user 200 in 10ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:55:44,1770224144477,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,n28qv-1770224144477-0f30d9a0d4b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-lve6uyze4-savonas-projects-0cd29dae.vercel.app,dpl_9Lf8E4w5tNvAUi7SpPsEKJZY5KdJ,1036,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMS9MEMPHNA5J1SD40HZSN9,ioLXmiys7AFt,1
+2026-02-04 16:37:35,1770223055079,dashboard-sb-team.vercel.app/api/orders,GET,,200,t4f8f-1770223054813-b61fee5adda4,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20513:12)
+    at async file:///var/task/api/handler.js:27425:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:35,1770223055080,dashboard-sb-team.vercel.app/api/orders,GET,,200,t4f8f-1770223054813-b61fee5adda4,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:35 PM [express] GET /api/orders 200 in 188ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:34,1770223054813,dashboard-sb-team.vercel.app/api/orders,GET,,200,t4f8f-1770223054813-b61fee5adda4,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,194,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR8C0YRTG2XK6HRVX57HH3,0z09UHIQpwDq,1
+2026-02-04 16:37:34,1770223054750,dashboard-sb-team.vercel.app/api/orders,POST,,200,mzdjt-1770223054499-05eaf262228f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Order create error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createOrder (file:///var/task/api/handler.js:20516:24)
+    at async file:///var/task/api/handler.js:27438:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:34,1770223054751,dashboard-sb-team.vercel.app/api/orders,POST,,200,mzdjt-1770223054499-05eaf262228f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:34 PM [express] POST /api/orders 200 in 188ms :: {""id"":0,""error"":""Failed to create order""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:34,1770223054499,dashboard-sb-team.vercel.app/api/orders,POST,,200,mzdjt-1770223054499-05eaf262228f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,195,iad1,264,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR8BPKYQBTYNCKQAEZ07PS,0z09UHIQpwDq,1
+2026-02-04 16:37:26,1770223046640,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,q7swl-1770223046355-03b9db00fe21,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:26,1770223046642,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,q7swl-1770223046355-03b9db00fe21,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:26 PM [express] POST /api/gamification/heartbeat 200 in 190ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:26,1770223046355,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,q7swl-1770223046355-03b9db00fe21,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,226,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR83R30YAVQWHTRXY5C02Y,0z09UHIQpwDq,1
+2026-02-04 16:37:23,1770223043293,dashboard-sb-team.vercel.app/api/ai/chat,POST,,200,t88jr-1770223043000-5d2605e0ca91,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,AI chat error: Tenant or user not found,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:23,1770223043295,dashboard-sb-team.vercel.app/api/ai/chat,POST,,200,t88jr-1770223043000-5d2605e0ca91,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:23 PM [express] POST /api/ai/chat 200 in 220ms :: {""response"":""Désolé, je rencontre des difficultés techniques. Réessayez dans quelques instants.""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:23,1770223043000,dashboard-sb-team.vercel.app/api/ai/chat,POST,,200,t88jr-1770223043000-5d2605e0ca91,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,240,iad1,310,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR80F74BAA5CF6HCZDPCP1,0z09UHIQpwDq,1
+2026-02-04 16:37:20,1770223040330,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,ll2cc-1770223040056-53543868f73d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:20,1770223040331,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,ll2cc-1770223040056-53543868f73d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:20 PM [express] POST /api/gamification/heartbeat 200 in 189ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:20,1770223040056,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,ll2cc-1770223040056-53543868f73d,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,206,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7XKPVX2TCJJ1N1AYG3JV,0z09UHIQpwDq,1
+2026-02-04 16:37:20,1770223040299,dashboard-sb-team.vercel.app/api/ai/chat/history,GET,,200,t88jr-1770223040049-437e70a52716,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"AI chat history error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27632:27 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:20,1770223040300,dashboard-sb-team.vercel.app/api/ai/chat/history,GET,,200,t88jr-1770223040049-437e70a52716,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:20 PM [express] GET /api/ai/chat/history 200 in 186ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:20,1770223040049,dashboard-sb-team.vercel.app/api/ai/chat/history,GET,,200,t88jr-1770223040049-437e70a52716,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,191,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7XK21CC8Q9JFDKVX4B9T,r9nnZX3QO0Jh,1
+2026-02-04 16:37:17,1770223037305,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,304,ll2cc-1770223037071-99a221afd868,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28223:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:17,1770223037307,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,304,ll2cc-1770223037071-99a221afd868,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:17 PM [express] GET /api/gamification/today-time/1 200 in 187ms :: {""userId"":1,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:17,1770223037071,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,304,ll2cc-1770223037071-99a221afd868,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,189,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TMZJ5AKT2GZRFDRWCS5,r9nnZX3QO0Jh,2
+2026-02-04 16:37:17,1770223037288,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,9c544-1770223037040-3a3e457c52d7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:17,1770223037289,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,9c544-1770223037040-3a3e457c52d7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:17 PM [express] GET /api/gamification/leaderboard-view 200 in 185ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:17,1770223037040,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,9c544-1770223037040-3a3e457c52d7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,189,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TMZJ5AKT2GZRFDRWCS5,r9nnZX3QO0Jh,2
+2026-02-04 16:37:16,1770223036977,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,rjd2k-1770223036727-1680d10caad3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27894:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036979,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,rjd2k-1770223036727-1680d10caad3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:16 PM [express] POST /api/gamification/ping 200 in 188ms :: {""success"":false,""timestamp"":""2026-02-04T16:37:16.977Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036727,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,rjd2k-1770223036727-1680d10caad3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,194,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TB7VDF5TXYBYN70V3D1,MO1ajTjvdpkN,1
+2026-02-04 16:37:16,1770223036980,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,200,mwnlr-1770223036727-037cff08f016,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Activity error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27946:32 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036982,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,200,mwnlr-1770223036727-037cff08f016,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:16 PM [express] GET /api/gamification/activity 200 in 187ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036727,dashboard-sb-team.vercel.app/api/gamification/activity,GET,,200,mwnlr-1770223036727-037cff08f016,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,193,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TB7VDF5TXYBYNJMYYBY,mlU1WHqNPMRK,1
+2026-02-04 16:37:16,1770223036979,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,200,ll2cc-1770223036727-49f2660b6042,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28223:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036982,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,200,ll2cc-1770223036727-49f2660b6042,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:16 PM [express] GET /api/gamification/today-time/1 200 in 191ms :: {""userId"":1,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036727,dashboard-sb-team.vercel.app/api/gamification/today-time/1,GET,,200,ll2cc-1770223036727-49f2660b6042,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,197,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TB8J2S14AWN7VH9RHSD,0z09UHIQpwDq,1
+2026-02-04 16:37:16,1770223036979,dashboard-sb-team.vercel.app/api/gamification/today-time/2,GET,,200,494cv-1770223036727-2983cb0da78b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28223:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036980,dashboard-sb-team.vercel.app/api/gamification/today-time/2,GET,,200,494cv-1770223036727-2983cb0da78b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:16 PM [express] GET /api/gamification/today-time/2 200 in 187ms :: {""userId"":2,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036727,dashboard-sb-team.vercel.app/api/gamification/today-time/2,GET,,200,494cv-1770223036727-2983cb0da78b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,193,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TBA8E1Q0B4S5S75K2S9,e3D896OGKpvi,1
+2026-02-04 16:37:17,1770223037002,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,6zk4g-1770223036725-921eba977635,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:17,1770223037004,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,6zk4g-1770223036725-921eba977635,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:17 PM [express] POST /api/gamification/heartbeat 200 in 192ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:16,1770223036725,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,6zk4g-1770223036725-921eba977635,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,210,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7TBGT5ZCVHVZPSJY83CV,r9nnZX3QO0Jh,1
+2026-02-04 16:37:14,1770223034312,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,g47zk-1770223034062-564d15a957c0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:14,1770223034313,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,g47zk-1770223034062-564d15a957c0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:14 PM [express] GET /api/gamification/leaderboard-view 200 in 187ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:14,1770223034062,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,304,g47zk-1770223034062-564d15a957c0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,193,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7QQYR1AG3KN8DQ14FDAF,mlU1WHqNPMRK,1
+2026-02-04 16:37:14,1770223034006,dashboard-sb-team.vercel.app/api/gamification/leads/pending,GET,,200,g47zk-1770223033762-f817eb06dea3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Pending leads error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28265:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:14,1770223034007,dashboard-sb-team.vercel.app/api/gamification/leads/pending,GET,,200,g47zk-1770223033762-f817eb06dea3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:14 PM [express] GET /api/gamification/leads/pending 200 in 190ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033762,dashboard-sb-team.vercel.app/api/gamification/leads/pending,GET,,200,g47zk-1770223033762-f817eb06dea3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,193,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P2PJ5N685STKS1B0T2N,0z09UHIQpwDq,2
+2026-02-04 16:37:13,1770223033779,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,dm4wt-1770223032467-bdd07dc84ad6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033779,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,dm4wt-1770223032467-bdd07dc84ad6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033998,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,dm4wt-1770223032467-bdd07dc84ad6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27894:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:14,1770223034028,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,dm4wt-1770223032467-bdd07dc84ad6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:14 PM [express] POST /api/gamification/ping 200 in 207ms :: {""success"":false,""timestamp"":""2026-02-04T16:37:13.997Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032467,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,dm4wt-1770223032467-bdd07dc84ad6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1360,iad1,306,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P640M3A72YEKDX9FQXE,mlU1WHqNPMRK,1
+2026-02-04 16:37:12,1770223032736,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,mwnlr-1770223032465-907d1fd0d874,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032737,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,mwnlr-1770223032465-907d1fd0d874,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:12 PM [express] POST /api/gamification/heartbeat 200 in 210ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032465,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,mwnlr-1770223032465-907d1fd0d874,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,224,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P0W6WRSYS676AP4ST96,ZTJKIolhb40X,4
+2026-02-04 16:37:13,1770223033415,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,jh2fn-1770223032359-0c6dd2f708af,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033415,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,jh2fn-1770223032359-0c6dd2f708af,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033614,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,jh2fn-1770223032359-0c6dd2f708af,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Model stats error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27623:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033635,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,jh2fn-1770223032359-0c6dd2f708af,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:13 PM [express] GET /api/model-stats 200 in 200ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032359,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,jh2fn-1770223032359-0c6dd2f708af,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1094,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P2RZ19D3WQY580V9ENH,XfEJTDrd8gn5,1
+2026-02-04 16:37:13,1770223033722,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,688t6-1770223032359-09b7a3a970b6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033722,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,688t6-1770223032359-09b7a3a970b6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033927,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,688t6-1770223032359-09b7a3a970b6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Model stats latest error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27613:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033957,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,688t6-1770223032359-09b7a3a970b6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:13 PM [express] GET /api/model-stats/latest 200 in 205ms,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032359,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,688t6-1770223032359-09b7a3a970b6,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1355,iad1,304,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P4CH0ZX2FM0TG4C7X0T,r9nnZX3QO0Jh,1
+2026-02-04 16:37:13,1770223033725,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,fcxf6-1770223032358-0a4558e259f3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033725,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,fcxf6-1770223032358-0a4558e259f3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033928,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,fcxf6-1770223032358-0a4558e259f3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033957,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,fcxf6-1770223032358-0a4558e259f3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:13 PM [express] GET /api/gamification/leaderboard-view 200 in 203ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032358,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,fcxf6-1770223032358-0a4558e259f3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,235,iad1,306,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P2PJ5N685STKS1B0T2N,0z09UHIQpwDq,2
+2026-02-04 16:37:13,1770223033677,dashboard-sb-team.vercel.app/api/orders,GET,,200,csvsw-1770223032358-c81d6fb46aa1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033677,dashboard-sb-team.vercel.app/api/orders,GET,,200,csvsw-1770223032358-c81d6fb46aa1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033884,dashboard-sb-team.vercel.app/api/orders,GET,,200,csvsw-1770223032358-c81d6fb46aa1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20513:12)
+    at async file:///var/task/api/handler.js:27425:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033914,dashboard-sb-team.vercel.app/api/orders,GET,,200,csvsw-1770223032358-c81d6fb46aa1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:13 PM [express] GET /api/orders 200 in 206ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032358,dashboard-sb-team.vercel.app/api/orders,GET,,200,csvsw-1770223032358-c81d6fb46aa1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1363,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P2PJ5N685STKRD3KKSE,EENCMtByPP3i,1
+2026-02-04 16:37:12,1770223032408,dashboard-sb-team.vercel.app/api/user,GET,,304,mwnlr-1770223032355-04d502b7fbb3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:12 PM [express] GET /api/user 200 in 1ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032355,dashboard-sb-team.vercel.app/api/user,GET,,304,mwnlr-1770223032355-04d502b7fbb3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,7,iad1,263,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P0W6WRSYS676AP4ST96,ZTJKIolhb40X,2
+2026-02-04 16:37:13,1770223033671,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,tp6ts-1770223032303-57abbd211e90,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033671,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,tp6ts-1770223032303-57abbd211e90,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033888,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,tp6ts-1770223032303-57abbd211e90,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27894:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033917,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,tp6ts-1770223032303-57abbd211e90,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:13 PM [express] POST /api/gamification/ping 200 in 205ms :: {""success"":false,""timestamp"":""2026-02-04T16:37:13.888Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032303,dashboard-sb-team.vercel.app/api/gamification/ping,POST,,200,tp6ts-1770223032303-57abbd211e90,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1359,iad1,310,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P11WZ1G7CATFJJDY5AH,rvk14gvZ8qkA,1
+2026-02-04 16:37:13,1770223033743,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,mkvjj-1770223032300-e922b430e2f8,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033743,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,mkvjj-1770223032300-e922b430e2f8,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033948,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,mkvjj-1770223032300-e922b430e2f8,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Model stats error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27623:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033978,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,mkvjj-1770223032300-e922b430e2f8,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:13 PM [express] GET /api/model-stats 200 in 204ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032300,dashboard-sb-team.vercel.app/api/model-stats,GET,,200,mkvjj-1770223032300-e922b430e2f8,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1416,iad1,306,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P10F6GANKQWW7C274Q5,e3D896OGKpvi,1
+2026-02-04 16:37:12,1770223032687,dashboard-sb-team.vercel.app/api/orders,GET,,200,gf4k6-1770223032300-a19a282b3144,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20513:12)
+    at async file:///var/task/api/handler.js:27425:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032688,dashboard-sb-team.vercel.app/api/orders,GET,,200,gf4k6-1770223032300-a19a282b3144,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:12 PM [express] GET /api/orders 200 in 209ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032300,dashboard-sb-team.vercel.app/api/orders,GET,,200,gf4k6-1770223032300-a19a282b3144,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,210,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P0W6WRSYS676AP4ST96,ZTJKIolhb40X,4
+2026-02-04 16:37:12,1770223032649,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,bb2pn-1770223032300-6e7ddef230a0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Model stats latest error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27613:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032651,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,bb2pn-1770223032300-6e7ddef230a0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:12 PM [express] GET /api/model-stats/latest 200 in 188ms,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032300,dashboard-sb-team.vercel.app/api/model-stats/latest,GET,,200,bb2pn-1770223032300-6e7ddef230a0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,190,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P0W6WRSYS676AP4ST96,ZTJKIolhb40X,4
+2026-02-04 16:37:12,1770223032611,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,p57t9-1770223032299-dea4d7822a62,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27875:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032613,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,p57t9-1770223032299-dea4d7822a62,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,4:37:12 PM [express] GET /api/gamification/leaderboard-view 200 in 239ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032299,dashboard-sb-team.vercel.app/api/gamification/leaderboard-view,GET,,200,p57t9-1770223032299-dea4d7822a62,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,243,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P0W6WRSYS676AP4ST96,ZTJKIolhb40X,4
+2026-02-04 16:37:13,1770223033710,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fcpm9-1770223032299-8090a4e39cfd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033710,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fcpm9-1770223032299-8090a4e39cfd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033956,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fcpm9-1770223032299-8090a4e39cfd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",error,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28063:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:13,1770223033986,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fcpm9-1770223032299-8090a4e39cfd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:13 PM [express] POST /api/gamification/heartbeat 200 in 229ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:12,1770223032299,dashboard-sb-team.vercel.app/api/gamification/heartbeat,POST,,200,fcpm9-1770223032299-8090a4e39cfd,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1387,iad1,305,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7P0W6WRSYS676C4AEDMR,MO1ajTjvdpkN,1
+2026-02-04 16:37:07,1770223027796,dashboard-sb-team.vercel.app/api/user,GET,,200,csvsw-1770223027454-25a0f3783a65,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:07,1770223027796,dashboard-sb-team.vercel.app/api/user,GET,,200,csvsw-1770223027454-25a0f3783a65,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:07,1770223027854,dashboard-sb-team.vercel.app/api/user,GET,,200,csvsw-1770223027454-25a0f3783a65,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:37:07 PM [express] GET /api/user 200 in 8ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:37:07,1770223027454,dashboard-sb-team.vercel.app/api/user,GET,,200,csvsw-1770223027454-25a0f3783a65,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team.vercel.app,dashboard-sb-team.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,84,iad1,306,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR7HH60E8R1RMFVH6NPDJN,ZTJKIolhb40X,1
+2026-02-04 16:36:51,1770223011111,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/favicon.png,GET,,401,gtwqc-1770223011111-9be72d30a09c,vercel-favicon/1.0,,production,main,,static,/favicon.png,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,2,sfo1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:51,1770223011094,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/favicon.png,GET,,401,922h2-1770223011094-df3bd1864c5c,vercel-favicon/1.0,,production,main,,static,/favicon.png,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,6,sfo1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971765,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,vqc92-1770222971709-5b2c561e8a74,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:36:11 PM [express] GET /api/user 200 in 1ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971709,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,vqc92-1770222971709-5b2c561e8a74,vercel-screenshot/1.0,,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,8,iad1,314,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR5TV2RP7H7MY9PDJ8WCEH,AylZK88hd1H2,1
+2026-02-04 16:36:11,1770222971571,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,4vmw9-1770222971370-b3493183e9b9,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:36:11 PM [express] GET /api/user 200 in 1ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971370,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,4vmw9-1770222971370-b3493183e9b9,vercel-screenshot/1.0,,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,8,iad1,314,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR5TGGCJ68TM91X5KP3PHV,AylZK88hd1H2,1
+2026-02-04 16:36:12,1770222972646,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,7kjcv-1770222971323-4b77d2ec0018,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:12,1770222972646,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,7kjcv-1770222971323-4b77d2ec0018,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:12,1770222972689,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,7kjcv-1770222971323-4b77d2ec0018,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:36:12 PM [express] GET /api/user 200 in 10ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971323,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,7kjcv-1770222971323-4b77d2ec0018,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,1183,iad1,305,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR5TF361TCE7DCMJVXEH3F,B7FCLMypW3Ij,1
+2026-02-04 16:36:11,1770222971475,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,4fhcl-1770222971114-58f36b171317,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971475,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,4fhcl-1770222971114-58f36b171317,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971525,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,4fhcl-1770222971114-58f36b171317,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,,,,,"4:36:11 PM [express] GET /api/user 200 in 11ms :: {""id"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-04 16:36:11,1770222971114,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,4fhcl-1770222971114-58f36b171317,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-cfj3d6axm-savonas-projects-0cd29dae.vercel.app,dpl_7kTZtqfYhCUVs3dJntXqR3j1G4Fb,88,iad1,313,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGMR5TCZ6X9AFK4FTZR23ZPD,AylZK88hd1H2,1
