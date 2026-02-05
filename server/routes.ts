@@ -900,10 +900,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
           xal.xp_gained as "xpGained",
           xal.description,
           xal.created_at as "createdAt",
-          COALESCE(gp.username, p.username, 'Utilisateur Inconnu') as username
+          COALESCE(gp.username, 'Utilisateur Inconnu') as username
         FROM xp_activity_log xal
         LEFT JOIN gamification_profiles gp ON xal.user_id = gp.user_id
-        LEFT JOIN profiles p ON xal.user_id = p.user_id
         ORDER BY xal.created_at DESC
         LIMIT 20
       `);
