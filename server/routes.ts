@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { setupAuth, isMockAuthEnabled, getCurrentUser, requireAuth, getUserNumericId } from "./auth";
 import axios from "axios";
-import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory, gamificationProfiles, hunterLeads, workSessions, xpActivityLog, insertHunterLeadSchema, insertWorkSessionSchema } from "@shared/schema";
+import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory, gamificationProfiles, hunterLeads, workSessions, xpActivityLog, groupMessages, insertHunterLeadSchema, insertWorkSessionSchema } from "@shared/schema";
 import { db } from "./db";
 import { desc, gte, eq, ne, sql, and, isNull } from "drizzle-orm";
 import { storage } from "./storage";
@@ -893,7 +893,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     try {
       // Get activities with user info via SQL JOIN
       const activitiesResult = await db.execute(sql`
-        SELECT 
+        SELECT
           xal.id,
           xal.user_id as "userId",
           xal.action_type as "actionType",
@@ -903,7 +903,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
           COALESCE(gp.username, p.username, 'Utilisateur Inconnu') as username
         FROM xp_activity_log xal
         LEFT JOIN gamification_profiles gp ON xal.user_id = gp.user_id
-        LEFT JOIN profiles p ON CAST(xal.user_id AS TEXT) = p.id
+        LEFT JOIN profiles p ON xal.user_id = p.user_id
         ORDER BY xal.created_at DESC
         LIMIT 20
       `);
@@ -1503,38 +1503,37 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   });
 
   // ===================== GROUP CHAT API =====================
-  
+
   // Get all group messages
   app.get("/api/group-messages", async (req, res) => {
     try {
-      const result = await db.execute(sql`
-        SELECT * FROM group_messages 
-        ORDER BY created_at ASC 
-        LIMIT 100
-      `);
-      res.json(result.rows || []);
+      const messages = await db.select()
+        .from(groupMessages)
+        .orderBy(groupMessages.createdAt)
+        .limit(100);
+      res.json(messages);
     } catch (error: any) {
       console.error("Error fetching group messages:", error);
       res.json([]);
     }
   });
-  
+
   // Send a group message
   app.post("/api/group-messages", async (req, res) => {
     try {
       const { senderId, senderUsername, content } = req.body;
-      
+
       if (!senderId || !senderUsername || !content?.trim()) {
         return res.status(400).json({ error: "Missing required fields" });
       }
-      
-      const result = await db.execute(sql`
-        INSERT INTO group_messages (sender_id, sender_username, content)
-        VALUES (${senderId}, ${senderUsername}, ${content.trim()})
-        RETURNING *
-      `);
-      
-      res.json(result.rows[0]);
+
+      const [message] = await db.insert(groupMessages).values({
+        senderId: typeof senderId === 'number' ? senderId : parseInt(String(senderId), 10),
+        senderUsername,
+        content: content.trim()
+      }).returning();
+
+      res.json(message);
     } catch (error: any) {
       console.error("Error sending group message:", error);
       res.json({ id: 0, error: "Failed to send message" });
