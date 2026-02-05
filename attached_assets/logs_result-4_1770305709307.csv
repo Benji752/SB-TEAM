@@ -1,0 +1,521 @@
+TimeUTC,timestampInMs,requestPath,requestMethod,requestQueryString,responseStatusCode,requestId,requestUserAgent,level,environment,branch,vercelCache,type,function,host,deploymentDomain,deploymentId,durationMs,region,maxMemoryUsed,memorySize,message,projectId,traceId,sessionId,invocationId,instanceId,concurrency
+2026-02-05 15:33:35,1770305615940,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,strbc-1770305615673-25383f49e562,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20529:12)
+    at async file:///var/task/api/handler.js:27441:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:35,1770305615941,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,strbc-1770305615673-25383f49e562,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:33:35 PM [express] GET /api/orders 200 in 187ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:35,1770305615673,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,strbc-1770305615673-25383f49e562,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,193,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZXVXGDJ0RZAXTGZMS89C,JDXhonrJKG0C,1
+2026-02-05 15:33:35,1770305615612,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,POST,,200,jrl56-1770305615304-f6648c08433e,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Order create error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.createOrder (file:///var/task/api/handler.js:20532:24)
+    at async file:///var/task/api/handler.js:27454:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:35,1770305615612,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,POST,,200,jrl56-1770305615304-f6648c08433e,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:35 PM [express] POST /api/orders 200 in 231ms :: {""id"":0,""error"":""Failed to create order""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:35,1770305615304,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,POST,,200,jrl56-1770305615304-f6648c08433e,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,238,iad1,267,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZXFS4QBHNPPVCFZB69N4,JDXhonrJKG0C,1
+2026-02-05 15:33:30,1770305610130,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,9xstk-1770305609667-f2bfb44eb7ba,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28080:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:30,1770305610130,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,9xstk-1770305609667-f2bfb44eb7ba,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:30 PM [express] POST /api/gamification/heartbeat 200 in 188ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:29,1770305609667,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,9xstk-1770305609667-f2bfb44eb7ba,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,198,iad1,266,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZR66JFFN0S6YQKR1R995,JDXhonrJKG0C,1
+2026-02-05 15:33:27,1770305607701,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,jrl56-1770305607164-c729db8688f2,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28080:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:27,1770305607702,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,jrl56-1770305607164-c729db8688f2,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:27 PM [express] POST /api/gamification/heartbeat 200 in 461ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:27,1770305607164,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,jrl56-1770305607164-c729db8688f2,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,469,iad1,265,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZNHVNVPYN7ABZY11DR39,JDXhonrJKG0C,1
+2026-02-05 15:33:24,1770305604116,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/ai/chat,POST,,200,7rft2-1770305603856-862029f31704,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,AI chat error: Tenant or user not found,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:24,1770305604118,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/ai/chat,POST,,200,7rft2-1770305603856-862029f31704,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:24 PM [express] POST /api/ai/chat 200 in 192ms :: {""response"":""Désolé, je rencontre des difficultés techniques. Réessayez dans quelques instants.""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:23,1770305603856,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/ai/chat,POST,,200,7rft2-1770305603856-862029f31704,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,201,iad1,264,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZJA4MB7KNF0XM5SWRGJ8,JDXhonrJKG0C,1
+2026-02-05 15:33:20,1770305600797,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/ai/chat/history,GET,,200,qglz4-1770305600211-9c73e2dcbefa,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"AI chat history error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27648:27 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:20,1770305600798,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/ai/chat/history,GET,,200,qglz4-1770305600211-9c73e2dcbefa,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:33:20 PM [express] GET /api/ai/chat/history 200 in 463ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:20,1770305600211,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/ai/chat/history,GET,,200,qglz4-1770305600211-9c73e2dcbefa,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,464,iad1,264,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZER8HS4MD2Q6MAZG3J5G,JDXhonrJKG0C,2
+2026-02-05 15:33:20,1770305600555,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,tdkmn-1770305600210-45c5fdf2161a,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28080:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:20,1770305600557,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,tdkmn-1770305600210-45c5fdf2161a,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:20 PM [express] POST /api/gamification/heartbeat 200 in 239ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:20,1770305600210,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,tdkmn-1770305600210-45c5fdf2161a,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,275,iad1,264,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZER8HS4MD2Q6MAZG3J5G,JDXhonrJKG0C,2
+2026-02-05 15:33:17,1770305597630,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,304,sgdjx-1770305597328-97d2a3db01df,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27892:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597632,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,304,sgdjx-1770305597328-97d2a3db01df,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:33:17 PM [express] GET /api/gamification/leaderboard-view 200 in 188ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597328,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,304,sgdjx-1770305597328-97d2a3db01df,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,196,iad1,264,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZBZ994VTMWD1B5VHJ9V0,JDXhonrJKG0C,1
+2026-02-05 15:33:17,1770305597230,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/today-time/2,GET,,200,9882n-1770305596932-bab4e6008766,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28240:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597232,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/today-time/2,GET,,200,9882n-1770305596932-bab4e6008766,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:17 PM [express] GET /api/gamification/today-time/2 200 in 225ms :: {""userId"":2,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:16,1770305596932,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/today-time/2,GET,,200,9882n-1770305596932-bab4e6008766,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,232,iad1,311,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZBHQEB4KC6YDXFC04CHD,QAyMXieKq29c,1
+2026-02-05 15:33:17,1770305597268,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/ping,POST,,200,t8wt4-1770305596928-9b8f49d46645,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27911:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597270,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/ping,POST,,200,t8wt4-1770305596928-9b8f49d46645,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:17 PM [express] POST /api/gamification/ping 200 in 202ms :: {""success"":false,""timestamp"":""2026-02-05T15:33:17.268Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:16,1770305596928,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/ping,POST,,200,t8wt4-1770305596928-9b8f49d46645,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,239,iad1,264,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZBHQEB4KC6YDXM5HXSP2,vX0dPR3e0Khd,1
+2026-02-05 15:33:17,1770305597230,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/today-time/1,GET,,200,sgdjx-1770305596925-3ade5cab9db5,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Today time error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28240:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597232,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/today-time/1,GET,,200,sgdjx-1770305596925-3ade5cab9db5,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:17 PM [express] GET /api/gamification/today-time/1 200 in 207ms :: {""userId"":1,""todayMinutes"":0,""formatted"":""0h 0m""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:16,1770305596925,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/today-time/1,GET,,200,sgdjx-1770305596925-3ade5cab9db5,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,223,iad1,310,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZBHQEB4KC6YDXGHA8HGR,sJXt9hRufZQ5,1
+2026-02-05 15:33:17,1770305597270,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,qglz4-1770305596925-6b17b3f9076c,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28080:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597270,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,qglz4-1770305596925-6b17b3f9076c,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:33:17 PM [express] POST /api/gamification/heartbeat 200 in 214ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:16,1770305596925,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,qglz4-1770305596925-6b17b3f9076c,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,281,iad1,311,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZBHJ7PRSJK87C85SGRKA,JDXhonrJKG0C,1
+2026-02-05 15:33:17,1770305597251,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/activity,GET,,200,nfdns-1770305596925-f5f70ad8ccd0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Activity error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27963:32 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:17,1770305597254,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/activity,GET,,200,nfdns-1770305596925-f5f70ad8ccd0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:33:17 PM [express] GET /api/gamification/activity 200 in 236ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:33:16,1770305596925,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/activity,GET,,200,nfdns-1770305596925-f5f70ad8ccd0,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,247,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6ZBJ429W3V3PXHRNBNPY8,xOfbg1nLz8wU,1
+2026-02-05 15:32:47,1770305567010,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leads/pending,GET,,200,fzjxn-1770305566743-be19307028be,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Pending leads error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28282:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:47,1770305567037,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leads/pending,GET,,200,fzjxn-1770305566743-be19307028be,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:32:47 PM [express] GET /api/gamification/leads/pending 200 in 214ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566743,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leads/pending,GET,,200,fzjxn-1770305566743-be19307028be,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,250,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGHJJQ2ZJNYK0JSRDYQ,JDXhonrJKG0C,3
+2026-02-05 15:32:47,1770305567040,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/ping,POST,,200,msf64-1770305566719-7ac26ba5535c,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Ping error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27911:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:47,1770305567045,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/ping,POST,,200,msf64-1770305566719-7ac26ba5535c,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:47 PM [express] POST /api/gamification/ping 200 in 261ms :: {""success"":false,""timestamp"":""2026-02-05T15:32:47.039Z""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566719,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/ping,POST,,200,msf64-1770305566719-7ac26ba5535c,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,284,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGHJJQ2ZJNYK0JSRDYQ,JDXhonrJKG0C,3
+2026-02-05 15:32:46,1770305566998,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,4z2sm-1770305566717-5535497cf476,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Heartbeat error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:28080:21 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566999,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,4z2sm-1770305566717-5535497cf476,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:46 PM [express] POST /api/gamification/heartbeat 200 in 202ms :: {""xpGained"":0,""message"":""Heartbeat failed silently""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566717,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/heartbeat,POST,,200,4z2sm-1770305566717-5535497cf476,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,217,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YE1HYV9ZTMQPXDA95SDJ,QAyMXieKq29c,1
+2026-02-05 15:32:45,1770305565483,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats/latest,GET,,200,msf64-1770305565148-74a16af1f4d1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Model stats latest error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27629:28 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:45,1770305565485,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats/latest,GET,,200,msf64-1770305565148-74a16af1f4d1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:32:45 PM [express] GET /api/model-stats/latest 200 in 227ms,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:45,1770305565148,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats/latest,GET,,200,msf64-1770305565148-74a16af1f4d1,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,268,iad1,309,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGFXCVDK2A19Z5H4GF7,vX0dPR3e0Khd,1
+2026-02-05 15:32:46,1770305566784,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,jcx9t-1770305565148-3d7b6557e48f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566784,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,jcx9t-1770305565148-3d7b6557e48f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:47,1770305567008,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,jcx9t-1770305565148-3d7b6557e48f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Orders error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getAllOrders (file:///var/task/api/handler.js:20529:12)
+    at async file:///var/task/api/handler.js:27441:25 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:47,1770305567041,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,jcx9t-1770305565148-3d7b6557e48f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:32:47 PM [express] GET /api/orders 200 in 220ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:45,1770305565148,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/orders,GET,,200,jcx9t-1770305565148-3d7b6557e48f,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,1609,iad1,306,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGV2FVEDZAZ94W1ATR3,sJXt9hRufZQ5,1
+2026-02-05 15:32:46,1770305566629,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,304,fzjxn-1770305565148-052e8121f802,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566629,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,304,fzjxn-1770305565148-052e8121f802,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566635,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,304,fzjxn-1770305565148-052e8121f802,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566671,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,304,fzjxn-1770305565148-052e8121f802,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:46 PM [express] GET /api/user 200 in 11ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:45,1770305565148,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,304,fzjxn-1770305565148-052e8121f802,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,1269,iad1,307,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGFXCVDK2A19X9K3A05,xOfbg1nLz8wU,1
+2026-02-05 15:32:46,1770305566457,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats,GET,,200,4z2sm-1770305565148-e1414cbc6a0b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566457,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats,GET,,200,4z2sm-1770305565148-e1414cbc6a0b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566663,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats,GET,,200,4z2sm-1770305565148-e1414cbc6a0b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Model stats error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async file:///var/task/api/handler.js:27639:24 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566689,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats,GET,,200,4z2sm-1770305565148-e1414cbc6a0b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:32:46 PM [express] GET /api/model-stats 200 in 205ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:45,1770305565148,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/model-stats,GET,,200,4z2sm-1770305565148-e1414cbc6a0b,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,1240,iad1,305,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGEF5P3R6JZA5ESJ0FW,QAyMXieKq29c,1
+2026-02-05 15:32:46,1770305566752,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,200,hbkb5-1770305565146-ed8cb02294b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:46,1770305566752,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,200,hbkb5-1770305565146-ed8cb02294b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:47,1770305567042,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,200,hbkb5-1770305565146-ed8cb02294b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",error,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Leaderboard view error: error: Tenant or user not found
+    at file:///var/task/api/handler.js:15647:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async file:///var/task/api/handler.js:27892:22 {
+  length: 52,
+  severity: 'FATAL',
+  code: 'XX000',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: undefined,
+  line: undefined,
+  routine: undefined
+}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:47,1770305567054,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,200,hbkb5-1770305565146-ed8cb02294b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,3:32:47 PM [express] GET /api/gamification/leaderboard-view 200 in 298ms :: [],prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:45,1770305565146,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/gamification/leaderboard-view,GET,,200,hbkb5-1770305565146-ed8cb02294b7,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,315,iad1,308,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6YCGHJJQ2ZJNYK0JSRDYQ,JDXhonrJKG0C,3
+2026-02-05 15:32:23,1770305543834,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,jnzd9-1770305543609-c42402e55849,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:23,1770305543834,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,jnzd9-1770305543609-c42402e55849,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:23,1770305543839,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,jnzd9-1770305543609-c42402e55849,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:23,1770305543871,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,jnzd9-1770305543609-c42402e55849,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:23 PM [express] GET /api/user 200 in 7ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:23,1770305543609,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,jnzd9-1770305543609-c42402e55849,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,43,iad1,306,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6XQM2WF8WWDTRCSAE39F1,vX0dPR3e0Khd,1
+2026-02-05 15:32:22,1770305542680,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/,GET,_vercel_jwt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzc28tcHJvdGVjdGlvbi1jYWxsYmFjayIsImF1ZCI6ImRhc2hib2FyZC1zYi10ZWFtLWF4Z3lwa2NyZi1zYXZvbmFzLXByb2plY3RzLTBjZDI5ZGFlLnZlcmNlbC5hcHAiLCJpYXQiOjE3NzAzMDU1NDIsImV4cCI6MTc3MDMwNTU1MiwidXNlcklkIjoiRnE4aExsalBDZHREd0ZTaDJsTkpxN2lrIiwidXNlcm5hbWUiOiJzYXZvbmEtYmVuamFtaW4tMzY3NyIsIm5vbmNlIjoiMGVmZGU1ZGU1OWQ0ZjE5Y2I3MTA3ZGE1ZGVlMTJmMGI4N2M4ZmI1NTk4NWZhNjViODczZTk0NGJiZGMyZmE4NyJ9.4TYy1IHqGfUdngkFeOnYMVER2SxG_A2R_gcLgnzyNuQ&_vercel_jwe=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..sKLGxrdHn4CceeWQ.kvB7Lvp4K_2WfGQqv3t9Qm0347koizzm-iOOOwHkrzphFfHza3sBPItyO0-dgLm_gkx24iWp02fAiwW-pbPRfCboe2KRtGZ6-0XnH130_4Bx4B47fxWWqxGNWcMyQZi1QpUCHnxgyyek24FPlsZRpyc7LMJgLm_0ilcPCOZTV5wn6FTjF382G1y4SZGVlApXmu829OHZi_R1qfMWg4VlL3Wecjsl3lgVMKxP9ekHZD-CjUz0q08lqrGZfnZPENl0ptl8ZAQPCQi3FEiXr_ZAKFcCJW2zIVHO6D8ydHqGgTWTdsB7PnK5Moxa91n-HrHRtegxKhkCif3DKFbzrpoi3ZXvTpPaioYEVeoxUggk5Op94g.iu25utmatfA672oLkGPuIw,307,8x82v-1770305542680-a55b45d77912,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,,static,/,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,125,cdg1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:22,1770305542052,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/,GET,,401,b8xvc-1770305542052-f158646904b3,"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15",,production,main,,static,/,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,126,cdg1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528823,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/favicon.png,GET,,401,ch4zs-1770305528823-0c188476b04f,vercel-favicon/1.0,,production,main,,static,/favicon.png,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,2,sfo1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528808,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/favicon.png,GET,,401,pzhjm-1770305528808-333b4ad7ec3a,vercel-favicon/1.0,,production,main,,static,/favicon.png,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,2,sfo1,,,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528355,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,2frh5-1770305528303-90c621404c79,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528356,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,2frh5-1770305528303-90c621404c79,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:08 PM [express] GET /api/user 200 in 1ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528303,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,2frh5-1770305528303-90c621404c79,vercel-screenshot/1.0,,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,9,iad1,314,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6X8GK8HKCYEWK0P6MRNT9,V61FCAFVC8yt,1
+2026-02-05 15:32:08,1770305528223,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,dch2f-1770305528166-083ba2c0fdf3,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528225,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,dch2f-1770305528166-083ba2c0fdf3,vercel-screenshot/1.0,info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:08 PM [express] GET /api/user 200 in 1ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528166,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,dch2f-1770305528166-083ba2c0fdf3,vercel-screenshot/1.0,,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,8,iad1,313,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6X8CAH1S06EGES2TC72Q4,V61FCAFVC8yt,1
+2026-02-05 15:32:08,1770305528193,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,r9s64-1770305528144-6308124b8b98,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528194,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,r9s64-1770305528144-6308124b8b98,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:08 PM [express] GET /api/user 200 in 2ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528144,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,r9s64-1770305528144-6308124b8b98,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,8,iad1,313,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6X8BKEFRKJ80CB9N0GHVH,V61FCAFVC8yt,1
+2026-02-05 15:32:08,1770305528156,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,7spnm-1770305528106-c85a8ed43a9a,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,,function,,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528157,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,7spnm-1770305528106-c85a8ed43a9a,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,,function,,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:08 PM [express] GET /api/user 200 in 2ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528106,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,,7spnm-1770305528106-c85a8ed43a9a,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,7,iad1,313,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6X8ADK4AVERP92B15Q40N,V61FCAFVC8yt,1
+2026-02-05 15:32:09,1770305529572,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,d8vgm-1770305527886-9335d3409988,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:09,1770305529572,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,d8vgm-1770305527886-9335d3409988,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:09,1770305529586,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,d8vgm-1770305527886-9335d3409988,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:09,1770305529648,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,d8vgm-1770305527886-9335d3409988,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:09 PM [express] GET /api/user 200 in 13ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:07,1770305527886,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,d8vgm-1770305527886-9335d3409988,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,1645,iad1,305,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6X83G7RE2B4PKAXHM4652,BsbsjT7jEjZb,1
+2026-02-05 15:32:07,1770305527985,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,zgwp8-1770305527657-a565bdeb8150,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"🔐 MOCK_AUTH ENABLED — tenant sb-tenant injected, admin user: Benjamin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:07,1770305527985,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,zgwp8-1770305527657-a565bdeb8150,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"Warning: connect.session() MemoryStore is notdesigned for a production environment, as it will leakmemory, and will not scale past a single process.",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:07,1770305527994,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,zgwp8-1770305527657-a565bdeb8150,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"[MOCK_AUTH] GET /api/user returning: id=730a5876-345a-4b11-a813-5b5ee08c8eef, numericId=1, role=admin",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:08,1770305528029,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,zgwp8-1770305527657-a565bdeb8150,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",info,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,,,,,"3:32:08 PM [express] GET /api/user 200 in 11ms :: {""id"":""730a5876-345a-4b11-a813-5b5ee08c8eef"",""numericId"":1,""username"":""Benjamin"",""email"":""admin@sb-digital.fr"",""role"":""admin"",""firstName"":""Benjamin"",""lastName"":""Admin"",""tenantId"":""sb-tenant""}",prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,,,
+2026-02-05 15:32:07,1770305527657,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app/api/user,GET,,200,zgwp8-1770305527657-a565bdeb8150,"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.0 Safari/537.36",,production,main,MISS,function,/api/handler,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dashboard-sb-team-axgypkcrf-savonas-projects-0cd29dae.vercel.app,dpl_3gvSnyMW6JqoE5EYy5pkQiXPeb1H,83,iad1,310,2048,,prj_qGPYigLYbjXekJ1FJ2yLASrWwrVs,,,01KGQ6X807NNJB03ZXPKSKWTCA,V61FCAFVC8yt,1
