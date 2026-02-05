@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { initializeDatabase } from "./db";
 
 const app = express();
 const httpServer = createServer(app);
@@ -68,6 +69,9 @@ app.use((req, res, next) => {
 let appReady: Promise<void>;
 
 async function initializeApp() {
+  // Auto-create missing tables and views on startup
+  await initializeDatabase();
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {

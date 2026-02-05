@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS work_sessions CASCADE;
 DROP TABLE IF EXISTS hunter_leads CASCADE;
 DROP TABLE IF EXISTS gamification_profiles CASCADE;
 DROP TABLE IF EXISTS ai_chat_history CASCADE;
+DROP TABLE IF EXISTS group_messages CASCADE;
 DROP TABLE IF EXISTS events CASCADE;
 DROP TABLE IF EXISTS resources CASCADE;
 DROP TABLE IF EXISTS tickets CASCADE;
@@ -209,6 +210,15 @@ CREATE TABLE ai_chat_history (
   user_message TEXT NOT NULL,
   ai_response TEXT NOT NULL,
   has_image BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Group Messages table (Team Chat)
+CREATE TABLE group_messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER NOT NULL,
+  sender_username TEXT NOT NULL,
+  content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
 

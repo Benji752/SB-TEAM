@@ -210,6 +210,19 @@ export const insertAiChatHistorySchema = createInsertSchema(aiChatHistory).omit(
 export type AiChatHistory = typeof aiChatHistory.$inferSelect;
 export type InsertAiChatHistory = z.infer<typeof insertAiChatHistorySchema>;
 
+// Group Messages (Team Chat)
+export const groupMessages = pgTable("group_messages", {
+  id: serial("id").primaryKey(),
+  senderId: integer("sender_id").notNull(),
+  senderUsername: text("sender_username").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertGroupMessageSchema = createInsertSchema(groupMessages).omit({ id: true, createdAt: true });
+export type GroupMessage = typeof groupMessages.$inferSelect;
+export type InsertGroupMessage = z.infer<typeof insertGroupMessageSchema>;
+
 // ========== SB HUNTER LEAGUE - Gamification ==========
 
 // Gamification Profiles
