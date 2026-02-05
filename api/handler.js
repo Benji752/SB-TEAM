@@ -20468,35 +20468,50 @@ var pool = new Pool2({
   ssl: true ? { rejectUnauthorized: false } : false
 });
 var db = drizzle(pool, { schema: schema_exports });
+async function safeQuery(client, label, sqlText) {
+  try {
+    await client.query(sqlText);
+  } catch (error) {
+    console.warn(`[DB] ${label} skipped: ${error.message}`);
+  }
+}
 async function initializeDatabase() {
   const client = await pool.connect();
   try {
-    await client.query(`
-      -- Core tables
+    console.log("[DB] Starting database initialization...");
+    await safeQuery(client, "users", `
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
         role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model'))
-      );
-
+      )
+    `);
+    await safeQuery(client, "auth_logs", `
       CREATE TABLE IF NOT EXISTS auth_logs (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL,
         event_type TEXT NOT NULL,
         reason TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "profiles", `
       CREATE TABLE IF NOT EXISTS profiles (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        username TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model')),
+        user_id INTEGER,
+        username TEXT,
+        role TEXT DEFAULT 'model',
         bio TEXT,
         avatar_url TEXT,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "profiles+user_id", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_id INTEGER`);
+    await safeQuery(client, "profiles+username", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS username TEXT`);
+    await safeQuery(client, "profiles+role", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'model'`);
+    await safeQuery(client, "profiles+bio", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT`);
+    await safeQuery(client, "profiles+avatar_url", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`);
+    await safeQuery(client, "models", `
       CREATE TABLE IF NOT EXISTS models (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -20507,8 +20522,9 @@ async function initializeDatabase() {
         profile_image TEXT,
         manager_id INTEGER,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "tasks", `
       CREATE TABLE IF NOT EXISTS tasks (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
@@ -20519,8 +20535,9 @@ async function initializeDatabase() {
         model_id INTEGER,
         due_date TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "agency_stats", `
       CREATE TABLE IF NOT EXISTS agency_stats (
         id SERIAL PRIMARY KEY,
         month TEXT NOT NULL,
@@ -20528,8 +20545,9 @@ async function initializeDatabase() {
         new_subscribers INTEGER DEFAULT 0,
         churn_rate INTEGER DEFAULT 0,
         updated_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "prospects", `
       CREATE TABLE IF NOT EXISTS prospects (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -20538,8 +20556,9 @@ async function initializeDatabase() {
         status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'qualified', 'rejected')),
         notes TEXT,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "messages", `
       CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
         sender_id TEXT NOT NULL,
@@ -20548,8 +20567,9 @@ async function initializeDatabase() {
         content TEXT NOT NULL,
         is_read BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "drive_assets", `
       CREATE TABLE IF NOT EXISTS drive_assets (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -20558,8 +20578,9 @@ async function initializeDatabase() {
         type TEXT,
         owner_id TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "drive_files", `
       CREATE TABLE IF NOT EXISTS drive_files (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -20569,8 +20590,9 @@ async function initializeDatabase() {
         folder_id INTEGER,
         owner_id INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "client_requests", `
       CREATE TABLE IF NOT EXISTS client_requests (
         id SERIAL PRIMARY KEY,
         client_name TEXT NOT NULL,
@@ -20579,8 +20601,9 @@ async function initializeDatabase() {
         status TEXT NOT NULL DEFAULT 'pending_payment',
         notes TEXT,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "orders", `
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
         client_name TEXT NOT NULL,
@@ -20589,19 +20612,21 @@ async function initializeDatabase() {
         status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('paid', 'pending', 'cancelled')),
         created_by INTEGER,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "model_stats", `
       CREATE TABLE IF NOT EXISTS model_stats (
         id SERIAL PRIMARY KEY,
-        is_online BOOLEAN NOT NULL,
-        current_price INTEGER NOT NULL,
+        is_online BOOLEAN NOT NULL DEFAULT FALSE,
+        current_price INTEGER NOT NULL DEFAULT 60,
         strip_score INTEGER DEFAULT 0,
         favorites INTEGER DEFAULT 0,
         subscribers INTEGER DEFAULT 0,
         hourly_revenue DOUBLE PRECISION DEFAULT 0,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "tickets", `
       CREATE TABLE IF NOT EXISTS tickets (
         id SERIAL PRIMARY KEY,
         subject TEXT NOT NULL,
@@ -20610,16 +20635,18 @@ async function initializeDatabase() {
         status TEXT NOT NULL DEFAULT 'pending',
         created_by INTEGER,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "resources", `
       CREATE TABLE IF NOT EXISTS resources (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         category TEXT,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "events", `
       CREATE TABLE IF NOT EXISTS events (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
@@ -20627,25 +20654,27 @@ async function initializeDatabase() {
         date TIMESTAMP NOT NULL,
         time TEXT,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "ai_chat_history", `
       CREATE TABLE IF NOT EXISTS ai_chat_history (
         id SERIAL PRIMARY KEY,
         user_message TEXT NOT NULL,
         ai_response TEXT NOT NULL,
         has_image BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "group_messages", `
       CREATE TABLE IF NOT EXISTS group_messages (
         id SERIAL PRIMARY KEY,
         sender_id INTEGER NOT NULL,
         sender_username TEXT NOT NULL,
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
-      -- Gamification tables
+      )
+    `);
+    await safeQuery(client, "gamification_profiles", `
       CREATE TABLE IF NOT EXISTS gamification_profiles (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL UNIQUE,
@@ -20658,8 +20687,14 @@ async function initializeDatabase() {
         last_active_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "gamification_profiles+id", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS id SERIAL`);
+    await safeQuery(client, "gamification_profiles+username", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS username TEXT`);
+    await safeQuery(client, "gamification_profiles+badges", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS badges TEXT[] DEFAULT '{}'`);
+    await safeQuery(client, "gamification_profiles+last_active_at", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMP`);
+    await safeQuery(client, "gamification_profiles+updated_at", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`);
+    await safeQuery(client, "hunter_leads", `
       CREATE TABLE IF NOT EXISTS hunter_leads (
         id SERIAL PRIMARY KEY,
         client_username TEXT NOT NULL,
@@ -20669,8 +20704,9 @@ async function initializeDatabase() {
         xp_awarded INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT NOW(),
         validated_at TIMESTAMP
-      );
-
+      )
+    `);
+    await safeQuery(client, "work_sessions", `
       CREATE TABLE IF NOT EXISTS work_sessions (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL,
@@ -20680,8 +20716,9 @@ async function initializeDatabase() {
         points_earned INTEGER DEFAULT 0,
         is_active BOOLEAN NOT NULL DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
+      )
+    `);
+    await safeQuery(client, "xp_activity_log", `
       CREATE TABLE IF NOT EXISTS xp_activity_log (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL,
@@ -20689,9 +20726,9 @@ async function initializeDatabase() {
         xp_gained INTEGER NOT NULL,
         description TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW()
-      );
-
-      -- Leaderboard view
+      )
+    `);
+    await safeQuery(client, "gamification_leaderboard_view", `
       CREATE OR REPLACE VIEW gamification_leaderboard_view AS
       SELECT
         gp.id,
@@ -20712,22 +20749,20 @@ async function initializeDatabase() {
           ELSE FALSE
         END AS is_online
       FROM gamification_profiles gp
-      ORDER BY gp.xp_total DESC;
-
-      -- Seed default admin user
+      ORDER BY gp.xp_total DESC
+    `);
+    await safeQuery(client, "seed:users", `
       INSERT INTO users (id, username, role) VALUES (1, 'Benjamin', 'admin')
-      ON CONFLICT (id) DO NOTHING;
-
-      INSERT INTO profiles (id, user_id, username, role) VALUES (1, 1, 'Benjamin', 'admin')
-      ON CONFLICT (id) DO NOTHING;
-
+      ON CONFLICT (id) DO NOTHING
+    `);
+    await safeQuery(client, "seed:gamification_profiles", `
       INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
       VALUES (1, 'Benjamin', 0, 1, 2.0)
-      ON CONFLICT (user_id) DO NOTHING;
+      ON CONFLICT (user_id) DO NOTHING
     `);
-    console.log("[DB] Database tables and views initialized successfully");
+    console.log("[DB] Database initialization complete");
   } catch (error) {
-    console.error("[DB] Error initializing database:", error);
+    console.error("[DB] Fatal error during initialization:", error);
   } finally {
     client.release();
   }
@@ -28245,10 +28280,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
           xal.xp_gained as "xpGained",
           xal.description,
           xal.created_at as "createdAt",
-          COALESCE(gp.username, p.username, 'Utilisateur Inconnu') as username
+          COALESCE(gp.username, 'Utilisateur Inconnu') as username
         FROM xp_activity_log xal
         LEFT JOIN gamification_profiles gp ON xal.user_id = gp.user_id
-        LEFT JOIN profiles p ON xal.user_id = p.user_id
         ORDER BY xal.created_at DESC
         LIMIT 20
       `);
