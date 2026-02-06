@@ -1,5 +1,8 @@
 import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
+import { db } from "./db";
+import { profiles } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 // Mock admin user for MOCK_AUTH mode
 // Uses UUID for display but also provides numeric ID for gamification tables
@@ -137,14 +140,29 @@ export function setupAuth(app: Express) {
     res.json(user);
   });
 
-  app.get("/api/user", (req, res) => {
-    // In mock auth mode, always return a valid user
+  app.get("/api/user", async (req, res) => {
+    // In mock auth mode, always return a valid user enriched with profile data
     if (isMockAuthEnabled()) {
       const user = getCurrentUser(req);
-      console.log(`[MOCK_AUTH] GET /api/user returning: id=${user.id}, numericId=${(user as any).numericId}, role=${user.role}`);
+      const numericId = (user as any).numericId || 1;
+
+      // Fetch avatar_url from profiles table
+      try {
+        const [profile] = await db.select().from(profiles).where(eq(profiles.userId, numericId));
+        if (profile) {
+          return res.json({
+            ...user,
+            avatarUrl: profile.avatarUrl,
+            avatar_url: profile.avatarUrl,
+          });
+        }
+      } catch (e) {
+        // DB not ready yet, return user without avatar
+      }
+
       return res.json(user);
     }
-    
+
     if ((req.session as any).user) {
       res.json((req.session as any).user);
     } else {
