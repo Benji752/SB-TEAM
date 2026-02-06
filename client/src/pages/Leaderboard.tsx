@@ -673,9 +673,14 @@ export default function Leaderboard() {
     queryKey: ["/api/gamification/today-time", 2],
   });
 
+  const { data: todayTime3 } = useQuery<TodayTime>({
+    queryKey: ["/api/gamification/today-time", 3],
+  });
+
   const todayTimes: Record<number, TodayTime> = {};
   if (todayTime1) todayTimes[1] = todayTime1;
   if (todayTime2) todayTimes[2] = todayTime2;
+  if (todayTime3) todayTimes[3] = todayTime3;
 
   const myProfile = currentUser ? {
     id: currentUser.id,

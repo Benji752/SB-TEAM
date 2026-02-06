@@ -36,7 +36,7 @@ DROP VIEW IF EXISTS gamification_leaderboard_view CASCADE;
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
-  role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model'))
+  role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model', 'staff'))
 );
 
 -- Auth Logs table
@@ -53,7 +53,7 @@ CREATE TABLE profiles (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
   username TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model')),
+  role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model', 'staff')),
   bio TEXT,
   avatar_url TEXT,
   created_at TIMESTAMP DEFAULT NOW()
@@ -302,19 +302,35 @@ FROM gamification_profiles gp
 ORDER BY gp.xp_total DESC;
 
 -- =============================================
--- SEED DATA - Default Mock User for MOCK_AUTH
+-- SEED DATA - Team Members
 -- =============================================
 
--- Insert default mock user (matching MOCK_USER_NUMERIC_ID = 1)
+-- Benjamin (admin, userId=1)
 INSERT INTO users (id, username, role) VALUES (1, 'Benjamin', 'admin')
-ON CONFLICT (id) DO NOTHING;
-
+ON CONFLICT (id) DO UPDATE SET username = 'Benjamin', role = 'admin';
 INSERT INTO profiles (id, user_id, username, role) VALUES (1, 1, 'Benjamin', 'admin')
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier) 
+ON CONFLICT (id) DO UPDATE SET user_id = 1, username = 'Benjamin', role = 'admin';
+INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
 VALUES (1, 'Benjamin', 0, 1, 2.0)
-ON CONFLICT (user_id) DO NOTHING;
+ON CONFLICT (user_id) DO UPDATE SET username = 'Benjamin';
+
+-- Laura (model, userId=2)
+INSERT INTO users (id, username, role) VALUES (2, 'Laura', 'model')
+ON CONFLICT (id) DO UPDATE SET username = 'Laura', role = 'model';
+INSERT INTO profiles (id, user_id, username, role) VALUES (2, 2, 'Laura', 'model')
+ON CONFLICT (id) DO UPDATE SET user_id = 2, username = 'Laura', role = 'model';
+INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
+VALUES (2, 'Laura', 0, 1, 1.0)
+ON CONFLICT (user_id) DO UPDATE SET username = 'Laura';
+
+-- Nico (staff, userId=3)
+INSERT INTO users (id, username, role) VALUES (3, 'Nico', 'staff')
+ON CONFLICT (id) DO UPDATE SET username = 'Nico', role = 'staff';
+INSERT INTO profiles (id, user_id, username, role) VALUES (3, 3, 'Nico', 'staff')
+ON CONFLICT (id) DO UPDATE SET user_id = 3, username = 'Nico', role = 'staff';
+INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
+VALUES (3, 'Nico', 0, 1, 2.0)
+ON CONFLICT (user_id) DO UPDATE SET username = 'Nico';
 
 -- =============================================
 -- DONE! All tables are now created.
