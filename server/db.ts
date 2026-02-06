@@ -358,7 +358,7 @@ export async function initializeDatabase() {
     `);
 
     // Seed the 3 team members: Benjamin(admin), Laura(model), Nico(staff)
-    // Users table
+    // Users table (our internal table with serial IDs)
     await safeQuery(client, "seed:users:benjamin", `
       INSERT INTO users (id, username, role) VALUES (1, 'Benjamin', 'admin')
       ON CONFLICT (id) DO UPDATE SET username = 'Benjamin', role = 'admin'
@@ -372,18 +372,16 @@ export async function initializeDatabase() {
       ON CONFLICT (id) DO UPDATE SET username = 'Nico', role = 'staff'
     `);
 
-    // Profiles table
-    await safeQuery(client, "seed:profiles:benjamin", `
-      INSERT INTO profiles (id, user_id, username, role) VALUES (1, 1, 'Benjamin', 'admin')
-      ON CONFLICT (id) DO UPDATE SET user_id = 1, username = 'Benjamin', role = 'admin'
+    // Link Supabase profiles (UUID-based) to numeric user_ids for gamification
+    // This updates the existing Supabase profiles table - DO NOT try to INSERT (UUID ids)
+    await safeQuery(client, "link:profiles:benjamin", `
+      UPDATE profiles SET user_id = 1 WHERE username = 'Benjamin' AND (user_id IS NULL OR user_id != 1)
     `);
-    await safeQuery(client, "seed:profiles:laura", `
-      INSERT INTO profiles (id, user_id, username, role) VALUES (2, 2, 'Laura', 'model')
-      ON CONFLICT (id) DO UPDATE SET user_id = 2, username = 'Laura', role = 'model'
+    await safeQuery(client, "link:profiles:laura", `
+      UPDATE profiles SET user_id = 2 WHERE username = 'Laura' AND (user_id IS NULL OR user_id != 2)
     `);
-    await safeQuery(client, "seed:profiles:nico", `
-      INSERT INTO profiles (id, user_id, username, role) VALUES (3, 3, 'Nico', 'staff')
-      ON CONFLICT (id) DO UPDATE SET user_id = 3, username = 'Nico', role = 'staff'
+    await safeQuery(client, "link:profiles:nico", `
+      UPDATE profiles SET user_id = 3 WHERE username = 'Nico' AND (user_id IS NULL OR user_id != 3)
     `);
 
     // Gamification profiles

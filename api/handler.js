@@ -17047,17 +17047,14 @@ async function initializeDatabase() {
       INSERT INTO users (id, username, role) VALUES (3, 'Nico', 'staff')
       ON CONFLICT (id) DO UPDATE SET username = 'Nico', role = 'staff'
     `);
-    await safeQuery(client, "seed:profiles:benjamin", `
-      INSERT INTO profiles (id, user_id, username, role) VALUES (1, 1, 'Benjamin', 'admin')
-      ON CONFLICT (id) DO UPDATE SET user_id = 1, username = 'Benjamin', role = 'admin'
+    await safeQuery(client, "link:profiles:benjamin", `
+      UPDATE profiles SET user_id = 1 WHERE username = 'Benjamin' AND (user_id IS NULL OR user_id != 1)
     `);
-    await safeQuery(client, "seed:profiles:laura", `
-      INSERT INTO profiles (id, user_id, username, role) VALUES (2, 2, 'Laura', 'model')
-      ON CONFLICT (id) DO UPDATE SET user_id = 2, username = 'Laura', role = 'model'
+    await safeQuery(client, "link:profiles:laura", `
+      UPDATE profiles SET user_id = 2 WHERE username = 'Laura' AND (user_id IS NULL OR user_id != 2)
     `);
-    await safeQuery(client, "seed:profiles:nico", `
-      INSERT INTO profiles (id, user_id, username, role) VALUES (3, 3, 'Nico', 'staff')
-      ON CONFLICT (id) DO UPDATE SET user_id = 3, username = 'Nico', role = 'staff'
+    await safeQuery(client, "link:profiles:nico", `
+      UPDATE profiles SET user_id = 3 WHERE username = 'Nico' AND (user_id IS NULL OR user_id != 3)
     `);
     await safeQuery(client, "seed:gamification:benjamin", `
       INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
