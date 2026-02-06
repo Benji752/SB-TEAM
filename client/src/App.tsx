@@ -133,10 +133,58 @@ export default function App() {
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Check cookie-based auth first (mock auth / demo mode)
+        // Check Supabase auth first (real authentication)
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+          setSession(session);
+          setLoading(false);
+
+          // Also set cookie for server-side if needed
+          if (!document.cookie.includes('sb-user-id=') && session.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('id', session.user.id)
+              .single();
+            if (profile?.user_id) {
+              fetch("/api/login-demo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: profile.user_id }),
+                credentials: "include",
+              }).catch(() => {});
+            }
+          }
+
+          if (session.user) {
+            supabase.from('profiles')
+              .update({ is_online: true })
+              .eq('id', session.user.id)
+              .then(({ error }) => {
+                if (error) console.error("Error setting online status:", error);
+              });
+
+            if (!sessionStorage.getItem('login_logged')) {
+              sessionStorage.setItem('login_logged', 'true');
+              supabase.from('activity_logs').insert({
+                user_id: session.user.id,
+                action: 'LOGIN',
+                details: 'Connexion réussie'
+              }).then(({ error }) => {
+                if (error) {
+                  console.error("Error logging login:", error);
+                  sessionStorage.removeItem('login_logged');
+                }
+              });
+            }
+          }
+          return;
+        }
+
+        // No Supabase session - check cookie fallback
         const hasCookie = document.cookie.includes('sb-user-id=');
         if (hasCookie) {
-          // Validate cookie by checking /api/user
           try {
             const res = await fetch("/api/user", { credentials: "include" });
             if (res.ok) {
@@ -150,33 +198,9 @@ export default function App() {
           } catch {}
         }
 
-        // Fallback: check Supabase auth
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
+        // No session at all
+        setSession(null);
         setLoading(false);
-
-        if (session?.user) {
-          supabase.from('profiles')
-            .update({ is_online: true })
-            .eq('id', session.user.id)
-            .then(({ error }) => {
-              if (error) console.error("Error setting online status:", error);
-            });
-
-          if (!sessionStorage.getItem('login_logged')) {
-            sessionStorage.setItem('login_logged', 'true');
-            supabase.from('activity_logs').insert({
-              user_id: session.user.id,
-              action: 'LOGIN',
-              details: 'Connexion réussie'
-            }).then(({ error }) => {
-              if (error) {
-                console.error("Error logging login:", error);
-                sessionStorage.removeItem('login_logged');
-              }
-            });
-          }
-        }
       } catch (err) {
         console.error("Session init error:", err);
         setLoading(false);
@@ -186,11 +210,8 @@ export default function App() {
     initSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Only update if no cookie-based session
-      if (!document.cookie.includes('sb-user-id=')) {
-        setSession(session);
-        setLoading(false);
-      }
+      setSession(session);
+      setLoading(false);
 
       if (session?.user) {
         supabase.from('profiles')
