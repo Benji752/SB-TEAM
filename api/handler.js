@@ -17084,50 +17084,66 @@ async function initializeDatabase() {
 
 // server/auth.ts
 import { eq } from "drizzle-orm";
-function getMockAdminUser() {
-  return {
-    id: process.env.MOCK_USER_ID || "mock-admin-uuid-001",
-    numericId: parseInt(process.env.MOCK_USER_NUMERIC_ID || "1", 10),
+var MOCK_USERS = {
+  1: {
+    id: "mock-admin-uuid-001",
+    numericId: 1,
     username: "Benjamin",
     email: "admin@sb-digital.fr",
     role: "admin",
     firstName: "Benjamin",
     lastName: "Admin",
     tenantId: "sb-tenant"
-  };
-}
-function getMockModelUser() {
-  return {
-    id: process.env.MOCK_MODEL_ID || "mock-model-uuid-002",
-    numericId: parseInt(process.env.MOCK_MODEL_NUMERIC_ID || "2", 10),
+  },
+  2: {
+    id: "mock-model-uuid-002",
+    numericId: 2,
     username: "Laura",
     email: "laura@sb-digital.fr",
     role: "model",
     firstName: "Laura",
     lastName: "Model",
     tenantId: "sb-tenant"
-  };
+  },
+  3: {
+    id: "mock-staff-uuid-003",
+    numericId: 3,
+    username: "Nico",
+    email: "nico@sb-digital.fr",
+    role: "staff",
+    firstName: "Nico",
+    lastName: "Staff",
+    tenantId: "sb-tenant"
+  }
+};
+function parseCookieUserId(req) {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(/sb-user-id=(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+}
+function getMockUserById(id) {
+  return MOCK_USERS[id] || null;
 }
 function isMockAuthEnabled() {
   return process.env.MOCK_AUTH === "true" || true;
 }
 function mockAuthMiddleware(req, _res, next) {
   if (isMockAuthEnabled()) {
-    const mockUser = getMockAdminUser();
-    if (!req.session.user) {
-      req.session.user = mockUser;
+    const cookieUserId = parseCookieUserId(req);
+    const mockUser = cookieUserId ? getMockUserById(cookieUserId) : null;
+    if (mockUser) {
+      req.user = mockUser;
+      req.isAuthenticated = () => true;
     }
-    req.user = req.session.user || mockUser;
-    req.isAuthenticated = () => true;
   }
   next();
 }
 function requireAuth(req, res) {
   if (isMockAuthEnabled()) {
-    if (!req.user) {
-      req.user = getMockAdminUser();
-    }
-    return true;
+    if (req.user) return true;
+    res.status(401).json({ error: "Not authenticated" });
+    return false;
   }
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     res.status(401).json({ error: "Not authenticated" });
@@ -17137,9 +17153,15 @@ function requireAuth(req, res) {
 }
 function getCurrentUser(req) {
   if (isMockAuthEnabled()) {
-    return req.user || getMockAdminUser();
+    if (req.user) return req.user;
+    const cookieUserId = parseCookieUserId(req);
+    if (cookieUserId) {
+      const user = getMockUserById(cookieUserId);
+      if (user) return user;
+    }
+    return MOCK_USERS[1];
   }
-  return req.user || req.session?.user || getMockAdminUser();
+  return req.user || req.session?.user || MOCK_USERS[1];
 }
 function getUserNumericId(req) {
   const user = getCurrentUser(req);
@@ -17156,25 +17178,43 @@ function setupAuth(app2) {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true,
-        sameSite: true ? "none" : "lax"
+        secure: false,
+        // Allow cookies on HTTP too (Vercel handles HTTPS)
+        sameSite: "lax"
       }
     })
   );
   app2.use(mockAuthMiddleware);
-  app2.post("/api/login-demo", (req, res) => {
-    const { role } = req.body;
-    const user = role === "model" ? getMockModelUser() : getMockAdminUser();
-    req.session.user = user;
-    req.user = user;
+  app2.post("/api/login-demo", (_req, res) => {
+    const { userId } = _req.body;
+    const numId = typeof userId === "number" ? userId : parseInt(String(userId), 10);
+    const user = getMockUserById(numId);
+    if (!user) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+    res.cookie("sb-user-id", String(numId), {
+      httpOnly: false,
+      // Accessible from JS for client-side checks
+      secure: false,
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1e3,
+      // 30 days
+      path: "/"
+    });
     res.json(user);
   });
   app2.get("/api/user", async (req, res) => {
     if (isMockAuthEnabled()) {
-      const user = getCurrentUser(req);
-      const numericId = user.numericId || 1;
+      const cookieUserId = parseCookieUserId(req);
+      if (!cookieUserId) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
+      const user = getMockUserById(cookieUserId);
+      if (!user) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
       try {
-        const [profile] = await db.select().from(profiles).where(eq(profiles.userId, numericId));
+        const [profile] = await db.select().from(profiles).where(eq(profiles.userId, user.numericId));
         if (profile) {
           return res.json({
             ...user,
@@ -17192,13 +17232,24 @@ function setupAuth(app2) {
       res.status(401).json({ message: "Not logged in" });
     }
   });
-  app2.post("/api/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Could not log out" });
-      }
-      res.json({ success: true });
+  app2.get("/api/users/available", (_req, res) => {
+    const users2 = Object.values(MOCK_USERS).map((u) => ({
+      numericId: u.numericId,
+      username: u.username,
+      role: u.role,
+      email: u.email
+    }));
+    res.json(users2);
+  });
+  app2.post("/api/logout", (_req, res) => {
+    res.cookie("sb-user-id", "", {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 0,
+      path: "/"
     });
+    res.json({ success: true });
   });
 }
 
