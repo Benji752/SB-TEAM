@@ -275,6 +275,8 @@ export async function initializeDatabase() {
     await safeQuery(client, "gamification_profiles+badges", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS badges TEXT[] DEFAULT '{}'`);
     await safeQuery(client, "gamification_profiles+last_active_at", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMP`);
     await safeQuery(client, "gamification_profiles+updated_at", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`);
+    // Drop NOT NULL on username (it may have been created with NOT NULL but we need to allow null)
+    await safeQuery(client, "gamification_profiles~username_nullable", `ALTER TABLE gamification_profiles ALTER COLUMN username DROP NOT NULL`);
 
     await safeQuery(client, "hunter_leads", `
       CREATE TABLE IF NOT EXISTS hunter_leads (

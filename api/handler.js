@@ -20694,6 +20694,7 @@ async function initializeDatabase() {
     await safeQuery(client, "gamification_profiles+badges", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS badges TEXT[] DEFAULT '{}'`);
     await safeQuery(client, "gamification_profiles+last_active_at", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMP`);
     await safeQuery(client, "gamification_profiles+updated_at", `ALTER TABLE gamification_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()`);
+    await safeQuery(client, "gamification_profiles~username_nullable", `ALTER TABLE gamification_profiles ALTER COLUMN username DROP NOT NULL`);
     await safeQuery(client, "hunter_leads", `
       CREATE TABLE IF NOT EXISTS hunter_leads (
         id SERIAL PRIMARY KEY,
@@ -27769,6 +27770,7 @@ async function registerRoutes(_httpServer, app2) {
         if (!profile) {
           [profile] = await db.insert(gamificationProfiles).values({
             userId: creatorId,
+            username: currentUser?.username || "Utilisateur",
             xpTotal: 0,
             level: 1,
             currentStreak: 0,
@@ -27805,6 +27807,7 @@ async function registerRoutes(_httpServer, app2) {
         if (!profile) {
           [profile] = await db.insert(gamificationProfiles).values({
             userId: creatorId,
+            username: "Utilisateur",
             xpTotal: 0,
             level: 1,
             currentStreak: 0,
@@ -28221,21 +28224,15 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const { userId, username } = result.data;
       const now = /* @__PURE__ */ new Date();
       const existing = await db.select().from(gamificationProfiles).where(eq2(gamificationProfiles.userId, userId)).limit(1);
-      if (existing.length) {
-        const updateData = { lastActiveAt: now, updatedAt: now };
-        if (username) updateData.username = username;
-        await db.update(gamificationProfiles).set(updateData).where(eq2(gamificationProfiles.userId, userId));
-      } else {
-        await db.insert(gamificationProfiles).values({
-          userId,
-          username: username || null,
-          xpTotal: 0,
-          level: 1,
-          currentStreak: 0,
-          roleMultiplier: 2,
-          lastActiveAt: now
-        });
-      }
+      const upsertUsername = username || "Utilisateur";
+      await db.execute(sql`
+        INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier, last_active_at, updated_at)
+        VALUES (${userId}, ${upsertUsername}, 0, 1, 0, 2.0, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          last_active_at = NOW(),
+          updated_at = NOW(),
+          username = COALESCE(NULLIF(${upsertUsername}, 'Utilisateur'), gamification_profiles.username)
+      `);
       await awardXP(userId, XP_PER_PRESENCE, "presence", `Pr\xE9sence active +${XP_PER_PRESENCE} XP`);
       res.json({ success: true, timestamp: now.toISOString() });
     } catch (error) {
@@ -28257,6 +28254,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
         const newProfile = await db.insert(gamificationProfiles).values({
           userId,
+          username: "Utilisateur",
           xpTotal: 0,
           level: 1,
           currentStreak: 0,
@@ -28393,15 +28391,12 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         const currentUser = getCurrentUser(req);
         const userRole = currentUser?.role?.toLowerCase() || "staff";
         const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
-        const newProfile = await db.insert(gamificationProfiles).values({
-          userId,
-          username: username || null,
-          xpTotal: 0,
-          level: 1,
-          currentStreak: 0,
-          roleMultiplier
-        }).returning();
-        profile = newProfile;
+        await db.execute(sql`
+          INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier)
+          VALUES (${userId}, ${username || "Utilisateur"}, 0, 1, 0, ${roleMultiplier})
+          ON CONFLICT (user_id) DO NOTHING
+        `);
+        profile = await db.select().from(gamificationProfiles).where(eq2(gamificationProfiles.userId, userId)).limit(1);
       }
       const now = /* @__PURE__ */ new Date();
       const updateData = { lastActiveAt: now, updatedAt: now };
@@ -28464,20 +28459,16 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       }
       const { userId } = result.data;
       console.log(`\u2705 Ping re\xE7u pour user ${userId}`);
-      const updated = await db.update(gamificationProfiles).set({ lastActiveAt: /* @__PURE__ */ new Date() }).where(eq2(gamificationProfiles.userId, userId)).returning();
-      if (!updated.length) {
-        const currentUser = getCurrentUser(req);
-        const userRole = currentUser?.role?.toLowerCase() || "staff";
-        const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
-        await db.insert(gamificationProfiles).values({
-          userId,
-          xpTotal: 0,
-          level: 1,
-          currentStreak: 0,
-          roleMultiplier,
-          lastActiveAt: /* @__PURE__ */ new Date()
-        });
-      }
+      const currentUser = getCurrentUser(req);
+      const userRole = currentUser?.role?.toLowerCase() || "staff";
+      const roleMultiplier = userRole === "admin" || userRole === "staff" ? 2 : 1;
+      await db.execute(sql`
+        INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier, last_active_at, updated_at)
+        VALUES (${userId}, 'Utilisateur', 0, 1, 0, ${roleMultiplier}, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          last_active_at = NOW(),
+          updated_at = NOW()
+      `);
       res.json({ success: true, timestamp: (/* @__PURE__ */ new Date()).toISOString() });
     } catch (error) {
       console.error("Ping error:", error);
