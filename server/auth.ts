@@ -4,73 +4,85 @@ import { db } from "./db";
 import { profiles } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
-// Mock admin user for MOCK_AUTH mode
-// Uses UUID for display but also provides numeric ID for gamification tables
-function getMockAdminUser() {
-  return {
-    id: process.env.MOCK_USER_ID || "mock-admin-uuid-001",
-    numericId: parseInt(process.env.MOCK_USER_NUMERIC_ID || "1", 10),
+// ========== MOCK USERS ==========
+
+const MOCK_USERS: Record<number, any> = {
+  1: {
+    id: "mock-admin-uuid-001",
+    numericId: 1,
     username: "Benjamin",
     email: "admin@sb-digital.fr",
     role: "admin",
     firstName: "Benjamin",
     lastName: "Admin",
     tenantId: "sb-tenant"
-  };
-}
-
-function getMockModelUser() {
-  return {
-    id: process.env.MOCK_MODEL_ID || "mock-model-uuid-002",
-    numericId: parseInt(process.env.MOCK_MODEL_NUMERIC_ID || "2", 10),
+  },
+  2: {
+    id: "mock-model-uuid-002",
+    numericId: 2,
     username: "Laura",
     email: "laura@sb-digital.fr",
     role: "model",
     firstName: "Laura",
     lastName: "Model",
     tenantId: "sb-tenant"
-  };
+  },
+  3: {
+    id: "mock-staff-uuid-003",
+    numericId: 3,
+    username: "Nico",
+    email: "nico@sb-digital.fr",
+    role: "staff",
+    firstName: "Nico",
+    lastName: "Staff",
+    tenantId: "sb-tenant"
+  }
+};
+
+// ========== HELPERS ==========
+
+function parseCookieUserId(req: Request): number | null {
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(/sb-user-id=(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
 }
 
-// Check if MOCK_AUTH mode is enabled
+function getMockUserById(id: number) {
+  return MOCK_USERS[id] || null;
+}
+
 export function isMockAuthEnabled(): boolean {
   return process.env.MOCK_AUTH === 'true' || process.env.NODE_ENV === 'production';
 }
 
-// Get mock tenant (bypasses any database lookup)
 export function getMockTenant(): string {
   return "sb-tenant";
 }
 
-// Middleware to inject mock authentication
+// ========== MIDDLEWARE ==========
+
 export function mockAuthMiddleware(req: Request, _res: Response, next: NextFunction) {
   if (isMockAuthEnabled()) {
-    const mockUser = getMockAdminUser();
-    
-    // Inject mock user
-    if (!(req.session as any).user) {
-      (req.session as any).user = mockUser;
+    const cookieUserId = parseCookieUserId(req);
+    const mockUser = cookieUserId ? getMockUserById(cookieUserId) : null;
+
+    if (mockUser) {
+      req.user = mockUser;
+      (req as any).isAuthenticated = () => true;
     }
-    
-    // Simulate req.user (used by Passport)
-    req.user = (req.session as any).user || mockUser;
-    
-    // Simulate req.isAuthenticated() (used by Passport)
-    (req as any).isAuthenticated = () => true;
   }
   next();
 }
 
-// Safe wrapper for routes that require authentication
 export function requireAuth(req: Request, res: Response): boolean {
   if (isMockAuthEnabled()) {
-    // Always authenticated in mock mode
-    if (!req.user) {
-      req.user = getMockAdminUser();
-    }
-    return true;
+    if (req.user) return true;
+    // No user cookie set
+    res.status(401).json({ error: "Not authenticated" });
+    return false;
   }
-  
+
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     res.status(401).json({ error: "Not authenticated" });
     return false;
@@ -78,7 +90,8 @@ export function requireAuth(req: Request, res: Response): boolean {
   return true;
 }
 
-// Type for user with string or number id
+// ========== TYPES ==========
+
 export interface AuthUser {
   id: string | number;
   numericId?: number;
@@ -90,24 +103,27 @@ export interface AuthUser {
   tenantId?: string;
 }
 
-// Get current user (with mock fallback)
 export function getCurrentUser(req: Request): AuthUser {
   if (isMockAuthEnabled()) {
-    return (req.user as any) || getMockAdminUser();
+    if (req.user) return req.user as any;
+    // Fallback: read cookie
+    const cookieUserId = parseCookieUserId(req);
+    if (cookieUserId) {
+      const user = getMockUserById(cookieUserId);
+      if (user) return user;
+    }
+    return MOCK_USERS[1]; // Ultimate fallback
   }
-  return (req.user as any) || (req.session as any)?.user || getMockAdminUser();
+  return (req.user as any) || (req.session as any)?.user || MOCK_USERS[1];
 }
 
-// Helper to get user ID as string (for UUID compatibility)
 export function getUserIdAsString(req: Request): string {
   const user = getCurrentUser(req);
   return String(user.id);
 }
 
-// Helper to get numeric user ID (for gamification tables that use integer)
 export function getUserNumericId(req: Request): number {
   const user = getCurrentUser(req);
-  // If user has numericId, use it; otherwise try to parse id or fallback to 1
   if ((user as any).numericId) {
     return (user as any).numericId;
   }
@@ -115,40 +131,63 @@ export function getUserNumericId(req: Request): number {
   return isNaN(parsed) ? 1 : parsed;
 }
 
+// ========== ROUTES ==========
+
 export function setupAuth(app: Express) {
   app.use(
     session({
       secret: process.env.SESSION_SECRET || "demo-secret-key",
       resave: false,
       saveUninitialized: false,
-      cookie: { 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      cookie: {
+        secure: false, // Allow cookies on HTTP too (Vercel handles HTTPS)
+        sameSite: 'lax'
       },
     })
   );
 
-  // Apply mock auth middleware globally when enabled
+  // Apply mock auth middleware globally
   app.use(mockAuthMiddleware);
 
-  app.post("/api/login-demo", (req, res) => {
-    const { role } = req.body;
-    
-    const user = role === "model" ? getMockModelUser() : getMockAdminUser();
-    (req.session as any).user = user;
-    req.user = user;
+  // Login: set cookie with selected user ID
+  app.post("/api/login-demo", (_req, res) => {
+    const { userId } = _req.body;
+    const numId = typeof userId === 'number' ? userId : parseInt(String(userId), 10);
+
+    const user = getMockUserById(numId);
+    if (!user) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Set persistent cookie (30 days)
+    res.cookie('sb-user-id', String(numId), {
+      httpOnly: false, // Accessible from JS for client-side checks
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: '/'
+    });
+
     res.json(user);
   });
 
+  // Get current user (enriched with profile avatar)
   app.get("/api/user", async (req, res) => {
-    // In mock auth mode, always return a valid user enriched with profile data
     if (isMockAuthEnabled()) {
-      const user = getCurrentUser(req);
-      const numericId = (user as any).numericId || 1;
+      const cookieUserId = parseCookieUserId(req);
 
-      // Fetch avatar_url from profiles table
+      if (!cookieUserId) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
+
+      const user = getMockUserById(cookieUserId);
+      if (!user) {
+        return res.status(401).json({ message: "Not logged in" });
+      }
+
+      // Enrich with avatar from profiles table
       try {
-        const [profile] = await db.select().from(profiles).where(eq(profiles.userId, numericId));
+        const [profile] = await db.select().from(profiles).where(eq(profiles.userId, user.numericId));
         if (profile) {
           return res.json({
             ...user,
@@ -157,7 +196,7 @@ export function setupAuth(app: Express) {
           });
         }
       } catch (e) {
-        // DB not ready yet, return user without avatar
+        // DB not ready
       }
 
       return res.json(user);
@@ -170,12 +209,26 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Could not log out" });
-      }
-      res.json({ success: true });
+  // Get list of available users (for login page)
+  app.get("/api/users/available", (_req, res) => {
+    const users = Object.values(MOCK_USERS).map(u => ({
+      numericId: u.numericId,
+      username: u.username,
+      role: u.role,
+      email: u.email,
+    }));
+    res.json(users);
+  });
+
+  // Logout: clear cookie
+  app.post("/api/logout", (_req, res) => {
+    res.cookie('sb-user-id', '', {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/'
     });
+    res.json({ success: true });
   });
 }

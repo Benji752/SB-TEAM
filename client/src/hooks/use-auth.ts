@@ -1,30 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
+import { queryClient } from "@/lib/queryClient";
 
 export function useAuth() {
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      // First try demo session auth (silently - no console spam)
+      // Check cookie-based auth (mock/demo mode)
       try {
-        const sessionResponse = await fetch("/api/user");
+        const sessionResponse = await fetch("/api/user", { credentials: "include" });
         if (sessionResponse.ok) {
           const sessionUser = await sessionResponse.json();
           if (sessionUser && sessionUser.id) {
             return sessionUser;
           }
         }
-        // 401 is expected when not logged in via demo - don't log it
       } catch {
-        // Network error - fall back to Supabase silently
+        // Fall back to Supabase
       }
-      
-      // Try Supabase auth (primary auth method)
+
+      // Try Supabase auth
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error || !user) return null;
-        
-        // Fetch profile associated with user
+
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -33,7 +32,6 @@ export function useAuth() {
 
         return { ...user, ...profile };
       } catch {
-        // Supabase not configured or error - return null silently
         return null;
       }
     },
@@ -42,12 +40,20 @@ export function useAuth() {
   });
 
   const logout = async () => {
-    // Try demo logout first
+    // Clear cookie-based session
     try {
-      await fetch("/api/logout", { method: "POST" });
+      await fetch("/api/logout", { method: "POST", credentials: "include" });
     } catch (e) {}
-    
+
+    // Clear Supabase session
     await supabase.auth.signOut();
+
+    // Clear cookie manually as fallback
+    document.cookie = "sb-user-id=; path=/; max-age=0";
+
+    // Clear all caches
+    queryClient.clear();
+
     window.location.href = "/";
   };
 

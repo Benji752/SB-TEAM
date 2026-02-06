@@ -131,23 +131,38 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Vérification initiale de la session
     const initSession = async () => {
       try {
+        // Check cookie-based auth first (mock auth / demo mode)
+        const hasCookie = document.cookie.includes('sb-user-id=');
+        if (hasCookie) {
+          // Validate cookie by checking /api/user
+          try {
+            const res = await fetch("/api/user", { credentials: "include" });
+            if (res.ok) {
+              const user = await res.json();
+              if (user && user.id) {
+                setSession({ user });
+                setLoading(false);
+                return;
+              }
+            }
+          } catch {}
+        }
+
+        // Fallback: check Supabase auth
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
-        setLoading(false); // Affiche le site immédiatement
+        setLoading(false);
 
         if (session?.user) {
-          // Mise à jour du statut en arrière-plan sans bloquer
           supabase.from('profiles')
             .update({ is_online: true })
             .eq('id', session.user.id)
             .then(({ error }) => {
               if (error) console.error("Error setting online status:", error);
             });
-            
-          // Enregistrement du LOGIN (avec protection contre les doublons)
+
           if (!sessionStorage.getItem('login_logged')) {
             sessionStorage.setItem('login_logged', 'true');
             supabase.from('activity_logs').insert({
@@ -157,7 +172,7 @@ export default function App() {
             }).then(({ error }) => {
               if (error) {
                 console.error("Error logging login:", error);
-                sessionStorage.removeItem('login_logged'); // Réessayer au prochain check si erreur
+                sessionStorage.removeItem('login_logged');
               }
             });
           }
@@ -170,11 +185,13 @@ export default function App() {
 
     initSession();
 
-    // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-      
+      // Only update if no cookie-based session
+      if (!document.cookie.includes('sb-user-id=')) {
+        setSession(session);
+        setLoading(false);
+      }
+
       if (session?.user) {
         supabase.from('profiles')
           .update({ is_online: true })
@@ -188,9 +205,6 @@ export default function App() {
     const handleUnload = () => {
       if (session?.user) {
         const { id } = session.user;
-        // Utilisation de navigator.sendBeacon pour assurer l'envoi lors de la fermeture
-        // Note: Supabase direct via SDK is harder in unload, so we use a beacon with a custom endpoint if needed
-        // For now, we'll try a synchronous update attempt if possible, or just the standard SDK update
         supabase.from('profiles').update({ is_online: false }).eq('id', id);
       }
     };
