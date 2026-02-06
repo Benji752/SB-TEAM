@@ -41,8 +41,15 @@ export async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
-        role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model'))
+        role TEXT NOT NULL DEFAULT 'model' CHECK (role IN ('admin', 'model', 'staff'))
       )
+    `);
+    // Update existing CHECK constraint to allow 'staff'
+    await safeQuery(client, "users~role_check", `
+      ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check
+    `);
+    await safeQuery(client, "users~role_check_new", `
+      ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin', 'model', 'staff'))
     `);
 
     await safeQuery(client, "auth_logs", `
@@ -73,6 +80,9 @@ export async function initializeDatabase() {
     await safeQuery(client, "profiles+role", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'model'`);
     await safeQuery(client, "profiles+bio", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio TEXT`);
     await safeQuery(client, "profiles+avatar_url", `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`);
+    // Update role CHECK constraint to allow 'staff'
+    await safeQuery(client, "profiles~role_check", `ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check`);
+    await safeQuery(client, "profiles~role_check_new", `ALTER TABLE profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('admin', 'model', 'staff'))`);
 
     await safeQuery(client, "models", `
       CREATE TABLE IF NOT EXISTS models (
@@ -340,16 +350,57 @@ export async function initializeDatabase() {
       ORDER BY gp.xp_total DESC
     `);
 
-    // Seed default admin user (each independently)
-    await safeQuery(client, "seed:users", `
-      INSERT INTO users (id, username, role) VALUES (1, 'Benjamin', 'admin')
-      ON CONFLICT (id) DO NOTHING
+    // Clean up orphan/ghost gamification profiles (no username or placeholder)
+    await safeQuery(client, "cleanup:orphan_profiles", `
+      DELETE FROM gamification_profiles
+      WHERE user_id NOT IN (1, 2, 3)
+      AND (username IS NULL OR username = '' OR username = 'Utilisateur' OR username = 'Utilisateur Inconnu')
     `);
 
-    await safeQuery(client, "seed:gamification_profiles", `
+    // Seed the 3 team members: Benjamin(admin), Laura(model), Nico(staff)
+    // Users table
+    await safeQuery(client, "seed:users:benjamin", `
+      INSERT INTO users (id, username, role) VALUES (1, 'Benjamin', 'admin')
+      ON CONFLICT (id) DO UPDATE SET username = 'Benjamin', role = 'admin'
+    `);
+    await safeQuery(client, "seed:users:laura", `
+      INSERT INTO users (id, username, role) VALUES (2, 'Laura', 'model')
+      ON CONFLICT (id) DO UPDATE SET username = 'Laura', role = 'model'
+    `);
+    await safeQuery(client, "seed:users:nico", `
+      INSERT INTO users (id, username, role) VALUES (3, 'Nico', 'staff')
+      ON CONFLICT (id) DO UPDATE SET username = 'Nico', role = 'staff'
+    `);
+
+    // Profiles table
+    await safeQuery(client, "seed:profiles:benjamin", `
+      INSERT INTO profiles (id, user_id, username, role) VALUES (1, 1, 'Benjamin', 'admin')
+      ON CONFLICT (id) DO UPDATE SET user_id = 1, username = 'Benjamin', role = 'admin'
+    `);
+    await safeQuery(client, "seed:profiles:laura", `
+      INSERT INTO profiles (id, user_id, username, role) VALUES (2, 2, 'Laura', 'model')
+      ON CONFLICT (id) DO UPDATE SET user_id = 2, username = 'Laura', role = 'model'
+    `);
+    await safeQuery(client, "seed:profiles:nico", `
+      INSERT INTO profiles (id, user_id, username, role) VALUES (3, 3, 'Nico', 'staff')
+      ON CONFLICT (id) DO UPDATE SET user_id = 3, username = 'Nico', role = 'staff'
+    `);
+
+    // Gamification profiles
+    await safeQuery(client, "seed:gamification:benjamin", `
       INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
       VALUES (1, 'Benjamin', 0, 1, 2.0)
-      ON CONFLICT (user_id) DO NOTHING
+      ON CONFLICT (user_id) DO UPDATE SET username = 'Benjamin'
+    `);
+    await safeQuery(client, "seed:gamification:laura", `
+      INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
+      VALUES (2, 'Laura', 0, 1, 1.0)
+      ON CONFLICT (user_id) DO UPDATE SET username = 'Laura'
+    `);
+    await safeQuery(client, "seed:gamification:nico", `
+      INSERT INTO gamification_profiles (user_id, username, xp_total, level, role_multiplier)
+      VALUES (3, 'Nico', 0, 1, 2.0)
+      ON CONFLICT (user_id) DO UPDATE SET username = 'Nico'
     `);
 
     console.log("[DB] Database initialization complete");

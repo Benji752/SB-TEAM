@@ -7,7 +7,7 @@ import { relations } from "drizzle-orm";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  role: text("role", { enum: ["admin", "model"] }).default("model").notNull(),
+  role: text("role", { enum: ["admin", "model", "staff"] }).default("model").notNull(),
 });
 
 export const authLogs = pgTable("auth_logs", {
@@ -22,7 +22,7 @@ export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   username: text("username").notNull(),
-  role: text("role", { enum: ["admin", "model"] }).default("model").notNull(),
+  role: text("role", { enum: ["admin", "model", "staff"] }).default("model").notNull(),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow(),

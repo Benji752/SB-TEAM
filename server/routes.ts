@@ -750,8 +750,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     try {
       // Known team members (userId -> {name, role})
       const TEAM_MEMBERS: Record<number, { name: string; role: string }> = {
-        1: { name: "Nico", role: "staff" },
+        1: { name: "Benjamin", role: "admin" },
         2: { name: "Laura", role: "model" },
+        3: { name: "Nico", role: "staff" },
       };
       
       // Get all gamification profiles
