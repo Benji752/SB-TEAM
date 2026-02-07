@@ -139,9 +139,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#050505] border-b border-white/[0.08] z-50 flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
-            <span className="text-black font-black text-xl italic">S</span>
-          </div>
+          <img src="/logo.png" alt="SB" className="w-9 h-9 object-contain" />
           <span className="text-lg font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
         </div>
         <Button
@@ -237,9 +235,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-64 border-r border-white/[0.08] flex-col fixed inset-y-0 bg-[#050505] z-50">
         <div className="p-8">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gold rounded-lg flex items-center justify-center">
-              <span className="text-black font-black text-xl italic">S</span>
-            </div>
+            <img src="/logo.png" alt="SB" className="w-9 h-9 object-contain" />
             <span className="text-xl font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
           </div>
           

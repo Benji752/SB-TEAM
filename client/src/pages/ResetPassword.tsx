@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
 
 export default function ResetPassword() {
   const { toast } = useToast();
@@ -81,10 +81,8 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_rgba(201,162,77,0.05)_0%,_transparent_70%)]">
       <div className="w-full max-w-md space-y-10">
         <div className="text-center space-y-4">
-          <div className="h-16 w-16 bg-gold rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-gold/20 mb-6">
-            <LayoutDashboard className="h-8 w-8 text-black" />
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-white">SB Digital</h1>
+          <img src="/logo.png" alt="SB Digital" className="h-20 w-20 object-contain mx-auto mb-6 drop-shadow-[0_0_20px_rgba(201,162,77,0.3)]" />
+          <h1 className="text-4xl font-bold tracking-tight text-white">SB <span className="text-gold">Digital</span></h1>
           <p className="text-muted-foreground/80 text-lg">Réinitialisez votre mot de passe</p>
         </div>
 

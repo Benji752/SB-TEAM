@@ -1,5 +1,7 @@
 {
   "buildCommand": "npm run build && node scripts/build-vercel.mjs",
+  "outputDirectory": "dist/public",
+  "framework": null,
   "rewrites": [
     {
       "source": "/api/(.*)",
