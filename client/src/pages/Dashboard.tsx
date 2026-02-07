@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   AreaChart,
   Area
@@ -12,45 +12,18 @@ import {
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15
-    }
-  }
-};
-
-const MotionCard = motion(Card);
-import { 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
-  MessageSquare,
+import {
+  Users,
+  TrendingUp,
+  DollarSign,
   Edit2,
   Eye,
-  Video,
   Activity,
   Loader2,
   ArrowRight,
-  CheckCircle,
-  CheckSquare
+  CheckSquare,
+  Star,
+  Heart
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
@@ -70,47 +43,82 @@ import { LeadValidation } from "@/components/LeadValidation";
 import { useGamificationData } from "@/hooks/useGamificationData";
 import { Trophy, Crown } from "lucide-react";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 15
+    }
+  }
+};
+
+const MotionCard = motion(Card);
+
 export default function Dashboard() {
   const { user } = useAuth();
   const { leaderboard } = useGamificationData();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [updateData, setUpdateData] = useState({ 
-    hourlyRevenue: "", 
-    subscribers: "",
-    stripScore: "",
-    favorites: "",
-    isOnline: "false"
-  });
+  const [hourlyRevenueInput, setHourlyRevenueInput] = useState("");
 
+  // Orders from API
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
-    select: (data: any) => data.slice(0, 5)
+    select: (data: any) => Array.isArray(data) ? data.slice(0, 5) : []
   });
 
+  // Tasks from Supabase
   const { data: recentTasks, isLoading: tasksLoading } = useQuery({
-    queryKey: ["tasks"],
-    select: (data: any) => data.filter((t: any) => !t.is_done).slice(0, 5) 
+    queryKey: ["dashboard-tasks"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('is_done', false)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
+    }
   });
 
-  const [manualData, setManualData] = useState<any>(null);
+  // Live Stripchat data (auto from server API)
   const [isOnline, setIsOnline] = useState(false);
   const [liveStats, setLiveStats] = useState<any>(null);
 
+  // Chart history
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/model-stats"],
   });
 
+  // Last manual stats (for hourly revenue)
+  const [manualData, setManualData] = useState<any>(null);
+
   const loadManualData = async () => {
     try {
-      const res = await apiRequest("GET", "/api/model-stats/latest");
-      const data = await res.json();
-      if (data) setManualData(data);
-    } catch (e) {
-      console.error("Failed to load manual data", e);
-    }
+      const res = await fetch("/api/model-stats/latest", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data) setManualData(data);
+      }
+    } catch {}
   };
 
-  // Fetch live data from our server endpoint (handles Stripchat API + auto-saves)
+  // Auto-fetch live status from our server endpoint (Stripchat API)
   const fetchStatus = async () => {
     try {
       const res = await fetch("/api/monitor/wildgirl", { credentials: "include" });
@@ -118,8 +126,6 @@ export default function Dashboard() {
         const data = await res.json();
         setLiveStats(data);
         setIsOnline(data.isOnline || false);
-      } else {
-        setIsOnline(false);
       }
     } catch {
       setIsOnline(false);
@@ -129,20 +135,33 @@ export default function Dashboard() {
   useEffect(() => {
     loadManualData();
     fetchStatus();
-    const interval = setInterval(fetchStatus, 30000); // Check every 30s
+    const interval = setInterval(fetchStatus, 30000);
     return () => clearInterval(interval);
   }, []);
 
+  // Manual update: only hourly revenue (everything else is auto)
   const updateMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/model-stats", data);
+    mutationFn: async (data: { hourlyRevenue: string }) => {
+      const res = await fetch("/api/model-stats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          hourlyRevenue: data.hourlyRevenue,
+          subscribers: liveStats?.subscribers || manualData?.subscribers || 0,
+          stripScore: liveStats?.stripScore || manualData?.stripScore || 0,
+          favorites: liveStats?.favorites || manualData?.favorites || 0,
+          isOnline: isOnline,
+        }),
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to save");
       return res.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/model-stats"] });
       setManualData(data);
       setIsUpdateModalOpen(false);
-      setUpdateData({ hourlyRevenue: "", subscribers: "", stripScore: "", favorites: "", isOnline: "false" });
+      setHourlyRevenueInput("");
     }
   });
 
@@ -156,11 +175,11 @@ export default function Dashboard() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-tasks"] });
     },
   });
 
-  // Prefer live API data, fallback to last manual data
+  // Display values: live API data first, manual fallback
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
   const displaySubscribers = liveStats?.subscribers || manualData?.subscribers || 0;
   const displayStripScore = liveStats?.stripScore || manualData?.stripScore || 0;
@@ -174,32 +193,7 @@ export default function Dashboard() {
     revenue: s.hourlyRevenue
   })) : [];
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["stats"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('agency_stats')
-        .select('*')
-        .order('month', { ascending: true });
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const latestStats = Array.isArray(stats) ? stats[stats.length - 1] : {
-    revenue: 0,
-    new_subscribers: 0,
-    churn_rate: 0
-  };
-
-  const stripStats = [
-    { label: "Revenu Horaire", value: `${displayHourlyRevenue} €`, icon: DollarSign },
-    { label: "Abonnés (Fan)", value: displaySubscribers, icon: Users },
-    { label: "Viewers", value: viewersCount, icon: Users },
-    { label: "StripScore", value: displayStripScore, icon: Activity },
-  ];
-
-  if (statsLoading || historyLoading) {
+  if (historyLoading) {
     return (
       <DashboardLayout>
         <div className="h-full w-full flex items-center justify-center min-h-[400px]">
@@ -218,94 +212,41 @@ export default function Dashboard() {
             <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">Monitoring Stripchat : WildgirlShow</p>
           </div>
           <div className="flex gap-4">
+            {/* Only hourly revenue needs manual update */}
             <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
               setIsUpdateModalOpen(open);
-              if (open && manualData) {
-                setUpdateData({
-                  hourlyRevenue: manualData.hourlyRevenue?.toString() || "",
-                  subscribers: manualData.subscribers?.toString() || "",
-                  stripScore: manualData.stripScore?.toString() || "",
-                  favorites: manualData.favorites?.toString() || "",
-                  isOnline: manualData.isOnline?.toString() || "false"
-                });
+              if (open) {
+                setHourlyRevenueInput(manualData?.hourlyRevenue?.toString() || "");
               }
             }}>
               <DialogTrigger asChild>
                 <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
-                  <Edit2 size={14} /> Actualiser
+                  <Edit2 size={14} /> Revenu Horaire
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white overflow-y-auto max-h-[90vh] rounded-[2rem]">
                 <DialogHeader>
-                  <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">Mise à jour Stripchat</DialogTitle>
+                  <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">Mise à jour du Revenu Horaire</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire (€)</Label>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        value={updateData.hourlyRevenue}
-                        onChange={e => setUpdateData({...updateData, hourlyRevenue: e.target.value})}
-                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
-                        placeholder="ex: 22.3"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Abonnés Fan-club</Label>
-                      <Input 
-                        type="number"
-                        value={updateData.subscribers}
-                        onChange={e => setUpdateData({...updateData, subscribers: e.target.value})}
-                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
-                        placeholder="ex: 150"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">StripScore</Label>
-                      <Input 
-                        type="number"
-                        value={updateData.stripScore}
-                        onChange={e => setUpdateData({...updateData, stripScore: e.target.value})}
-                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
-                        placeholder="ex: 645"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Favoris</Label>
-                      <Input 
-                        type="number"
-                        value={updateData.favorites}
-                        onChange={e => setUpdateData({...updateData, favorites: e.target.value})}
-                        className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
-                        placeholder="ex: 5000"
-                      />
-                    </div>
-                  </div>
+                  <p className="text-sm text-white/40">Les autres stats (StripScore, Favoris, Abonnés, Statut Live) sont mises à jour automatiquement via l'API Stripchat.</p>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Statut</Label>
-                    <Select 
-                      value={updateData.isOnline} 
-                      onValueChange={(v) => setUpdateData({...updateData, isOnline: v})}
-                    >
-                      <SelectTrigger className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
-                        <SelectItem value="true">En ligne 🟢</SelectItem>
-                        <SelectItem value="false">Hors ligne ⚪</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire (€)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={hourlyRevenueInput}
+                      onChange={e => setHourlyRevenueInput(e.target.value)}
+                      className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
+                      placeholder="ex: 22.3"
+                    />
                   </div>
-                  <Button 
-                    onClick={() => updateMutation.mutate(updateData)}
+                  <Button
+                    onClick={() => updateMutation.mutate({ hourlyRevenue: hourlyRevenueInput })}
                     disabled={updateMutation.isPending}
                     className="w-full bg-gold text-black font-black uppercase tracking-widest text-[10px] h-12 rounded-xl mt-4"
                   >
-                    {updateMutation.isPending ? <Loader2 className="animate-spin" /> : "Sauvegarder les modifications"}
+                    {updateMutation.isPending ? <Loader2 className="animate-spin" /> : "Sauvegarder"}
                   </Button>
                 </div>
               </DialogContent>
@@ -313,7 +254,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <motion.div 
+        {/* Main model card + stats */}
+        <motion.div
           className="grid gap-6 lg:grid-cols-12"
           variants={containerVariants}
           initial="hidden"
@@ -323,7 +265,6 @@ export default function Dashboard() {
             <div className="relative h-full flex flex-col md:flex-row">
               <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center min-h-[350px]">
                 {isOnline ? (
-                  /* Live embed when model is streaming */
                   <iframe
                     src="https://stripchat.com/wildgirlshow/embed"
                     className="absolute inset-0 w-full h-full border-0"
@@ -331,7 +272,6 @@ export default function Dashboard() {
                     allowFullScreen
                   />
                 ) : (
-                  /* Offline avatar display */
                   <div className="relative w-full h-full">
                     <img
                       src={avatarUrl}
@@ -344,27 +284,24 @@ export default function Dashboard() {
                         <div className="absolute inset-0 bg-gold/10 blur-3xl rounded-full" />
                         <Avatar className="h-48 w-48 border-4 border-white/5 shadow-2xl relative bg-[#050505]">
                           <AvatarImage src={avatarUrl} className="object-cover" />
-                          <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">
-                            WG
-                          </AvatarFallback>
+                          <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">WG</AvatarFallback>
                         </Avatar>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Live/Offline Badge */}
                 <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none z-10">
                   <div className={cn(
                     "h-2.5 w-2.5 rounded-full transition-all duration-500",
                     isOnline ? "bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" : "bg-gray-500"
                   )} />
                   <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                    {isOnline ? '🔴 LIVE' : 'HORS LIGNE'}
+                    {isOnline ? 'LIVE' : 'HORS LIGNE'}
                   </span>
                 </div>
 
-                {isOnline && (
+                {isOnline && viewersCount > 0 && (
                   <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 z-10">
                     <Eye size={14} className="text-gold" />
                     <span className="text-xs font-black text-white">{viewersCount} <span className="text-white/40 font-bold ml-1">VIEWERS</span></span>
@@ -379,10 +316,10 @@ export default function Dashboard() {
                       "text-[10px] font-black uppercase tracking-[0.3em] mb-4 block",
                       isOnline ? "text-red-400" : "text-gold"
                     )}>
-                      {isOnline ? '🔴 NOW STREAMING' : 'OFFLINE'}
+                      {isOnline ? 'NOW STREAMING' : 'OFFLINE'}
                     </span>
                     <h2 className="text-2xl font-black text-white leading-tight tracking-tighter italic uppercase mb-2">
-                      {isOnline ? roomTitle : "WildgirlShow"}
+                      {isOnline && roomTitle ? roomTitle : "WildgirlShow"}
                     </h2>
                     <p className="text-white/40 text-sm font-medium">WildgirlShow sur Stripchat</p>
                   </div>
@@ -398,7 +335,7 @@ export default function Dashboard() {
                     </div>
                     <div className="space-y-1">
                       <span className="text-[8px] font-black uppercase tracking-widest text-white/30">FAVORIS</span>
-                      <div className="text-xl font-black text-white">{displayFavorites.toLocaleString()}</div>
+                      <div className="text-xl font-black text-white">{typeof displayFavorites === 'number' ? displayFavorites.toLocaleString() : displayFavorites}</div>
                     </div>
                     <div className="space-y-1">
                       <span className="text-[8px] font-black uppercase tracking-widest text-white/30">ABONNÉS</span>
@@ -418,11 +355,7 @@ export default function Dashboard() {
                         : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white"
                     )}
                   >
-                    <a
-                      href="https://stripchat.com/wildgirlshow"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href="https://stripchat.com/wildgirlshow" target="_blank" rel="noopener noreferrer">
                       {isOnline ? "Voir le live en plein écran" : "Ouvrir la plateforme"}
                     </a>
                   </Button>
@@ -431,22 +364,27 @@ export default function Dashboard() {
             </div>
           </MotionCard>
 
+          {/* Side stats cards */}
           <motion.div variants={cardVariants} className="lg:col-span-4 flex flex-col gap-4">
-            {stripStats.slice(0, 2).map((stat, i) => (
-              <Card key={i} className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
-                <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
-                  <stat.icon size={18} className="text-gold" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{stat.label}</span>
-                <span className="text-3xl font-black text-white tracking-tighter italic">
-                  {stat.value}
-                </span>
-              </Card>
-            ))}
+            <Card className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
+              <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
+                <DollarSign size={18} className="text-gold" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Revenu Horaire</span>
+              <span className="text-3xl font-black text-white tracking-tighter italic">{displayHourlyRevenue} €</span>
+            </Card>
+            <Card className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
+              <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
+                <Users size={18} className="text-gold" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Abonnés (Fan)</span>
+              <span className="text-3xl font-black text-white tracking-tighter italic">{displaySubscribers}</span>
+            </Card>
           </motion.div>
         </motion.div>
 
-        <MotionCard 
+        {/* Performance Chart */}
+        <MotionCard
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -462,49 +400,55 @@ export default function Dashboard() {
                 <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire (€)</p>
               </div>
             </div>
-            
+
             <div className="h-[400px] w-full mt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
-                      <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                  <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
-                  <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: "rgba(10, 10, 10, 0.95)", 
-                      border: "1px solid rgba(255, 255, 255, 0.08)", 
-                      borderRadius: "16px", 
-                      backdropFilter: "blur(10px)",
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: "#fff"
-                    }} 
-                    itemStyle={{ color: "#C9A24D" }}
-                    formatter={(value: any) => [`${value} €`, "Revenu"]}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#C9A24D" 
-                    fillOpacity={1} 
-                    fill="url(#colorRevenueDashboard)" 
-                    strokeWidth={4} 
-                    activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                    <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
+                    <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(10, 10, 10, 0.95)",
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(10px)",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: "#fff"
+                      }}
+                      itemStyle={{ color: "#C9A24D" }}
+                      formatter={(value: any) => [`${value} €`, "Revenu"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#C9A24D"
+                      fillOpacity={1}
+                      fill="url(#colorRevenueDashboard)"
+                      strokeWidth={4}
+                      activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-white/20 text-[10px] font-black uppercase tracking-widest">
+                  Aucune donnée de performance. Mettez à jour le revenu horaire pour commencer.
+                </div>
+              )}
             </div>
           </div>
         </MotionCard>
 
         {/* Hunter League Mini Widget */}
-        <MotionCard 
+        <MotionCard
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -536,12 +480,14 @@ export default function Dashboard() {
           </div>
         </MotionCard>
 
-        <motion.div 
+        {/* Orders + Tasks grid */}
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
+          {/* Recent Orders */}
           <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
@@ -563,7 +509,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {ordersLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
-              ) : recentOrders && Array.isArray(recentOrders) && recentOrders.length > 0 ? (
+              ) : recentOrders && recentOrders.length > 0 ? (
                 recentOrders.map((order: any) => (
                   <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
                     <div className="space-y-1">
@@ -581,9 +527,11 @@ export default function Dashboard() {
                       <div className="text-lg font-black text-white">{order.amount} €</div>
                       <Badge className={cn(
                         "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-none",
-                        order.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
+                        order.status === 'paid' ? "bg-emerald-500/10 text-emerald-500" :
+                        order.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" :
+                        "bg-amber-500/10 text-amber-500"
                       )}>
-                        {order.status}
+                        {order.status === 'paid' ? 'PAID' : order.status}
                       </Badge>
                     </div>
                   </div>
@@ -596,6 +544,7 @@ export default function Dashboard() {
             </div>
           </MotionCard>
 
+          {/* Urgent Tasks */}
           <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
@@ -617,7 +566,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {tasksLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
-              ) : recentTasks && Array.isArray(recentTasks) && recentTasks.length > 0 ? (
+              ) : recentTasks && recentTasks.length > 0 ? (
                 recentTasks.map((task: any) => (
                   <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all group">
                     <div className="flex items-center gap-4">
