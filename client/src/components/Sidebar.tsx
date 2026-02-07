@@ -39,9 +39,7 @@ export function Sidebar() {
   return (
     <div className="hidden md:flex flex-col w-64 glass-card border-r fixed h-screen overflow-y-auto z-40 rounded-none">
       <div className="p-8 flex items-center gap-3">
-        <div className="h-8 w-8 bg-gold rounded-lg flex items-center justify-center shadow-lg shadow-primary/10">
-          <LayoutDashboard className="h-5 w-5 text-black" />
-        </div>
+        <img src="/logo.png" alt="SB" className="h-9 w-9 object-contain" />
         <span className="font-bold text-xl tracking-tight text-white">SB Digital</span>
       </div>
 
