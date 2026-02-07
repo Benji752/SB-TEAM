@@ -94,7 +94,7 @@ export default function Dashboard() {
 
   const [manualData, setManualData] = useState<any>(null);
   const [isOnline, setIsOnline] = useState(false);
-  const [apiData, setApiData] = useState<any>(null);
+  const [liveStats, setLiveStats] = useState<any>(null);
 
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/model-stats"],
@@ -110,26 +110,18 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch live data from our server endpoint (handles Stripchat API + auto-saves)
   const fetchStatus = async () => {
     try {
-      const username = "wildgirlshow";
-      const targetUrl = `https://fr.stripchat.com/api/front/v2/models/username/${username}`;
-      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
-      
-      const res = await fetch(proxyUrl);
+      const res = await fetch("/api/monitor/wildgirl", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        console.log('Retour API:', data);
-        setApiData(data);
-        
-        // Check the path data.user.status as requested
-        const status = data?.user?.status;
-        setIsOnline(status === 'public');
+        setLiveStats(data);
+        setIsOnline(data.isOnline || false);
       } else {
         setIsOnline(false);
       }
-    } catch (e) {
-      // Silent fail - avoid console errors
+    } catch {
       setIsOnline(false);
     }
   };
@@ -137,7 +129,7 @@ export default function Dashboard() {
   useEffect(() => {
     loadManualData();
     fetchStatus();
-    const interval = setInterval(fetchStatus, 30000); // Check status every 30s
+    const interval = setInterval(fetchStatus, 30000); // Check every 30s
     return () => clearInterval(interval);
   }, []);
 
@@ -168,12 +160,13 @@ export default function Dashboard() {
     },
   });
 
+  // Prefer live API data, fallback to last manual data
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
-  const displaySubscribers = manualData?.subscribers || 0;
-  const displayStripScore = manualData?.stripScore || 0;
-  const displayFavorites = manualData?.favorites || 0;
-  const viewersCount = apiData?.model?.viewersCount || 0;
-  const roomTitle = apiData?.model?.topic || "WildgirlShow Live";
+  const displaySubscribers = liveStats?.subscribers || manualData?.subscribers || 0;
+  const displayStripScore = liveStats?.stripScore || manualData?.stripScore || 0;
+  const displayFavorites = liveStats?.favorites || manualData?.favorites || 0;
+  const viewersCount = liveStats?.viewersCount || 0;
+  const roomTitle = liveStats?.roomTitle || "WildgirlShow Live";
   const avatarUrl = "https://ui-avatars.com/api/?name=Wild+Girl&background=0A0A0A&color=C9A24D&size=256&bold=true";
 
   const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
@@ -328,35 +321,46 @@ export default function Dashboard() {
         >
           <MotionCard variants={cardVariants} className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
             <div className="relative h-full flex flex-col md:flex-row">
-              <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  <img 
-                    src={avatarUrl}
-                    alt="Profile Avatar" 
-                    className="w-full h-full object-cover scale-110 blur-xl opacity-30 pointer-events-none"
+              <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center min-h-[350px]">
+                {isOnline ? (
+                  /* Live embed when model is streaming */
+                  <iframe
+                    src="https://stripchat.com/wildgirlshow/embed"
+                    className="absolute inset-0 w-full h-full border-0"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
                   />
-                  <div className="absolute inset-0 bg-black/40" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gold/10 blur-3xl rounded-full" />
-                      <Avatar className="h-48 w-48 border-4 border-white/5 shadow-2xl relative bg-[#050505]">
-                        <AvatarImage src={avatarUrl} className="object-cover" />
-                        <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">
-                          WG
-                        </AvatarFallback>
-                      </Avatar>
+                ) : (
+                  /* Offline avatar display */
+                  <div className="relative w-full h-full">
+                    <img
+                      src={avatarUrl}
+                      alt="Profile Avatar"
+                      className="w-full h-full object-cover scale-110 blur-xl opacity-30 pointer-events-none"
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gold/10 blur-3xl rounded-full" />
+                        <Avatar className="h-48 w-48 border-4 border-white/5 shadow-2xl relative bg-[#050505]">
+                          <AvatarImage src={avatarUrl} className="object-cover" />
+                          <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">
+                            WG
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* Overlay Badge */}
+                )}
+
+                {/* Live/Offline Badge */}
                 <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none z-10">
                   <div className={cn(
                     "h-2.5 w-2.5 rounded-full transition-all duration-500",
-                    isOnline ? "bg-green-500 animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.8)]" : "bg-gray-500"
+                    isOnline ? "bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" : "bg-gray-500"
                   )} />
                   <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                    {isOnline ? 'EN LIGNE' : 'HORS LIGNE'}
+                    {isOnline ? '🔴 LIVE' : 'HORS LIGNE'}
                   </span>
                 </div>
 
@@ -371,7 +375,12 @@ export default function Dashboard() {
               <div className="md:w-2/5 p-10 flex flex-col justify-between bg-white/[0.01]">
                 <div className="space-y-6">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold mb-4 block">NOW STREAMING</span>
+                    <span className={cn(
+                      "text-[10px] font-black uppercase tracking-[0.3em] mb-4 block",
+                      isOnline ? "text-red-400" : "text-gold"
+                    )}>
+                      {isOnline ? '🔴 NOW STREAMING' : 'OFFLINE'}
+                    </span>
                     <h2 className="text-2xl font-black text-white leading-tight tracking-tighter italic uppercase mb-2">
                       {isOnline ? roomTitle : "WildgirlShow"}
                     </h2>
@@ -387,21 +396,34 @@ export default function Dashboard() {
                       <span className="text-[8px] font-black uppercase tracking-widest text-white/30">STRIPSCORE</span>
                       <div className="text-xl font-black text-gold">{displayStripScore}</div>
                     </div>
+                    <div className="space-y-1">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">FAVORIS</span>
+                      <div className="text-xl font-black text-white">{displayFavorites.toLocaleString()}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">ABONNÉS</span>
+                      <div className="text-xl font-black text-white">{displaySubscribers}</div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="pt-8">
-                  <Button 
+                  <Button
                     asChild
-                    variant="outline" 
-                    className="w-full border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white font-black uppercase tracking-widest text-[9px] h-12 rounded-xl"
+                    variant="outline"
+                    className={cn(
+                      "w-full font-black uppercase tracking-widest text-[9px] h-12 rounded-xl",
+                      isOnline
+                        ? "border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400"
+                        : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white"
+                    )}
                   >
-                    <a 
-                      href={`https://stripchat.com/wildgirlshow`} 
-                      target="_blank" 
+                    <a
+                      href="https://stripchat.com/wildgirlshow"
+                      target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Ouvrir la plateforme
+                      {isOnline ? "Voir le live en plein écran" : "Ouvrir la plateforme"}
                     </a>
                   </Button>
                 </div>

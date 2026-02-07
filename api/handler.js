@@ -27962,28 +27962,53 @@ async function registerRoutes(_httpServer, app2) {
   });
   app2.get("/api/monitor/wildgirl", async (req, res) => {
     try {
-      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+      const username = "WildgirlShow";
+      let liveData = null;
       try {
-        const response = await axios_default.get(proxyUrl, { timeout: 8e3 });
-        if (response.data && response.data.contents) {
-          const realData = JSON.parse(response.data.contents);
-          if (realData.cam) {
-            return res.json({
-              isOnline: realData.cam.isLive || false,
-              currentPrice: realData.cam.viewPrivatePrice || 60,
-              stripScore: realData.model?.stripScore || 0,
-              favorites: realData.model?.favoritesCount || 0
+        const directRes = await axios_default.get(
+          `https://stripchat.com/api/front/v2/models/username/${username}/cam`,
+          { timeout: 8e3, headers: { "User-Agent": "Mozilla/5.0 (compatible)" } }
+        );
+        if (directRes.data) liveData = directRes.data;
+      } catch {
+        try {
+          const proxyRes = await axios_default.get(
+            `https://api.allorigins.win/get?url=${encodeURIComponent(`https://stripchat.com/api/front/v2/models/username/${username}/cam`)}`,
+            { timeout: 8e3 }
+          );
+          if (proxyRes.data?.contents) liveData = JSON.parse(proxyRes.data.contents);
+        } catch {
+        }
+      }
+      if (liveData) {
+        const isOnline = liveData.cam?.isLive || liveData.user?.status === "public" || false;
+        const stripScore = liveData.user?.stripScore || liveData.model?.stripScore || 0;
+        const favorites = liveData.user?.favoritesCount || liveData.model?.favoritesCount || 0;
+        const viewersCount = liveData.cam?.viewersCount || 0;
+        const currentPrice = liveData.cam?.viewPrivatePrice || 60;
+        const subscribers = liveData.user?.subscribersCount || 0;
+        const roomTitle = liveData.cam?.topic || "";
+        if (isOnline) {
+          try {
+            const lastStats = await db.select().from(modelStats).orderBy(desc2(modelStats.createdAt)).limit(1);
+            const lastRevenue = lastStats[0]?.hourlyRevenue || 0;
+            await db.insert(modelStats).values({
+              isOnline: true,
+              currentPrice,
+              stripScore,
+              favorites,
+              subscribers,
+              hourlyRevenue: lastRevenue
             });
+          } catch {
           }
         }
-      } catch (e) {
-        console.error("API Fetch failed:", e.message);
+        return res.json({ isOnline, currentPrice, stripScore, favorites, viewersCount, subscribers, roomTitle });
       }
-      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0 });
+      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0, viewersCount: 0, subscribers: 0, roomTitle: "" });
     } catch (error) {
       console.error("Monitor error:", error);
-      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0 });
+      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0, viewersCount: 0, subscribers: 0, roomTitle: "" });
     }
   });
   app2.post("/api/model-stats", async (req, res) => {
