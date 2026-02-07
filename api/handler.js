@@ -17021,6 +17021,7 @@ async function initializeDatabase() {
         gp.last_active_at,
         gp.created_at,
         gp.updated_at,
+        u.role,
         EXTRACT(EPOCH FROM (NOW() - gp.last_active_at))::INTEGER AS seconds_since_active,
         CASE
           WHEN gp.last_active_at IS NULL THEN FALSE
@@ -17028,12 +17029,12 @@ async function initializeDatabase() {
           ELSE FALSE
         END AS is_online
       FROM gamification_profiles gp
+      LEFT JOIN users u ON u.id = gp.user_id
       ORDER BY gp.xp_total DESC
     `);
     await safeQuery(client, "cleanup:orphan_profiles", `
       DELETE FROM gamification_profiles
       WHERE user_id NOT IN (1, 2, 3)
-      AND (username IS NULL OR username = '' OR username = 'Utilisateur' OR username = 'Utilisateur Inconnu')
     `);
     await safeQuery(client, "seed:users:benjamin", `
       INSERT INTO users (id, username, role) VALUES (1, 'Benjamin', 'admin')
@@ -27788,15 +27789,7 @@ async function registerRoutes(_httpServer, app2) {
       const { userId, username } = req.body;
       console.log("[RESET] Tentative par:", userId, username);
       let isAdmin = false;
-      if (userId) {
-        const result = await db.execute(
-          sql`SELECT role FROM profiles WHERE id = ${String(userId)} LIMIT 1`
-        );
-        if (result.rows?.length && result.rows[0].role === "admin") {
-          isAdmin = true;
-        }
-      }
-      if (!isAdmin && username) {
+      if (username) {
         const result = await db.execute(
           sql`SELECT role FROM profiles WHERE username = ${username} LIMIT 1`
         );
@@ -27807,6 +27800,17 @@ async function registerRoutes(_httpServer, app2) {
           isAdmin = true;
         }
       }
+      if (!isAdmin && userId) {
+        const numId = typeof userId === "number" ? userId : parseInt(String(userId), 10);
+        if (!isNaN(numId)) {
+          const result = await db.execute(
+            sql`SELECT role FROM users WHERE id = ${numId} LIMIT 1`
+          );
+          if (result.rows?.length && result.rows[0].role === "admin") {
+            isAdmin = true;
+          }
+        }
+      }
       if (!isAdmin) {
         return res.status(403).json({ error: "Interdit. Tu n'es pas admin." });
       }
@@ -27815,8 +27819,8 @@ async function registerRoutes(_httpServer, app2) {
       await db.delete(hunterLeads).where(sql`1=1`);
       await db.delete(workSessions).where(sql`1=1`);
       await db.execute(sql`
-        DELETE FROM gamification_profiles 
-        WHERE username IS NULL OR username = '' OR username = 'Utilisateur Inconnu'
+        DELETE FROM gamification_profiles
+        WHERE user_id NOT IN (1, 2, 3)
       `);
       console.log("[RESET] Season reset by:", username || userId);
       return res.json({ success: true, message: `Saison Reset par ${username || "Admin"}!` });
