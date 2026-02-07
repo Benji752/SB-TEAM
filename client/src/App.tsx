@@ -209,17 +209,23 @@ export default function App() {
 
     initSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Only react to real auth changes, not initial session (handled above)
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setLoading(false);
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setSession(session);
+        setLoading(false);
 
-      if (session?.user) {
-        supabase.from('profiles')
-          .update({ is_online: true })
-          .eq('id', session.user.id)
-          .then(({ error }) => {
-            if (error) console.error("Error updating online status:", error);
-          });
+        if (session?.user) {
+          supabase.from('profiles')
+            .update({ is_online: true })
+            .eq('id', session.user.id)
+            .then(({ error }) => {
+              if (error) console.error("Error updating online status:", error);
+            });
+        }
       }
     });
 

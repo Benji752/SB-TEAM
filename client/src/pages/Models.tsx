@@ -20,6 +20,7 @@ function uuidToInt(uuid: string): number {
 
 interface Profile {
   id: string;
+  user_id: number | null;
   username: string;
   role: string;
   avatar_url: string;
@@ -94,11 +95,11 @@ export default function TeamPage() {
                 </Avatar>
                 <div 
                   className={`absolute bottom-0 right-0 w-5 h-5 border-4 border-[#0A0A0A] rounded-full shadow-lg ${
-                    isUserOnline(uuidToInt(profile.id)) 
+                    isUserOnline(profile.user_id ?? 0) 
                       ? 'bg-[#10B981]' 
                       : 'bg-gray-500'
                   }`}
-                  title={isUserOnline(uuidToInt(profile.id)) ? 'En ligne' : 'Hors ligne'}
+                  title={isUserOnline(profile.user_id ?? 0) ? 'En ligne' : 'Hors ligne'}
                 />
               </div>
 

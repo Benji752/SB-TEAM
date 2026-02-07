@@ -158,7 +158,7 @@ export default function Orders() {
                 </DialogTitle>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit((data) => createMutation.mutate({ ...data, createdBy: user?.id ? uuidToInt(String(user.id)) : undefined }))} className="space-y-4 py-4">
+                <form onSubmit={form.handleSubmit((data) => createMutation.mutate({ ...data, createdBy: (user as any)?.numericId || (user as any)?.user_id || (typeof user?.id === 'number' ? user.id : undefined) }))} className="space-y-4 py-4">
                   <FormField
                     control={form.control}
                     name="clientName"
