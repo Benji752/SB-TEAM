@@ -42,11 +42,13 @@ export function HeartbeatTracker() {
     const rawUserId = user?.id;
     if (!rawUserId) return;
 
-    const numericUserId = typeof rawUserId === 'number' 
-      ? rawUserId 
-      : (typeof rawUserId === 'string' && /^\d+$/.test(rawUserId))
-        ? parseInt(rawUserId, 10)
-        : uuidToInt(String(rawUserId));
+    // Prefer numericId (from cookie auth) or user_id (from Supabase profile)
+    const numericUserId = (user as any)?.numericId
+      || (user as any)?.user_id
+      || (typeof rawUserId === 'number' ? rawUserId : null)
+      || (typeof rawUserId === 'string' && /^\d+$/.test(rawUserId) ? parseInt(rawUserId, 10) : null);
+
+    if (!numericUserId) return;
 
     // Get username from user object (email prefix or username field)
     const userEmail = (user as any)?.email;
