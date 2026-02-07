@@ -301,32 +301,58 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     }
   });
 
-  // Monitoring WildgirlShow - API Proxy only
+  // Auto-fetch live stats from Stripchat API + save to DB when online
   app.get("/api/monitor/wildgirl", async (req, res) => {
     try {
-      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-      
+      const username = "WildgirlShow";
+      let liveData: any = null;
+
+      // Try direct Stripchat API (server-side, no CORS issues)
       try {
-        const response = await axios.get(proxyUrl, { timeout: 8000 });
-        if (response.data && response.data.contents) {
-          const realData = JSON.parse(response.data.contents);
-          if (realData.cam) {
-            return res.json({
-              isOnline: realData.cam.isLive || false,
-              currentPrice: realData.cam.viewPrivatePrice || 60,
-              stripScore: realData.model?.stripScore || 0,
-              favorites: realData.model?.favoritesCount || 0,
-            });
-          }
-        }
-      } catch (e: any) {
-        console.error("API Fetch failed:", e.message);
+        const directRes = await axios.get(
+          `https://stripchat.com/api/front/v2/models/username/${username}/cam`,
+          { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' } }
+        );
+        if (directRes.data) liveData = directRes.data;
+      } catch {
+        // Fallback to proxy
+        try {
+          const proxyRes = await axios.get(
+            `https://api.allorigins.win/get?url=${encodeURIComponent(`https://stripchat.com/api/front/v2/models/username/${username}/cam`)}`,
+            { timeout: 8000 }
+          );
+          if (proxyRes.data?.contents) liveData = JSON.parse(proxyRes.data.contents);
+        } catch {}
       }
-      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0 });
+
+      if (liveData) {
+        const isOnline = liveData.cam?.isLive || liveData.user?.status === 'public' || false;
+        const stripScore = liveData.user?.stripScore || liveData.model?.stripScore || 0;
+        const favorites = liveData.user?.favoritesCount || liveData.model?.favoritesCount || 0;
+        const viewersCount = liveData.cam?.viewersCount || 0;
+        const currentPrice = liveData.cam?.viewPrivatePrice || 60;
+        const subscribers = liveData.user?.subscribersCount || 0;
+        const roomTitle = liveData.cam?.topic || '';
+
+        // Auto-save stats snapshot when online
+        if (isOnline) {
+          try {
+            const lastStats = await db.select().from(modelStats).orderBy(desc(modelStats.createdAt)).limit(1);
+            const lastRevenue = lastStats[0]?.hourlyRevenue || 0;
+            await db.insert(modelStats).values({
+              isOnline: true, currentPrice, stripScore, favorites, subscribers,
+              hourlyRevenue: lastRevenue,
+            });
+          } catch {}
+        }
+
+        return res.json({ isOnline, currentPrice, stripScore, favorites, viewersCount, subscribers, roomTitle });
+      }
+
+      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0, viewersCount: 0, subscribers: 0, roomTitle: '' });
     } catch (error: any) {
       console.error("Monitor error:", error);
-      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0 });
+      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0, viewersCount: 0, subscribers: 0, roomTitle: '' });
     }
   });
 
