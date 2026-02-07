@@ -27751,7 +27751,7 @@ OpenAI.Videos = Videos;
 // server/routes.ts
 import { z } from "zod";
 var XP_PER_LEAD = 150;
-var XP_PER_PRESENCE = 10;
+var XP_PER_PRESENCE = 1;
 var XP_PER_ORDER_CREATE = 75;
 var XP_PER_ORDER_PAID = 75;
 var XP_LOGIN_BONUS = 50;
@@ -27870,7 +27870,7 @@ async function registerRoutes(_httpServer, app2) {
   app2.post("/api/orders", async (req, res) => {
     try {
       const currentUser = getCurrentUser(req);
-      const rawCreatorId = currentUser?.id || req.body.createdBy;
+      const rawCreatorId = currentUser?.numericId || req.body.createdBy || currentUser?.id;
       const creatorId = rawCreatorId ? typeof rawCreatorId === "number" ? rawCreatorId : parseInt(String(rawCreatorId), 10) : null;
       const orderData = { ...req.body, createdBy: creatorId || null };
       const order = await storage.createOrder(orderData);

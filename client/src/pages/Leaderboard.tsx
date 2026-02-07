@@ -562,7 +562,7 @@ function RulesCard() {
   const rules = [
     { icon: ShoppingCart, color: "blue", title: "Nouvelle Commande", xp: "+75 XP", desc: "Créer une commande" },
     { icon: CheckCircle, color: "green", title: "Commande Payée", xp: "+75 XP", desc: "Quand statut = Payé" },
-    { icon: Clock, color: "purple", title: "Présence Active", xp: "+10 XP / 10min", desc: "Tracking automatique" },
+    { icon: Clock, color: "purple", title: "Présence Active", xp: "+1 XP / 10min", desc: "Tracking automatique" },
     { icon: Moon, color: "yellow", title: "Night Owl", xp: "+50 XP", desc: "00h00 - 06h00" },
   ];
 

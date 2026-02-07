@@ -11,7 +11,7 @@ import { z } from "zod";
 // ========== GAMIFICATION HELPERS ==========
 // SAISON MENSUELLE - Objectif Niveau 300 (Formule linéaire: 100 XP = 1 niveau)
 const XP_PER_LEAD = 150;           // Déclaration de leads approuvés
-const XP_PER_PRESENCE = 10;        // Toutes les 10 minutes de présence
+const XP_PER_PRESENCE = 1;         // 1 XP toutes les 10 minutes de présence
 const XP_PER_ORDER_CREATE = 75;    // Création de commande
 const XP_PER_ORDER_PAID = 75;      // Commande payée (total: 150 XP)
 const XP_LOGIN_BONUS = 50;         // Bonus première connexion du jour
@@ -175,9 +175,9 @@ export async function registerRoutes(_httpServer: any, app: Express) {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      // Get creator from current user (MOCK_AUTH compatible)
+      // Get creator from current user - prefer numericId over id (which may be a UUID string)
       const currentUser = getCurrentUser(req);
-      const rawCreatorId = currentUser?.id || req.body.createdBy;
+      const rawCreatorId = (currentUser as any)?.numericId || req.body.createdBy || currentUser?.id;
       const creatorId = rawCreatorId ? (typeof rawCreatorId === 'number' ? rawCreatorId : parseInt(String(rawCreatorId), 10)) : null;
       
       // Create order with createdBy from session if available
