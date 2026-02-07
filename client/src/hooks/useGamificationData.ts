@@ -22,6 +22,7 @@ export interface LeaderboardUser {
   user_id: number;
   username: string | null;
   xp: number;
+  xp_total: number;
   level: number;
   current_streak: number;
   role_multiplier: number;
@@ -40,13 +41,12 @@ export function useGamificationData() {
   const lastActivityRef = useRef<number>(Date.now());
   const [isActive, setIsActive] = useState(true);
 
-  const currentUserId = user?.id 
-    ? (typeof user.id === 'number' 
-        ? user.id 
-        : (typeof user.id === 'string' && /^\d+$/.test(user.id))
-          ? parseInt(user.id, 10)
-          : uuidToInt(String(user.id)))
-    : null;
+  // Prefer numericId (from cookie auth) or user_id (from Supabase profile) over raw id
+  const currentUserId = (user as any)?.numericId
+    || (user as any)?.user_id
+    || (user?.id && typeof user.id === 'number' ? user.id : null)
+    || (user?.id && typeof user.id === 'string' && /^\d+$/.test(user.id) ? parseInt(user.id, 10) : null)
+    || null;
 
   const currentUsername = user 
     ? ((user as any)?.username || (user as any)?.name || ((user as any)?.email?.split('@')[0]) || null)
