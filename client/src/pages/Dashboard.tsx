@@ -503,7 +503,7 @@ export default function Dashboard() {
             <div className="text-right">
               <p className="text-[10px] font-black uppercase tracking-widest text-white/30">#1 Leader</p>
               <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">
-                {leaderboard[0]?.xp || 0} XP
+                {leaderboard[0]?.xp_total || 0} XP
               </p>
             </div>
             <Link href="/leaderboard">

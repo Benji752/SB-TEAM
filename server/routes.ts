@@ -61,22 +61,12 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   app.post("/api/dev/reset-season", async (req, res) => {
     try {
       const { userId, username } = req.body;
-      
+
       console.log('[RESET] Tentative par:', userId, username);
 
-      // Check by ID first
+      // Check admin by username (most reliable - avoids UUID format issues)
       let isAdmin = false;
-      if (userId) {
-        const result = await db.execute(
-          sql`SELECT role FROM profiles WHERE id = ${String(userId)} LIMIT 1`
-        );
-        if (result.rows?.length && result.rows[0].role === 'admin') {
-          isAdmin = true;
-        }
-      }
-
-      // Backup: If username is Benjamin, allow
-      if (!isAdmin && username) {
+      if (username) {
         const result = await db.execute(
           sql`SELECT role FROM profiles WHERE username = ${username} LIMIT 1`
         );
@@ -86,6 +76,19 @@ export async function registerRoutes(_httpServer: any, app: Express) {
         // Special case: Benjamin always passes
         if (username === 'Benjamin') {
           isAdmin = true;
+        }
+      }
+
+      // Fallback: check by numeric user_id in users table
+      if (!isAdmin && userId) {
+        const numId = typeof userId === 'number' ? userId : parseInt(String(userId), 10);
+        if (!isNaN(numId)) {
+          const result = await db.execute(
+            sql`SELECT role FROM users WHERE id = ${numId} LIMIT 1`
+          );
+          if (result.rows?.length && result.rows[0].role === 'admin') {
+            isAdmin = true;
+          }
         }
       }
 
@@ -107,10 +110,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       // Delete all work sessions
       await db.delete(workSessions).where(sql`1=1`);
 
-      // Purge orphan/ghost profiles
+      // Purge ALL ghost profiles (only keep team members 1, 2, 3)
       await db.execute(sql`
-        DELETE FROM gamification_profiles 
-        WHERE username IS NULL OR username = '' OR username = 'Utilisateur Inconnu'
+        DELETE FROM gamification_profiles
+        WHERE user_id NOT IN (1, 2, 3)
       `);
 
       console.log("[RESET] Season reset by:", username || userId);

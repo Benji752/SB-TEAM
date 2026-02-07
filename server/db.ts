@@ -325,7 +325,7 @@ export async function initializeDatabase() {
       )
     `);
 
-    // Leaderboard view (depends on gamification_profiles)
+    // Leaderboard view (depends on gamification_profiles + users for role)
     await safeQuery(client, "gamification_leaderboard_view", `
       CREATE OR REPLACE VIEW gamification_leaderboard_view AS
       SELECT
@@ -340,6 +340,7 @@ export async function initializeDatabase() {
         gp.last_active_at,
         gp.created_at,
         gp.updated_at,
+        u.role,
         EXTRACT(EPOCH FROM (NOW() - gp.last_active_at))::INTEGER AS seconds_since_active,
         CASE
           WHEN gp.last_active_at IS NULL THEN FALSE
@@ -347,14 +348,14 @@ export async function initializeDatabase() {
           ELSE FALSE
         END AS is_online
       FROM gamification_profiles gp
+      LEFT JOIN users u ON u.id = gp.user_id
       ORDER BY gp.xp_total DESC
     `);
 
-    // Clean up orphan/ghost gamification profiles (no username or placeholder)
+    // Clean up ALL ghost gamification profiles (only keep user_id 1, 2, 3)
     await safeQuery(client, "cleanup:orphan_profiles", `
       DELETE FROM gamification_profiles
       WHERE user_id NOT IN (1, 2, 3)
-      AND (username IS NULL OR username = '' OR username = 'Utilisateur' OR username = 'Utilisateur Inconnu')
     `);
 
     // Seed the 3 team members: Benjamin(admin), Laura(model), Nico(staff)

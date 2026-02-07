@@ -621,7 +621,7 @@ export default function Leaderboard() {
       const response = await fetch('/api/dev/reset-season', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.id, username: user?.username || 'Benjamin' })
+        body: JSON.stringify({ userId: (user as any)?.numericId || (user as any)?.user_id, username: (user as any)?.username || 'Benjamin' })
       });
       
       if (!response.ok) {
@@ -690,6 +690,7 @@ export default function Leaderboard() {
     currentStreak: currentUser.current_streak ?? 0,
     roleMultiplier: currentUser.role_multiplier ?? 1,
     badges: currentUser.badges || [],
+    role: (currentUser as any).role || null,
     username: currentUser.username,
     isOnline: currentUser.isOnline,
     isCurrentUser: true
@@ -704,6 +705,7 @@ export default function Leaderboard() {
     currentStreak: u.current_streak ?? 0,
     roleMultiplier: u.role_multiplier ?? 1,
     badges: u.badges || [],
+    role: (u as any).role || null,
     username: u.username,
     isOnline: u.isOnline,
     isCurrentUser: u.isCurrentUser
