@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import { LayoutDashboard, Loader2, ArrowLeft } from "lucide-react";
 
 export default function Landing() {
@@ -16,24 +16,44 @@ export default function Landing() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
-  const { user } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
-      
+
+      // After Supabase login, fetch profile to get user_id and set cookie for server
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profile?.user_id) {
+          // Set cookie so Express API knows who we are
+          await fetch("/api/login-demo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: profile.user_id }),
+            credentials: "include",
+          });
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+
       toast({
         title: "Connexion réussie",
-        description: "Vous allez être redirigé vers votre tableau de bord.",
+        description: "Bienvenue sur votre tableau de bord.",
       });
-      
+
       window.location.href = "/";
     } catch (error: any) {
       toast({
@@ -56,7 +76,7 @@ export default function Landing() {
       });
       return;
     }
-    
+
     setResetLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
@@ -64,7 +84,7 @@ export default function Landing() {
       });
 
       if (error) throw error;
-      
+
       toast({
         title: "Email envoyé",
         description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe.",
@@ -99,10 +119,9 @@ export default function Landing() {
           {showForgotPassword ? (
             <>
               <div className="mb-8">
-                <button 
+                <button
                   onClick={() => setShowForgotPassword(false)}
                   className="flex items-center gap-2 text-muted-foreground hover:text-white mb-4 transition-colors"
-                  data-testid="button-back-login"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   <span className="text-sm">Retour à la connexion</span>
@@ -113,18 +132,17 @@ export default function Landing() {
               <form onSubmit={handleForgotPassword} className="space-y-6">
                 <div className="space-y-3">
                   <Label htmlFor="reset-email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email</Label>
-                  <Input 
-                    id="reset-email" 
-                    type="email" 
-                    placeholder="votre@email.com" 
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="votre@email.com"
                     className="bg-white/[0.03] border-white/[0.08] text-white h-12 rounded-xl focus:ring-gold/30"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
                     required
-                    data-testid="input-reset-email"
                   />
                 </div>
-                <Button type="submit" className="w-full luxury-button h-12" disabled={resetLoading} data-testid="button-send-reset">
+                <Button type="submit" className="w-full luxury-button h-12" disabled={resetLoading}>
                   {resetLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Envoyer le lien"}
                 </Button>
               </form>
@@ -138,40 +156,37 @@ export default function Landing() {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-3">
                   <Label htmlFor="email" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="admin@agency.com" 
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@agency.com"
                     className="bg-white/[0.03] border-white/[0.08] text-white h-12 rounded-xl focus:ring-gold/30"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    data-testid="input-email"
                   />
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Mot de passe</Label>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setShowForgotPassword(true)}
                       className="text-xs text-gold hover:text-gold/80 transition-colors"
-                      data-testid="button-forgot-password"
                     >
                       Mot de passe oublié ?
                     </button>
                   </div>
-                  <Input 
-                    id="password" 
-                    type="password" 
+                  <Input
+                    id="password"
+                    type="password"
                     className="bg-white/[0.03] border-white/[0.08] text-white h-12 rounded-xl focus:ring-gold/30"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    data-testid="input-password"
                   />
                 </div>
-                <Button type="submit" className="w-full luxury-button h-12" disabled={loading} data-testid="button-login">
+                <Button type="submit" className="w-full luxury-button h-12" disabled={loading}>
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Accéder au Dashboard"}
                 </Button>
               </form>

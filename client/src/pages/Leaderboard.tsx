@@ -562,7 +562,7 @@ function RulesCard() {
   const rules = [
     { icon: ShoppingCart, color: "blue", title: "Nouvelle Commande", xp: "+75 XP", desc: "Créer une commande" },
     { icon: CheckCircle, color: "green", title: "Commande Payée", xp: "+75 XP", desc: "Quand statut = Payé" },
-    { icon: Clock, color: "purple", title: "Présence Active", xp: "+10 XP / 10min", desc: "Tracking automatique" },
+    { icon: Clock, color: "purple", title: "Présence Active", xp: "+1 XP / 10min", desc: "Tracking automatique" },
     { icon: Moon, color: "yellow", title: "Night Owl", xp: "+50 XP", desc: "00h00 - 06h00" },
   ];
 
@@ -621,7 +621,7 @@ export default function Leaderboard() {
       const response = await fetch('/api/dev/reset-season', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.id, username: user?.username || 'Benjamin' })
+        body: JSON.stringify({ userId: (user as any)?.numericId || (user as any)?.user_id, username: (user as any)?.username || 'Benjamin' })
       });
       
       if (!response.ok) {
@@ -673,18 +673,24 @@ export default function Leaderboard() {
     queryKey: ["/api/gamification/today-time", 2],
   });
 
+  const { data: todayTime3 } = useQuery<TodayTime>({
+    queryKey: ["/api/gamification/today-time", 3],
+  });
+
   const todayTimes: Record<number, TodayTime> = {};
   if (todayTime1) todayTimes[1] = todayTime1;
   if (todayTime2) todayTimes[2] = todayTime2;
+  if (todayTime3) todayTimes[3] = todayTime3;
 
   const myProfile = currentUser ? {
     id: currentUser.id,
     userId: currentUser.user_id,
-    xpTotal: currentUser.xp,
-    level: currentUser.level,
-    currentStreak: currentUser.current_streak,
-    roleMultiplier: currentUser.role_multiplier,
+    xpTotal: currentUser.xp_total ?? currentUser.xp ?? 0,
+    level: currentUser.level ?? 1,
+    currentStreak: currentUser.current_streak ?? 0,
+    roleMultiplier: currentUser.role_multiplier ?? 1,
     badges: currentUser.badges || [],
+    role: (currentUser as any).role || null,
     username: currentUser.username,
     isOnline: currentUser.isOnline,
     isCurrentUser: true
@@ -694,11 +700,12 @@ export default function Leaderboard() {
   const mappedLeaderboard: GamificationProfile[] = leaderboard.map(u => ({
     id: u.id,
     userId: u.user_id,
-    xpTotal: u.xp,
-    level: u.level,
-    currentStreak: u.current_streak,
-    roleMultiplier: u.role_multiplier,
+    xpTotal: u.xp_total ?? u.xp ?? 0,
+    level: u.level ?? 1,
+    currentStreak: u.current_streak ?? 0,
+    roleMultiplier: u.role_multiplier ?? 1,
     badges: u.badges || [],
+    role: (u as any).role || null,
     username: u.username,
     isOnline: u.isOnline,
     isCurrentUser: u.isCurrentUser

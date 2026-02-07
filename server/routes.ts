@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { setupAuth, isMockAuthEnabled, getCurrentUser, requireAuth, getUserNumericId } from "./auth";
 import axios from "axios";
-import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory, gamificationProfiles, hunterLeads, workSessions, xpActivityLog, insertHunterLeadSchema, insertWorkSessionSchema } from "@shared/schema";
+import { modelStats, authLogs, users, profiles, tasks, orders, models, agencyStats, aiChatHistory, gamificationProfiles, hunterLeads, workSessions, xpActivityLog, groupMessages, insertHunterLeadSchema, insertWorkSessionSchema } from "@shared/schema";
 import { db } from "./db";
 import { desc, gte, eq, ne, sql, and, isNull } from "drizzle-orm";
 import { storage } from "./storage";
@@ -11,7 +11,7 @@ import { z } from "zod";
 // ========== GAMIFICATION HELPERS ==========
 // SAISON MENSUELLE - Objectif Niveau 300 (Formule linéaire: 100 XP = 1 niveau)
 const XP_PER_LEAD = 150;           // Déclaration de leads approuvés
-const XP_PER_PRESENCE = 10;        // Toutes les 10 minutes de présence
+const XP_PER_PRESENCE = 1;         // 1 XP toutes les 10 minutes de présence
 const XP_PER_ORDER_CREATE = 75;    // Création de commande
 const XP_PER_ORDER_PAID = 75;      // Commande payée (total: 150 XP)
 const XP_LOGIN_BONUS = 50;         // Bonus première connexion du jour
@@ -61,22 +61,12 @@ export async function registerRoutes(_httpServer: any, app: Express) {
   app.post("/api/dev/reset-season", async (req, res) => {
     try {
       const { userId, username } = req.body;
-      
+
       console.log('[RESET] Tentative par:', userId, username);
 
-      // Check by ID first
+      // Check admin by username (most reliable - avoids UUID format issues)
       let isAdmin = false;
-      if (userId) {
-        const result = await db.execute(
-          sql`SELECT role FROM profiles WHERE id = ${String(userId)} LIMIT 1`
-        );
-        if (result.rows?.length && result.rows[0].role === 'admin') {
-          isAdmin = true;
-        }
-      }
-
-      // Backup: If username is Benjamin, allow
-      if (!isAdmin && username) {
+      if (username) {
         const result = await db.execute(
           sql`SELECT role FROM profiles WHERE username = ${username} LIMIT 1`
         );
@@ -86,6 +76,19 @@ export async function registerRoutes(_httpServer: any, app: Express) {
         // Special case: Benjamin always passes
         if (username === 'Benjamin') {
           isAdmin = true;
+        }
+      }
+
+      // Fallback: check by numeric user_id in users table
+      if (!isAdmin && userId) {
+        const numId = typeof userId === 'number' ? userId : parseInt(String(userId), 10);
+        if (!isNaN(numId)) {
+          const result = await db.execute(
+            sql`SELECT role FROM users WHERE id = ${numId} LIMIT 1`
+          );
+          if (result.rows?.length && result.rows[0].role === 'admin') {
+            isAdmin = true;
+          }
         }
       }
 
@@ -107,10 +110,10 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       // Delete all work sessions
       await db.delete(workSessions).where(sql`1=1`);
 
-      // Purge orphan/ghost profiles
+      // Purge ALL ghost profiles (only keep team members 1, 2, 3)
       await db.execute(sql`
-        DELETE FROM gamification_profiles 
-        WHERE username IS NULL OR username = '' OR username = 'Utilisateur Inconnu'
+        DELETE FROM gamification_profiles
+        WHERE user_id NOT IN (1, 2, 3)
       `);
 
       console.log("[RESET] Season reset by:", username || userId);
@@ -172,9 +175,9 @@ export async function registerRoutes(_httpServer: any, app: Express) {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      // Get creator from current user (MOCK_AUTH compatible)
+      // Get creator from current user - prefer numericId over id (which may be a UUID string)
       const currentUser = getCurrentUser(req);
-      const rawCreatorId = currentUser?.id || req.body.createdBy;
+      const rawCreatorId = (currentUser as any)?.numericId || req.body.createdBy || currentUser?.id;
       const creatorId = rawCreatorId ? (typeof rawCreatorId === 'number' ? rawCreatorId : parseInt(String(rawCreatorId), 10)) : null;
       
       // Create order with createdBy from session if available
@@ -189,6 +192,7 @@ export async function registerRoutes(_httpServer: any, app: Express) {
         if (!profile) {
           [profile] = await db.insert(gamificationProfiles).values({
             userId: creatorId,
+            username: currentUser?.username || 'Utilisateur',
             xpTotal: 0,
             level: 1,
             currentStreak: 0,
@@ -196,7 +200,7 @@ export async function registerRoutes(_httpServer: any, app: Express) {
             badges: [],
           }).returning();
         }
-        
+
         // Add XP for creating order
         const xpGained = XP_PER_ORDER_CREATE;
         const newXp = profile.xpTotal + xpGained;
@@ -242,6 +246,7 @@ export async function registerRoutes(_httpServer: any, app: Express) {
         if (!profile) {
           [profile] = await db.insert(gamificationProfiles).values({
             userId: creatorId,
+            username: 'Utilisateur',
             xpTotal: 0,
             level: 1,
             currentStreak: 0,
@@ -249,7 +254,7 @@ export async function registerRoutes(_httpServer: any, app: Express) {
             badges: [],
           }).returning();
         }
-        
+
         // Add XP bonus for paid order
         const xpGained = XP_PER_ORDER_PAID;
         const newXp = profile.xpTotal + xpGained;
@@ -296,32 +301,58 @@ export async function registerRoutes(_httpServer: any, app: Express) {
     }
   });
 
-  // Monitoring WildgirlShow - API Proxy only
+  // Auto-fetch live stats from Stripchat API + save to DB when online
   app.get("/api/monitor/wildgirl", async (req, res) => {
     try {
-      const targetUrl = "https://stripchat.com/api/front/v2/models/username/WildgirlShow/cam";
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-      
+      const username = "WildgirlShow";
+      let liveData: any = null;
+
+      // Try direct Stripchat API (server-side, no CORS issues)
       try {
-        const response = await axios.get(proxyUrl, { timeout: 8000 });
-        if (response.data && response.data.contents) {
-          const realData = JSON.parse(response.data.contents);
-          if (realData.cam) {
-            return res.json({
-              isOnline: realData.cam.isLive || false,
-              currentPrice: realData.cam.viewPrivatePrice || 60,
-              stripScore: realData.model?.stripScore || 0,
-              favorites: realData.model?.favoritesCount || 0,
-            });
-          }
-        }
-      } catch (e: any) {
-        console.error("API Fetch failed:", e.message);
+        const directRes = await axios.get(
+          `https://stripchat.com/api/front/v2/models/username/${username}/cam`,
+          { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible)' } }
+        );
+        if (directRes.data) liveData = directRes.data;
+      } catch {
+        // Fallback to proxy
+        try {
+          const proxyRes = await axios.get(
+            `https://api.allorigins.win/get?url=${encodeURIComponent(`https://stripchat.com/api/front/v2/models/username/${username}/cam`)}`,
+            { timeout: 8000 }
+          );
+          if (proxyRes.data?.contents) liveData = JSON.parse(proxyRes.data.contents);
+        } catch {}
       }
-      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0 });
+
+      if (liveData) {
+        const isOnline = liveData.cam?.isLive || liveData.user?.status === 'public' || false;
+        const stripScore = liveData.user?.stripScore || liveData.model?.stripScore || 0;
+        const favorites = liveData.user?.favoritesCount || liveData.model?.favoritesCount || 0;
+        const viewersCount = liveData.cam?.viewersCount || 0;
+        const currentPrice = liveData.cam?.viewPrivatePrice || 60;
+        const subscribers = liveData.user?.subscribersCount || 0;
+        const roomTitle = liveData.cam?.topic || '';
+
+        // Auto-save stats snapshot when online
+        if (isOnline) {
+          try {
+            const lastStats = await db.select().from(modelStats).orderBy(desc(modelStats.createdAt)).limit(1);
+            const lastRevenue = lastStats[0]?.hourlyRevenue || 0;
+            await db.insert(modelStats).values({
+              isOnline: true, currentPrice, stripScore, favorites, subscribers,
+              hourlyRevenue: lastRevenue,
+            });
+          } catch {}
+        }
+
+        return res.json({ isOnline, currentPrice, stripScore, favorites, viewersCount, subscribers, roomTitle });
+      }
+
+      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0, viewersCount: 0, subscribers: 0, roomTitle: '' });
     } catch (error: any) {
       console.error("Monitor error:", error);
-      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0 });
+      res.json({ isOnline: false, currentPrice: 60, stripScore: 0, favorites: 0, viewersCount: 0, subscribers: 0, roomTitle: '' });
     }
   });
 
@@ -748,8 +779,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     try {
       // Known team members (userId -> {name, role})
       const TEAM_MEMBERS: Record<number, { name: string; role: string }> = {
-        1: { name: "Nico", role: "staff" },
+        1: { name: "Benjamin", role: "admin" },
         2: { name: "Laura", role: "model" },
+        3: { name: "Nico", role: "staff" },
       };
       
       // Get all gamification profiles
@@ -815,26 +847,16 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         .where(eq(gamificationProfiles.userId, userId))
         .limit(1);
       
-      if (existing.length) {
-        // Update existing profile
-        const updateData: any = { lastActiveAt: now, updatedAt: now };
-        if (username) updateData.username = username;
-        
-        await db.update(gamificationProfiles)
-          .set(updateData)
-          .where(eq(gamificationProfiles.userId, userId));
-      } else {
-        // Create new profile
-        await db.insert(gamificationProfiles).values({
-          userId,
-          username: username || null,
-          xpTotal: 0,
-          level: 1,
-          currentStreak: 0,
-          roleMultiplier: 2.0,
-          lastActiveAt: now
-        });
-      }
+      // Upsert: create profile if missing, update if exists (race-condition safe)
+      const upsertUsername = username || 'Utilisateur';
+      await db.execute(sql`
+        INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier, last_active_at, updated_at)
+        VALUES (${userId}, ${upsertUsername}, 0, 1, 0, 2.0, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          last_active_at = NOW(),
+          updated_at = NOW(),
+          username = COALESCE(NULLIF(${upsertUsername}, 'Utilisateur'), gamification_profiles.username)
+      `);
       
       // Award XP for presence (10 XP per ping, configured for 10-minute intervals)
       await awardXP(userId, XP_PER_PRESENCE, "presence", `Présence active +${XP_PER_PRESENCE} XP`);
@@ -873,6 +895,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         
         const newProfile = await db.insert(gamificationProfiles).values({
           userId,
+          username: 'Utilisateur',
           xpTotal: 0,
           level: 1,
           currentStreak: 0,
@@ -893,17 +916,16 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     try {
       // Get activities with user info via SQL JOIN
       const activitiesResult = await db.execute(sql`
-        SELECT 
+        SELECT
           xal.id,
           xal.user_id as "userId",
           xal.action_type as "actionType",
           xal.xp_gained as "xpGained",
           xal.description,
           xal.created_at as "createdAt",
-          COALESCE(gp.username, p.username, 'Utilisateur Inconnu') as username
+          COALESCE(gp.username, 'Utilisateur Inconnu') as username
         FROM xp_activity_log xal
         LEFT JOIN gamification_profiles gp ON xal.user_id = gp.user_id
-        LEFT JOIN profiles p ON CAST(xal.user_id AS TEXT) = p.id
         ORDER BY xal.created_at DESC
         LIMIT 20
       `);
@@ -1052,27 +1074,27 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       }
       const { userId, username } = result.data;
       
-      // Get user's gamification profile (create if doesn't exist)
+      // Get user's gamification profile (create if doesn't exist, race-condition safe)
       let profile = await db.select().from(gamificationProfiles)
         .where(eq(gamificationProfiles.userId, userId))
         .limit(1);
-      
+
       if (!profile.length) {
         // Get role from current user (MOCK_AUTH compatible)
         const currentUser = getCurrentUser(req);
         const userRole = currentUser?.role?.toLowerCase() || 'staff';
-        
+
         const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
-        
-        const newProfile = await db.insert(gamificationProfiles).values({
-          userId,
-          username: username || null,
-          xpTotal: 0,
-          level: 1,
-          currentStreak: 0,
-          roleMultiplier
-        }).returning();
-        profile = newProfile;
+
+        // Use ON CONFLICT to avoid duplicate key errors from concurrent heartbeats
+        await db.execute(sql`
+          INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier)
+          VALUES (${userId}, ${username || 'Utilisateur'}, 0, 1, 0, ${roleMultiplier})
+          ON CONFLICT (user_id) DO NOTHING
+        `);
+        profile = await db.select().from(gamificationProfiles)
+          .where(eq(gamificationProfiles.userId, userId))
+          .limit(1);
       }
       
       // Update lastActiveAt timestamp and always update username if provided
@@ -1162,27 +1184,18 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const { userId } = result.data;
       console.log(`✅ Ping reçu pour user ${userId}`);
       
-      // Update lastActiveAt in gamification_profiles
-      const updated = await db.update(gamificationProfiles)
-        .set({ lastActiveAt: new Date() })
-        .where(eq(gamificationProfiles.userId, userId))
-        .returning();
-      
-      if (!updated.length) {
-        // Create profile if doesn't exist
-        const currentUser = getCurrentUser(req);
-        const userRole = currentUser?.role?.toLowerCase() || 'staff';
-        const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
-        
-        await db.insert(gamificationProfiles).values({
-          userId,
-          xpTotal: 0,
-          level: 1,
-          currentStreak: 0,
-          roleMultiplier,
-          lastActiveAt: new Date()
-        });
-      }
+      // Upsert lastActiveAt in gamification_profiles (race-condition safe)
+      const currentUser = getCurrentUser(req);
+      const userRole = currentUser?.role?.toLowerCase() || 'staff';
+      const roleMultiplier = (userRole === 'admin' || userRole === 'staff') ? 2.0 : 1.0;
+
+      await db.execute(sql`
+        INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier, last_active_at, updated_at)
+        VALUES (${userId}, 'Utilisateur', 0, 1, 0, ${roleMultiplier}, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          last_active_at = NOW(),
+          updated_at = NOW()
+      `);
       
       res.json({ success: true, timestamp: new Date().toISOString() });
     } catch (error: any) {
@@ -1503,38 +1516,37 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   });
 
   // ===================== GROUP CHAT API =====================
-  
+
   // Get all group messages
   app.get("/api/group-messages", async (req, res) => {
     try {
-      const result = await db.execute(sql`
-        SELECT * FROM group_messages 
-        ORDER BY created_at ASC 
-        LIMIT 100
-      `);
-      res.json(result.rows || []);
+      const messages = await db.select()
+        .from(groupMessages)
+        .orderBy(groupMessages.createdAt)
+        .limit(100);
+      res.json(messages);
     } catch (error: any) {
       console.error("Error fetching group messages:", error);
       res.json([]);
     }
   });
-  
+
   // Send a group message
   app.post("/api/group-messages", async (req, res) => {
     try {
       const { senderId, senderUsername, content } = req.body;
-      
+
       if (!senderId || !senderUsername || !content?.trim()) {
         return res.status(400).json({ error: "Missing required fields" });
       }
-      
-      const result = await db.execute(sql`
-        INSERT INTO group_messages (sender_id, sender_username, content)
-        VALUES (${senderId}, ${senderUsername}, ${content.trim()})
-        RETURNING *
-      `);
-      
-      res.json(result.rows[0]);
+
+      const [message] = await db.insert(groupMessages).values({
+        senderId: typeof senderId === 'number' ? senderId : parseInt(String(senderId), 10),
+        senderUsername,
+        content: content.trim()
+      }).returning();
+
+      res.json(message);
     } catch (error: any) {
       console.error("Error sending group message:", error);
       res.json({ id: 0, error: "Failed to send message" });

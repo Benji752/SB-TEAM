@@ -7,7 +7,7 @@ import { relations } from "drizzle-orm";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  role: text("role", { enum: ["admin", "model"] }).default("model").notNull(),
+  role: text("role", { enum: ["admin", "model", "staff"] }).default("model").notNull(),
 });
 
 export const authLogs = pgTable("auth_logs", {
@@ -22,7 +22,7 @@ export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   username: text("username").notNull(),
-  role: text("role", { enum: ["admin", "model"] }).default("model").notNull(),
+  role: text("role", { enum: ["admin", "model", "staff"] }).default("model").notNull(),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -209,6 +209,19 @@ export const aiChatHistory = pgTable("ai_chat_history", {
 export const insertAiChatHistorySchema = createInsertSchema(aiChatHistory).omit({ id: true, createdAt: true });
 export type AiChatHistory = typeof aiChatHistory.$inferSelect;
 export type InsertAiChatHistory = z.infer<typeof insertAiChatHistorySchema>;
+
+// Group Messages (Team Chat)
+export const groupMessages = pgTable("group_messages", {
+  id: serial("id").primaryKey(),
+  senderId: integer("sender_id").notNull(),
+  senderUsername: text("sender_username").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertGroupMessageSchema = createInsertSchema(groupMessages).omit({ id: true, createdAt: true });
+export type GroupMessage = typeof groupMessages.$inferSelect;
+export type InsertGroupMessage = z.infer<typeof insertGroupMessageSchema>;
 
 // ========== SB HUNTER LEAGUE - Gamification ==========
 
