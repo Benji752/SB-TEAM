@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Calendar, 
-  CheckSquare, 
-  HardDrive, 
-  FileText, 
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Calendar,
+  CheckSquare,
+  HardDrive,
+  FileText,
   AlertCircle,
   LogOut,
   User,
@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartbeatTracker, useHeartbeatStatus } from "@/components/HeartbeatTracker";
+import { useGlobalUnread } from "@/hooks/useGlobalUnread";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -40,39 +41,50 @@ const pageTransition = {
 };
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  console.log('Sidebar loaded');
   const [location] = useLocation();
   const { logout, user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const globalUnread = useGlobalUnread();
+
+  // Get the correct numeric userId for API calls
+  const numericUserId = (user as any)?.numericId || (user as any)?.user_id || null;
+
+  // Handle tab/browser close - mark user offline via beacon
+  useEffect(() => {
+    if (!numericUserId) return;
+    const handleBeforeUnload = () => {
+      const data = JSON.stringify({ userId: numericUserId });
+      navigator.sendBeacon('/api/user/offline', new Blob([data], { type: 'application/json' }));
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [numericUserId]);
 
   const handleLogout = async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    
-    console.log("NUCLEAR LOGOUT INITIATED");
-    
+
+    console.log("LOGOUT INITIATED");
+
     try {
-      if (user?.id) {
-        const userId = typeof user.id === 'number' ? user.id : parseInt(user.id as string);
-        
+      if (numericUserId) {
         // Mark user as offline immediately via API
         try {
           await fetch('/api/user/offline', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
+            body: JSON.stringify({ userId: numericUserId })
           });
-          // Invalidate presence queries instantly so other users see the change
           queryClient.invalidateQueries({ queryKey: ['/api/user/presence-all'] });
         } catch (e) {
           // Ignore offline API errors
         }
-        
-        // Enregistrement du LOGOUT
+
+        // Log LOGOUT event
         await supabase.from('activity_logs').insert({
-          user_id: user.id,
+          user_id: numericUserId,
           action: 'LOGOUT',
           details: 'Déconnexion manuelle'
         });
@@ -120,7 +132,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects" },
     { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders" },
     { label: "Ressources", icon: FileText, href: "/resources", testId: "link-resources" },
-    { label: "Messages", icon: MessageSquare, href: "/messages", testId: "link-messages" },
+    { label: "Messages", icon: MessageSquare, href: "/messages", testId: "link-messages", badge: globalUnread },
     { label: "Calendrier", icon: Calendar, href: "/calendar", testId: "link-calendar" },
     { label: "Équipe", icon: Users, href: "/models", testId: "link-models" },
     { label: "Tâches", icon: CheckSquare, href: "/tasks", testId: "link-tasks" },
@@ -130,7 +142,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
   const isActive = useHeartbeatStatus();
-  console.log('User Role:', user?.role);
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-[#050505]">
@@ -174,16 +185,21 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <nav className="p-4 space-y-1">
                 {menuItems.map((item) => (
                   <Link key={item.href} href={item.href}>
-                    <div 
+                    <div
                       onClick={() => setMobileMenuOpen(false)}
                       data-testid={`mobile-${item.testId}`}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
-                      location === item.href 
-                        ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                      location === item.href
+                        ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]"
                         : "text-white/40 hover:text-white hover:bg-white/[0.03]"
                     }`}>
                       <item.icon size={20} className={location === item.href ? "text-black" : "group-hover:text-gold"} />
-                      <span className="text-sm font-bold uppercase tracking-widest">{item.label}</span>
+                      <span className="text-sm font-bold uppercase tracking-widest flex-1">{item.label}</span>
+                      {(item as any).badge > 0 && (
+                        <span className="h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-[9px] font-black text-white">{(item as any).badge}</span>
+                        </span>
+                      )}
                     </div>
                   </Link>
                 ))}
@@ -260,15 +276,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <div 
+              <div
                 data-testid={item.testId}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group cursor-pointer ${
-                location === item.href 
-                  ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]" 
+                location === item.href
+                  ? "bg-gold text-black shadow-[0_0_20px_rgba(201,162,77,0.2)]"
                   : "text-white/40 hover:text-white hover:bg-white/[0.03]"
               }`}>
                 <item.icon size={20} className={location === item.href ? "text-black" : "group-hover:text-gold"} />
-                <span className="text-sm font-bold uppercase tracking-widest">{item.label}</span>
+                <span className="text-sm font-bold uppercase tracking-widest flex-1">{item.label}</span>
+                {(item as any).badge > 0 && (
+                  <span className="h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
+                    <span className="text-[9px] font-black text-white">{(item as any).badge}</span>
+                  </span>
+                )}
               </div>
             </Link>
           ))}

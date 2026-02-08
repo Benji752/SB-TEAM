@@ -28634,7 +28634,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         return res.json({ userId, lastActiveAt: null, isOnline: false });
       }
       const lastActiveAt = profile[0].lastActiveAt;
-      const ONLINE_THRESHOLD_MS = 10 * 60 * 1e3;
+      const ONLINE_THRESHOLD_MS = 5 * 60 * 1e3;
       const isOnline = lastActiveAt ? Date.now() - new Date(lastActiveAt).getTime() < ONLINE_THRESHOLD_MS : false;
       res.json({ userId, lastActiveAt, isOnline });
     } catch (error) {

@@ -100,7 +100,7 @@ export default function Messages() {
   useEffect(() => {
     if (!currentUser) return;
 
-    // Channel for DM messages
+    // Channel for DM messages (INSERT + UPDATE for read status)
     const dmChannel = supabase
       .channel('dm-messages')
       .on('postgres_changes', {
@@ -109,11 +109,9 @@ export default function Messages() {
         table: 'messages',
       }, (payload) => {
         const newMsg = payload.new as any;
-        // Is this message relevant to current user?
         const isForMe = newMsg.receiver_id === currentUser.id || newMsg.sender_id === currentUser.id;
         if (!isForMe) return;
 
-        // If in DM mode and chatting with this person, add to messages
         const sel = selectedUserRef.current;
         if (chatModeRef.current === 'dm' && sel) {
           const isInConvo =
@@ -124,16 +122,27 @@ export default function Messages() {
               if (prev.some(m => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
+            // Auto mark as read if it's incoming and we're viewing the convo
+            if (newMsg.sender_id !== currentUser.id) {
+              supabase.from('messages').update({ is_read: true }).eq('id', newMsg.id);
+            }
           }
         }
 
-        // Notification for incoming message
         if (newMsg.sender_id !== currentUser.id) {
           playNotificationSound();
           setUnreadCount(prev => prev + 1);
-          // Clear unread after 3s
           setTimeout(() => setUnreadCount(prev => Math.max(0, prev - 1)), 3000);
         }
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'messages',
+      }, (payload) => {
+        const updated = payload.new as any;
+        // Update is_read status in local state (for "Vu" indicator)
+        setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, is_read: updated.is_read } : m));
       })
       .subscribe();
 
@@ -247,6 +256,14 @@ export default function Messages() {
 
       if (error) throw error;
       setMessages(data || []);
+
+      // Mark incoming messages as read
+      await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('sender_id', recipientId)
+        .eq('receiver_id', currentUser.id)
+        .eq('is_read', false);
     } catch (err) {
       console.error("Error fetching messages:", err);
     } finally {
@@ -661,21 +678,29 @@ export default function Messages() {
                     <p>Aucun message. Commencez la discussion !</p>
                   </div>
                 ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm ${
-                        msg.sender_id === currentUser?.id
-                          ? 'self-end bg-gold text-black rounded-tr-none shadow-[0_5px_15px_rgba(201,162,77,0.1)]'
-                          : 'self-start bg-white/[0.05] text-white rounded-tl-none border border-white/[0.08]'
-                      }`}
-                    >
-                      <div className="font-medium break-words">{msg.content}</div>
-                      <div className={`text-[9px] mt-1 opacity-50 text-right ${msg.sender_id === currentUser?.id ? 'text-black/70' : 'text-white/50'}`}>
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  messages.map((msg) => {
+                    const isMe = msg.sender_id === currentUser?.id;
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm ${
+                          isMe
+                            ? 'self-end bg-gold text-black rounded-tr-none shadow-[0_5px_15px_rgba(201,162,77,0.1)]'
+                            : 'self-start bg-white/[0.05] text-white rounded-tl-none border border-white/[0.08]'
+                        }`}
+                      >
+                        <div className="font-medium break-words">{msg.content}</div>
+                        <div className={`text-[9px] mt-1 flex items-center justify-end gap-1 ${isMe ? 'text-black/60' : 'text-white/40'}`}>
+                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {isMe && (
+                            <span className={`font-bold ${msg.is_read ? 'text-blue-600' : 'opacity-40'}`}>
+                              {msg.is_read ? 'Vu' : '✓'}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 
