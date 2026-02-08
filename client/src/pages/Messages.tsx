@@ -44,6 +44,8 @@ export default function Messages() {
   const [isLoadingGroupMessages, setIsLoadingGroupMessages] = useState(false);
   const [mobileView, setMobileView] = useState<'contacts' | 'chat'>('chat');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadBySender, setUnreadBySender] = useState<Record<string, number>>({});
+  const [unreadGroup, setUnreadGroup] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const groupScrollRef = useRef<HTMLDivElement>(null);
   const selectedUserRef = useRef<any>(null);
@@ -129,10 +131,18 @@ export default function Messages() {
           }
         }
 
+        // Notification: only if not viewing this convo right now
         if (newMsg.sender_id !== currentUser.id) {
-          playNotificationSound();
-          setUnreadCount(prev => prev + 1);
-          setTimeout(() => setUnreadCount(prev => Math.max(0, prev - 1)), 3000);
+          const sel = selectedUserRef.current;
+          const isViewingThisConvo = chatModeRef.current === 'dm' && sel?.id === newMsg.sender_id;
+          if (!isViewingThisConvo) {
+            playNotificationSound();
+            setUnreadCount(prev => prev + 1);
+            setUnreadBySender(prev => ({
+              ...prev,
+              [newMsg.sender_id]: (prev[newMsg.sender_id] || 0) + 1
+            }));
+          }
         }
       })
       .on('postgres_changes', {
@@ -160,41 +170,21 @@ export default function Messages() {
           return [...prev, newMsg];
         });
 
-        // Notification if not from me
+        // Notification if not from me and not currently viewing group chat
         if (newMsg.sender_id !== currentUser.id) {
-          playNotificationSound();
-          setUnreadCount(prev => prev + 1);
-          setTimeout(() => setUnreadCount(prev => Math.max(0, prev - 1)), 3000);
+          const isViewingGroup = chatModeRef.current === 'group';
+          if (!isViewingGroup) {
+            playNotificationSound();
+            setUnreadCount(prev => prev + 1);
+            setUnreadGroup(prev => prev + 1);
+          }
         }
-      })
-      .subscribe();
-
-    // Channel for online status changes
-    const presenceChannel = supabase
-      .channel('online-status')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'profiles',
-        filter: 'is_online=eq.true',
-      }, () => {
-        // Refresh profiles when someone comes online
-        fetchProfiles(currentUser.id);
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'profiles',
-        filter: 'is_online=eq.false',
-      }, () => {
-        fetchProfiles(currentUser.id);
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(dmChannel);
       supabase.removeChannel(groupChannel);
-      supabase.removeChannel(presenceChannel);
     };
   }, [currentUser?.id]);
 
@@ -408,20 +398,30 @@ export default function Messages() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => { setChatMode('group'); setAdminViewMode(false); }}
-                className={`flex-1 gap-2 ${chatMode === 'group' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
+                onClick={() => { setChatMode('group'); setAdminViewMode(false); setUnreadGroup(0); }}
+                className={`flex-1 gap-2 relative ${chatMode === 'group' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
               >
                 <Users size={16} />
                 Chat Équipe
+                {unreadGroup > 0 && chatMode !== 'group' && (
+                  <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
+                    <span className="text-[9px] font-black text-white">{unreadGroup}</span>
+                  </span>
+                )}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => { setChatMode('dm'); setMobileView('contacts'); }}
-                className={`flex-1 gap-2 ${chatMode === 'dm' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
+                className={`flex-1 gap-2 relative ${chatMode === 'dm' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
               >
                 <User size={16} />
                 Privé
+                {Object.values(unreadBySender).reduce((a, b) => a + b, 0) > 0 && chatMode !== 'dm' && (
+                  <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
+                    <span className="text-[9px] font-black text-white">{Object.values(unreadBySender).reduce((a, b) => a + b, 0)}</span>
+                  </span>
+                )}
               </Button>
             </div>
 
@@ -465,11 +465,20 @@ export default function Messages() {
               <div className="text-center p-8 text-muted-foreground">Aucun membre trouvé</div>
             ) : (
               profiles.map((profile) => {
-                const online = profile.is_online || isUserOnline(profile.user_id ?? 0);
+                const online = isUserOnline(profile.user_id ?? 0);
                 return (
                   <div
                     key={profile.id}
-                    onClick={() => { setSelectedUser(profile); setMobileView('chat'); }}
+                    onClick={() => {
+                      setSelectedUser(profile);
+                      setMobileView('chat');
+                      // Clear unread badge for this sender
+                      const senderUnread = unreadBySender[profile.id] || 0;
+                      if (senderUnread > 0) {
+                        setUnreadBySender(prev => ({ ...prev, [profile.id]: 0 }));
+                        setUnreadCount(prev => Math.max(0, prev - senderUnread));
+                      }
+                    }}
                     className={`p-4 flex items-center gap-4 cursor-pointer transition-all rounded-2xl border border-transparent ${
                       selectedUser?.id === profile.id ? 'bg-gold/10 border-gold/20' : 'hover:bg-white/[0.03]'
                     }`}
@@ -489,6 +498,11 @@ export default function Messages() {
                       <div className="font-bold text-white truncate">{profile.username}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-widest">{profile.role}</div>
                     </div>
+                    {(unreadBySender[profile.id] || 0) > 0 && (
+                      <div className="h-6 min-w-[24px] px-1.5 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/40">
+                        <span className="text-[10px] font-black text-white">{unreadBySender[profile.id]}</span>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -512,7 +526,7 @@ export default function Messages() {
                       <AvatarFallback className="bg-white/[0.05] text-gold text-xs font-bold">{p.username?.[0]}</AvatarFallback>
                     </Avatar>
                     <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border border-[#050505] rounded-full ${
-                      p.is_online || isUserOnline(p.user_id ?? 0) ? 'bg-[#10B981]' : 'bg-gray-500'
+                      isUserOnline(p.user_id ?? 0) ? 'bg-[#10B981]' : 'bg-gray-500'
                     }`} />
                   </div>
                 ))}
@@ -656,15 +670,15 @@ export default function Messages() {
                     <AvatarFallback className="bg-white/[0.05] text-gold font-bold">{selectedUser.username?.[0]?.toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#050505] rounded-full shadow-lg z-10 ${
-                    selectedUser.is_online || isUserOnline(selectedUser.user_id ?? 0) ? 'bg-[#10B981]' : 'bg-gray-500'
+                    isUserOnline(selectedUser.user_id ?? 0) ? 'bg-[#10B981]' : 'bg-gray-500'
                   }`} />
                 </div>
                 <div>
                   <h3 className="font-bold text-white">{selectedUser.username}</h3>
                   <p className={`text-[10px] uppercase tracking-widest font-bold ${
-                    selectedUser.is_online || isUserOnline(selectedUser.user_id ?? 0) ? 'text-[#10B981]' : 'text-gray-500'
+                    isUserOnline(selectedUser.user_id ?? 0) ? 'text-[#10B981]' : 'text-gray-500'
                   }`}>
-                    {selectedUser.is_online || isUserOnline(selectedUser.user_id ?? 0) ? 'En ligne' : 'Hors ligne'}
+                    {isUserOnline(selectedUser.user_id ?? 0) ? 'En ligne' : 'Hors ligne'}
                   </p>
                 </div>
               </div>
