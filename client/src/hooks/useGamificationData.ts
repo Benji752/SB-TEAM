@@ -3,9 +3,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect, useRef, useState } from "react";
 
-const ONLINE_THRESHOLD_SECONDS = 900;
-const HEARTBEAT_INTERVAL = 10 * 60 * 1000;
-const ACTIVITY_THRESHOLD = 5 * 60 * 1000;
+const ONLINE_THRESHOLD_SECONDS = 300; // 5 minutes = offline
+const HEARTBEAT_INTERVAL = 2 * 60 * 1000; // Ping every 2 minutes
+const ACTIVITY_THRESHOLD = 3 * 60 * 1000; // 3 minutes inactivity = stop pinging
 
 function uuidToInt(uuid: string): number {
   let hash = 0;

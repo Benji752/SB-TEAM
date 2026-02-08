@@ -1243,7 +1243,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       }
       
       const lastActiveAt = profile[0].lastActiveAt;
-      const ONLINE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes tolerance
+      const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes tolerance
       const isOnline = lastActiveAt 
         ? (Date.now() - new Date(lastActiveAt).getTime()) < ONLINE_THRESHOLD_MS 
         : false;
