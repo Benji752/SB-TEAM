@@ -425,15 +425,48 @@ export async function registerRoutes(_httpServer: any, app: Express) {
       if (!requireAuth(req, res)) return;
       const { avatarUrl } = req.body;
       const numericId = getUserNumericId(req);
-      
+
       await db.update(profiles)
         .set({ avatarUrl })
         .where(eq(profiles.userId, numericId));
-        
+
       res.json({ success: true });
     } catch (error: any) {
       console.error("Avatar update error:", error);
       res.json({ success: false });
+    }
+  });
+
+  // Update profile info (username, bio)
+  app.post("/api/profiles/update", async (req, res) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const numericId = getUserNumericId(req);
+      const { username, bio } = req.body;
+
+      const updateData: any = {};
+      if (username !== undefined) updateData.username = username;
+      if (bio !== undefined) updateData.bio = bio;
+
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: "Nothing to update" });
+      }
+
+      await db.update(profiles)
+        .set(updateData)
+        .where(eq(profiles.userId, numericId));
+
+      // Also update gamification_profiles username if changed
+      if (username) {
+        await db.update(gamificationProfiles)
+          .set({ username })
+          .where(eq(gamificationProfiles.userId, numericId));
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ success: false, error: error.message });
     }
   });
 

@@ -81,13 +81,21 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         } catch (e) {
           // Ignore offline API errors
         }
+      }
 
-        // Log LOGOUT event
-        await supabase.from('activity_logs').insert({
-          user_id: numericUserId,
-          action: 'LOGOUT',
-          details: 'Déconnexion manuelle'
-        });
+      // Log LOGOUT event using Supabase auth UUID (matches LOGIN format)
+      try {
+        const { data: { user: supaUser } } = await supabase.auth.getUser();
+        const logUserId = supaUser?.id || user?.id;
+        if (logUserId) {
+          await supabase.from('activity_logs').insert({
+            user_id: logUserId,
+            action: 'LOGOUT',
+            details: 'Déconnexion manuelle'
+          });
+        }
+      } catch (e) {
+        console.error("Failed to log logout:", e);
       }
 
       // 1. Nettoyage brutal

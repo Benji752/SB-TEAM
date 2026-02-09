@@ -28073,6 +28073,27 @@ async function registerRoutes(_httpServer, app2) {
       res.json({ success: false });
     }
   });
+  app2.post("/api/profiles/update", async (req, res) => {
+    try {
+      if (!requireAuth(req, res)) return;
+      const numericId = getUserNumericId(req);
+      const { username, bio } = req.body;
+      const updateData = {};
+      if (username !== void 0) updateData.username = username;
+      if (bio !== void 0) updateData.bio = bio;
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: "Nothing to update" });
+      }
+      await db.update(profiles).set(updateData).where(eq3(profiles.userId, numericId));
+      if (username) {
+        await db.update(gamificationProfiles).set({ username }).where(eq3(gamificationProfiles.userId, numericId));
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
   app2.get("/api/model-stats/latest", async (req, res) => {
     try {
       const lastStatsArr = await db.select().from(modelStats).orderBy(desc2(modelStats.createdAt)).limit(1);
