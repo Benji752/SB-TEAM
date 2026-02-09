@@ -827,10 +827,10 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
-  // Simplified ping - just update last_active_at and username
+  // Simplified ping - update last_active_at, username, AND profiles.is_online
   app.post("/api/gamification/ping", async (req, res) => {
     try {
-      const schema = z.object({ 
+      const schema = z.object({
         userId: z.number(),
         username: z.string().optional()
       });
@@ -839,15 +839,10 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         return res.status(400).json({ error: "Invalid request body" });
       }
       const { userId, username } = result.data;
-      
+
       const now = new Date();
-      
-      // Check if profile exists
-      const existing = await db.select().from(gamificationProfiles)
-        .where(eq(gamificationProfiles.userId, userId))
-        .limit(1);
-      
-      // Upsert: create profile if missing, update if exists (race-condition safe)
+
+      // Upsert gamification profile (race-condition safe)
       const upsertUsername = username || 'Utilisateur';
       await db.execute(sql`
         INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier, last_active_at, updated_at)
@@ -857,14 +852,17 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
           updated_at = NOW(),
           username = COALESCE(NULLIF(${upsertUsername}, 'Utilisateur'), gamification_profiles.username)
       `);
-      
-      // Award XP for presence (10 XP per ping, configured for 10-minute intervals)
+
+      // Also sync profiles.is_online = true
+      await db.execute(sql`UPDATE profiles SET is_online = true WHERE user_id = ${userId}`);
+
+      // Award XP for presence
       await awardXP(userId, XP_PER_PRESENCE, "presence", `Présence active +${XP_PER_PRESENCE} XP`);
-      
+
       res.json({ success: true, timestamp: now.toISOString() });
     } catch (error: any) {
       console.error("Ping error:", error);
-      res.json({ success: false, timestamp: new Date().toISOString() }); // Don't crash
+      res.json({ success: false, timestamp: new Date().toISOString() });
     }
   });
 
@@ -1106,6 +1104,9 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       await db.update(gamificationProfiles)
         .set(updateData)
         .where(eq(gamificationProfiles.userId, userId));
+
+      // Sync profiles.is_online = true
+      await db.execute(sql`UPDATE profiles SET is_online = true WHERE user_id = ${userId}`);
       
       // Check for daily login bonus (+50 XP first connection of the day)
       const today = new Date();
@@ -1204,7 +1205,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
-  // Mark user as offline (called on logout)
+  // Mark user as offline (called on logout + tab close)
   app.post("/api/user/offline", async (req, res) => {
     try {
       const schema = z.object({ userId: z.number() });
@@ -1213,14 +1214,17 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         return res.status(400).json({ error: "Invalid request body" });
       }
       const { userId } = result.data;
-      
-      // Set lastActiveAt to a date in the past (20 minutes ago) to ensure offline status
+
+      // Set lastActiveAt to 20 minutes ago to ensure offline status
       const offlineDate = new Date(Date.now() - 20 * 60 * 1000);
-      
+
       await db.update(gamificationProfiles)
         .set({ lastActiveAt: offlineDate })
         .where(eq(gamificationProfiles.userId, userId));
-      
+
+      // Also set profiles.is_online = false
+      await db.execute(sql`UPDATE profiles SET is_online = false WHERE user_id = ${userId}`);
+
       res.json({ success: true, status: 'offline' });
     } catch (error: any) {
       console.error("Offline status error:", error);
@@ -1255,9 +1259,18 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
     }
   });
 
-  // Get all users presence status (bulk)
+  // Get all users presence status (bulk) + auto-cleanup stale online users
   app.get("/api/user/presence-all", async (req, res) => {
     try {
+      // Auto-cleanup: set profiles.is_online = false for users inactive > 5 min
+      await db.execute(sql`
+        UPDATE profiles SET is_online = false
+        WHERE user_id IN (
+          SELECT user_id FROM gamification_profiles
+          WHERE last_active_at < NOW() - INTERVAL '5 minutes'
+        ) AND is_online = true
+      `);
+
       const allProfiles = await db.select({
         userId: gamificationProfiles.userId,
         lastActiveAt: gamificationProfiles.lastActiveAt

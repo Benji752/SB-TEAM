@@ -28358,7 +28358,6 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       }
       const { userId, username } = result.data;
       const now = /* @__PURE__ */ new Date();
-      const existing = await db.select().from(gamificationProfiles).where(eq3(gamificationProfiles.userId, userId)).limit(1);
       const upsertUsername = username || "Utilisateur";
       await db.execute(sql`
         INSERT INTO gamification_profiles (user_id, username, xp_total, level, current_streak, role_multiplier, last_active_at, updated_at)
@@ -28368,6 +28367,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
           updated_at = NOW(),
           username = COALESCE(NULLIF(${upsertUsername}, 'Utilisateur'), gamification_profiles.username)
       `);
+      await db.execute(sql`UPDATE profiles SET is_online = true WHERE user_id = ${userId}`);
       await awardXP(userId, XP_PER_PRESENCE, "presence", `Pr\xE9sence active +${XP_PER_PRESENCE} XP`);
       res.json({ success: true, timestamp: now.toISOString() });
     } catch (error) {
@@ -28539,6 +28539,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
         updateData.username = username;
       }
       await db.update(gamificationProfiles).set(updateData).where(eq3(gamificationProfiles.userId, userId));
+      await db.execute(sql`UPDATE profiles SET is_online = true WHERE user_id = ${userId}`);
       const today = /* @__PURE__ */ new Date();
       today.setHours(0, 0, 0, 0);
       const todayLoginCheck = await db.select().from(xpActivityLog).where(and(
@@ -28620,6 +28621,7 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const { userId } = result.data;
       const offlineDate = new Date(Date.now() - 20 * 60 * 1e3);
       await db.update(gamificationProfiles).set({ lastActiveAt: offlineDate }).where(eq3(gamificationProfiles.userId, userId));
+      await db.execute(sql`UPDATE profiles SET is_online = false WHERE user_id = ${userId}`);
       res.json({ success: true, status: "offline" });
     } catch (error) {
       console.error("Offline status error:", error);
@@ -28644,6 +28646,13 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
   });
   app2.get("/api/user/presence-all", async (req, res) => {
     try {
+      await db.execute(sql`
+        UPDATE profiles SET is_online = false
+        WHERE user_id IN (
+          SELECT user_id FROM gamification_profiles
+          WHERE last_active_at < NOW() - INTERVAL '5 minutes'
+        ) AND is_online = true
+      `);
       const allProfiles = await db.select({
         userId: gamificationProfiles.userId,
         lastActiveAt: gamificationProfiles.lastActiveAt
