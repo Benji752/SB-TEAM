@@ -74,16 +74,20 @@ function InactivityHandler() {
 
   const handleFinalLogout = async () => {
     try {
-      if (user) {
+      // Get Supabase auth UUID for activity logging (matches LOGIN format)
+      const { data: { user: supaUser } } = await supabase.auth.getUser();
+      const logUserId = supaUser?.id || user?.id;
+
+      if (logUserId) {
         // 1. Log l'activité
         await supabase.from('activity_logs').insert({
-          user_id: user.id,
+          user_id: logUserId,
           action: 'LOGOUT',
           details: 'Déconnexion automatique (inactivité)'
         });
 
         // 2. Mettre is_online à false
-        await supabase.from('profiles').update({ is_online: false }).eq('id', user.id);
+        await supabase.from('profiles').update({ is_online: false }).eq('id', logUserId);
       }
 
       // 3. Nettoyer session et déconnecter
