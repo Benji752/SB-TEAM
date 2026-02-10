@@ -43,6 +43,7 @@ export function NotificationCenter() {
   const panelRef = useRef<HTMLDivElement>(null);
   const [supaUserId, setSupaUserId] = useState<string | null>(null);
   const numericUserId = (user as any)?.numericId || (user as any)?.user_id;
+  const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
 
   // Get the REAL Supabase auth UUID (not from useAuth which may return mock UUID)
   useEffect(() => {
@@ -185,28 +186,30 @@ export function NotificationCenter() {
         console.error("[Notif] Tasks fetch error:", e);
       }
 
-      // ===== 5. RECENT TICKETS/COMPLAINTS =====
-      try {
-        const { data: tickets } = await supabase
-          .from("tickets")
-          .select("id, subject, priority, status, created_at")
-          .eq("status", "pending")
-          .order("created_at", { ascending: false })
-          .limit(5);
+      // ===== 5. RECENT TICKETS/COMPLAINTS (admin only) =====
+      if (isAdmin) {
+        try {
+          const { data: tickets } = await supabase
+            .from("tickets")
+            .select("id, subject, priority, status, created_at")
+            .eq("status", "pending")
+            .order("created_at", { ascending: false })
+            .limit(5);
 
-        (tickets || []).forEach((t: any) => {
-          notifs.push({
-            id: `ticket-${t.id}`,
-            type: "ticket",
-            title: t.subject,
-            body: `${t.priority === "urgent" ? "URGENT" : "Normal"} - En attente`,
-            time: new Date(t.created_at),
-            link: "/complaints",
-            read: t.priority !== "urgent",
+          (tickets || []).forEach((t: any) => {
+            notifs.push({
+              id: `ticket-${t.id}`,
+              type: "ticket",
+              title: t.subject,
+              body: `${t.priority === "urgent" ? "URGENT" : "Normal"} - En attente`,
+              time: new Date(t.created_at),
+              link: "/complaints",
+              read: t.priority !== "urgent",
+            });
           });
-        });
-      } catch (e) {
-        console.error("[Notif] Tickets fetch error:", e);
+        } catch (e) {
+          console.error("[Notif] Tickets fetch error:", e);
+        }
       }
 
       // ===== 6. XP / GAMIFICATION ACTIVITY =====
@@ -339,31 +342,34 @@ export function NotificationCenter() {
       })
       .subscribe();
 
-    // New tickets
-    const ticketChannel = supabase
-      .channel("notif-center-tickets")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "tickets" }, (payload) => {
-        const t = payload.new as any;
-        setNotifications(prev => [{
-          id: `ticket-new-${t.id}`,
-          type: "ticket" as NotifType,
-          title: t.subject,
-          body: `${t.priority === "urgent" ? "URGENT" : "Normal"} - Nouvelle reclamation`,
-          time: new Date(t.created_at || Date.now()),
-          link: "/complaints",
-          read: false,
-        }, ...prev].slice(0, 40));
-      })
-      .subscribe();
+    // New tickets (admin only)
+    let ticketChannel: any = null;
+    if (isAdmin) {
+      ticketChannel = supabase
+        .channel("notif-center-tickets")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "tickets" }, (payload) => {
+          const t = payload.new as any;
+          setNotifications(prev => [{
+            id: `ticket-new-${t.id}`,
+            type: "ticket" as NotifType,
+            title: t.subject,
+            body: `${t.priority === "urgent" ? "URGENT" : "Normal"} - Nouvelle reclamation`,
+            time: new Date(t.created_at || Date.now()),
+            link: "/complaints",
+            read: false,
+          }, ...prev].slice(0, 40));
+        })
+        .subscribe();
+    }
 
     return () => {
       supabase.removeChannel(dmChannel);
       supabase.removeChannel(groupChannel);
       supabase.removeChannel(orderChannel);
       supabase.removeChannel(taskChannel);
-      supabase.removeChannel(ticketChannel);
+      if (ticketChannel) supabase.removeChannel(ticketChannel);
     };
-  }, [supaUserId, user?.id, numericUserId]);
+  }, [supaUserId, user?.id, numericUserId, isAdmin]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

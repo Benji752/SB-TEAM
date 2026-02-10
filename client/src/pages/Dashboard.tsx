@@ -206,7 +206,12 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-10 py-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
           <div>
             <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic mb-2">SB <span className="text-gold">Dashboard</span></h1>
             <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">Monitoring Stripchat : WildgirlShow</p>
@@ -252,7 +257,33 @@ export default function Dashboard() {
               </DialogContent>
             </Dialog>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Welcome Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+          className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-gold/5 via-transparent to-gold/5 border border-gold/10 p-6 md:p-8"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="relative flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
+                Bonjour, <span className="text-gold">{user?.username || 'Team'}</span>
+              </h2>
+              <p className="text-white/30 text-sm mt-1">
+                {isOnline ? '🔴 WildgirlShow est en LIVE maintenant !' : 'WildgirlShow est hors ligne. Tout est sous controle.'}
+              </p>
+            </div>
+            <div className="hidden md:flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Aujourd'hui</p>
+                <p className="text-lg font-black text-white">{format(new Date(), "dd MMMM yyyy", { locale: fr })}</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Main model card + stats */}
         <motion.div
