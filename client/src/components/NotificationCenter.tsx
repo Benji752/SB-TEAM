@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { Bell, MessageSquare, ShoppingCart, X } from "lucide-react";
+import { Bell, MessageSquare, ShoppingCart, CheckSquare, AlertCircle, Trophy, X } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 
+type NotifType = "message" | "order" | "task" | "ticket" | "xp";
+
 interface Notification {
   id: string;
-  type: "message" | "order";
+  type: NotifType;
   title: string;
   body: string;
   avatar?: string;
@@ -17,14 +19,37 @@ interface Notification {
   read: boolean;
 }
 
+const TYPE_ICONS: Record<NotifType, typeof MessageSquare> = {
+  message: MessageSquare,
+  order: ShoppingCart,
+  task: CheckSquare,
+  ticket: AlertCircle,
+  xp: Trophy,
+};
+
+const TYPE_COLORS: Record<NotifType, string> = {
+  message: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+  order: "bg-gold/10 border-gold/20 text-gold",
+  task: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+  ticket: "bg-red-500/10 border-red-500/20 text-red-400",
+  xp: "bg-green-500/10 border-green-500/20 text-green-400",
+};
+
 export function NotificationCenter() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const panelRef = useRef<HTMLDivElement>(null);
-  const currentUserId = user?.id;
+  const [supaUserId, setSupaUserId] = useState<string | null>(null);
   const numericUserId = (user as any)?.numericId || (user as any)?.user_id;
+
+  // Get the REAL Supabase auth UUID (not from useAuth which may return mock UUID)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user: su } }) => {
+      if (su?.id) setSupaUserId(su.id);
+    });
+  }, [user?.id]);
 
   // Close on outside click
   useEffect(() => {
@@ -37,91 +62,198 @@ export function NotificationCenter() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  // Load initial notifications
+  // Load all notifications
   useEffect(() => {
-    if (!currentUserId) return;
+    const userId = supaUserId || user?.id;
+    if (!userId) return;
 
     const loadNotifications = async () => {
       const notifs: Notification[] = [];
 
-      // Fetch recent unread DMs (last 20)
-      const { data: dms } = await supabase
-        .from("messages")
-        .select("id, sender_id, content, created_at, is_read")
-        .eq("receiver_id", currentUserId)
-        .eq("is_read", false)
-        .order("created_at", { ascending: false })
-        .limit(20);
+      // ===== 1. UNREAD DMs =====
+      try {
+        const { data: dms } = await supabase
+          .from("messages")
+          .select("id, sender_id, content, created_at, is_read")
+          .eq("receiver_id", userId)
+          .eq("is_read", false)
+          .order("created_at", { ascending: false })
+          .limit(15);
 
-      // Fetch sender profiles for DMs
-      const senderIds = [...new Set((dms || []).map((m: any) => m.sender_id))];
-      let profileMap: Record<string, any> = {};
-      if (senderIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, username, avatar_url")
-          .in("id", senderIds);
-        (profiles || []).forEach((p: any) => {
-          profileMap[p.id] = p;
+        // Get sender profiles
+        const senderIds = [...new Set((dms || []).map((m: any) => m.sender_id))];
+        let profileMap: Record<string, any> = {};
+        if (senderIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, username, avatar_url")
+            .in("id", senderIds);
+          (profiles || []).forEach((p: any) => { profileMap[p.id] = p; });
+        }
+
+        (dms || []).forEach((m: any) => {
+          const sender = profileMap[m.sender_id];
+          notifs.push({
+            id: `msg-${m.id}`,
+            type: "message",
+            title: sender?.username || "Nouveau message",
+            body: m.content?.length > 50 ? m.content.slice(0, 50) + "..." : m.content,
+            avatar: sender?.avatar_url,
+            time: new Date(m.created_at),
+            link: "/messages",
+            read: false,
+          });
         });
+      } catch (e) {
+        console.error("[Notif] DM fetch error:", e);
       }
 
-      (dms || []).forEach((m: any) => {
-        const sender = profileMap[m.sender_id];
-        notifs.push({
-          id: `msg-${m.id}`,
-          type: "message",
-          title: sender?.username || "Message",
-          body: m.content?.length > 60 ? m.content.slice(0, 60) + "..." : m.content,
-          avatar: sender?.avatar_url,
-          time: new Date(m.created_at),
-          link: "/messages",
-          read: false,
-        });
-      });
+      // ===== 2. RECENT GROUP MESSAGES (last 5) =====
+      try {
+        const { data: groupMsgs } = await supabase
+          .from("group_messages")
+          .select("id, sender_id, sender_username, content, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
 
-      // Fetch recent orders (last 10)
+        (groupMsgs || []).forEach((m: any) => {
+          if (m.sender_id === numericUserId) return;
+          notifs.push({
+            id: `grp-${m.id}`,
+            type: "message",
+            title: `${m.sender_username} (Groupe)`,
+            body: m.content?.length > 50 ? m.content.slice(0, 50) + "..." : m.content,
+            time: new Date(m.created_at),
+            link: "/messages",
+            read: true,
+          });
+        });
+      } catch (e) {
+        console.error("[Notif] Group fetch error:", e);
+      }
+
+      // ===== 3. RECENT ORDERS (last 8 via API) =====
       try {
         const res = await fetch("/api/orders", { credentials: "include" });
         if (res.ok) {
           const orders = await res.json();
           const recent = (orders || [])
             .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .slice(0, 10);
+            .slice(0, 8);
 
           recent.forEach((o: any) => {
+            const statusLabel = o.status === "paid" ? "Payee" : o.status === "pending" ? "En attente" : "Annulee";
+            const statusIcon = o.status === "paid" ? " ✓" : o.status === "pending" ? " ⏳" : " ✗";
             notifs.push({
               id: `order-${o.id}`,
               type: "order",
-              title: o.clientName,
-              body: `${o.serviceType} - ${o.amount}€ (${o.status === "paid" ? "Payee" : o.status === "pending" ? "En attente" : "Annulee"})`,
+              title: `${o.clientName}${statusIcon}`,
+              body: `${o.serviceType} - ${o.amount}€ (${statusLabel})`,
               time: new Date(o.createdAt),
               link: "/orders",
-              read: true, // orders are informational
+              read: true,
             });
           });
         }
-      } catch {}
+      } catch (e) {
+        console.error("[Notif] Orders fetch error:", e);
+      }
 
-      // Sort by time
-      notifs.sort((a, b) => b.time.getTime() - a.time.getTime());
+      // ===== 4. TASKS ASSIGNED TO ME =====
+      try {
+        const { data: tasks } = await supabase
+          .from("tasks")
+          .select("id, title, priority, is_done, due_date, created_at")
+          .eq("is_done", false)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        (tasks || []).forEach((t: any) => {
+          const priorityLabel = t.priority === "high" ? "🔴 " : t.priority === "medium" ? "🟡 " : "";
+          const dueInfo = t.due_date ? ` - Echue le ${new Date(t.due_date).toLocaleDateString('fr-FR')}` : "";
+          notifs.push({
+            id: `task-${t.id}`,
+            type: "task",
+            title: `${priorityLabel}${t.title}`,
+            body: `Tache en cours${dueInfo}`,
+            time: new Date(t.created_at),
+            link: "/tasks",
+            read: true,
+          });
+        });
+      } catch (e) {
+        console.error("[Notif] Tasks fetch error:", e);
+      }
+
+      // ===== 5. RECENT TICKETS/COMPLAINTS =====
+      try {
+        const { data: tickets } = await supabase
+          .from("tickets")
+          .select("id, subject, priority, status, created_at")
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        (tickets || []).forEach((t: any) => {
+          notifs.push({
+            id: `ticket-${t.id}`,
+            type: "ticket",
+            title: t.subject,
+            body: `${t.priority === "urgent" ? "URGENT" : "Normal"} - En attente`,
+            time: new Date(t.created_at),
+            link: "/complaints",
+            read: t.priority !== "urgent",
+          });
+        });
+      } catch (e) {
+        console.error("[Notif] Tickets fetch error:", e);
+      }
+
+      // ===== 6. XP / GAMIFICATION ACTIVITY =====
+      try {
+        const res = await fetch("/api/gamification/activity", { credentials: "include" });
+        if (res.ok) {
+          const activities = await res.json();
+          const myActivities = (activities || [])
+            .filter((a: any) => a.user_id === numericUserId)
+            .slice(0, 5);
+
+          myActivities.forEach((a: any) => {
+            notifs.push({
+              id: `xp-${a.id}`,
+              type: "xp",
+              title: `+${a.xp_gained} XP`,
+              body: a.description,
+              time: new Date(a.created_at),
+              link: "/leaderboard",
+              read: true,
+            });
+          });
+        }
+      } catch (e) {
+        console.error("[Notif] XP fetch error:", e);
+      }
+
+      // Sort by time (most recent first), unread at top
+      notifs.sort((a, b) => {
+        if (a.read !== b.read) return a.read ? 1 : -1;
+        return b.time.getTime() - a.time.getTime();
+      });
+
       setNotifications(notifs);
     };
 
     loadNotifications();
 
-    // Realtime: new DMs
-    const dmChannel = supabase
-      .channel("notif-dm")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
-      }, async (payload) => {
-        const msg = payload.new as any;
-        if (msg.receiver_id !== currentUserId || msg.sender_id === currentUserId) return;
+    // ===== REALTIME SUBSCRIPTIONS =====
 
-        // Fetch sender profile
+    // New DMs
+    const dmChannel = supabase
+      .channel("notif-center-dm")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, async (payload) => {
+        const msg = payload.new as any;
+        if (msg.receiver_id !== userId || msg.sender_id === userId) return;
+
         const { data: sender } = await supabase
           .from("profiles")
           .select("username, avatar_url")
@@ -130,75 +262,97 @@ export function NotificationCenter() {
 
         setNotifications(prev => [{
           id: `msg-${msg.id}`,
-          type: "message",
-          title: sender?.username || "Message",
-          body: msg.content?.length > 60 ? msg.content.slice(0, 60) + "..." : msg.content,
+          type: "message" as NotifType,
+          title: sender?.username || "Nouveau message",
+          body: msg.content?.length > 50 ? msg.content.slice(0, 50) + "..." : msg.content,
           avatar: sender?.avatar_url,
           time: new Date(msg.created_at),
           link: "/messages",
           read: false,
-        }, ...prev].slice(0, 30));
+        }, ...prev].slice(0, 40));
       })
       .subscribe();
 
-    // Realtime: new group messages
+    // New group messages
     const groupChannel = supabase
-      .channel("notif-group")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "group_messages",
-      }, (payload) => {
+      .channel("notif-center-group")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "group_messages" }, (payload) => {
         const msg = payload.new as any;
         if (msg.sender_id === numericUserId) return;
 
         setNotifications(prev => [{
           id: `grp-${msg.id}`,
-          type: "message",
+          type: "message" as NotifType,
           title: `${msg.sender_username} (Groupe)`,
-          body: msg.content?.length > 60 ? msg.content.slice(0, 60) + "..." : msg.content,
+          body: msg.content?.length > 50 ? msg.content.slice(0, 50) + "..." : msg.content,
           time: new Date(msg.created_at),
           link: "/messages",
           read: false,
-        }, ...prev].slice(0, 30));
+        }, ...prev].slice(0, 40));
       })
       .subscribe();
 
-    // Realtime: new/updated orders
+    // New orders or status changes
     const orderChannel = supabase
-      .channel("notif-orders")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "orders",
-      }, (payload) => {
+      .channel("notif-center-orders")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
         const o = payload.new as any;
         setNotifications(prev => [{
-          id: `order-${o.id}`,
-          type: "order",
-          title: o.client_name,
-          body: `${o.service_type} - ${o.amount}€ (Nouvelle)`,
+          id: `order-new-${o.id}`,
+          type: "order" as NotifType,
+          title: `${o.client_name} ⏳`,
+          body: `Nouvelle commande - ${o.service_type} - ${o.amount}€`,
           time: new Date(o.created_at || Date.now()),
           link: "/orders",
           read: false,
-        }, ...prev].slice(0, 30));
+        }, ...prev].slice(0, 40));
       })
-      .on("postgres_changes", {
-        event: "UPDATE",
-        schema: "public",
-        table: "orders",
-      }, (payload) => {
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
         const o = payload.new as any;
-        const statusLabel = o.status === "paid" ? "Payee" : o.status === "pending" ? "En attente" : "Annulee";
+        const statusLabel = o.status === "paid" ? "Payee ✓" : o.status === "cancelled" ? "Annulee ✗" : "Mise a jour";
         setNotifications(prev => [{
           id: `order-upd-${o.id}-${Date.now()}`,
-          type: "order",
-          title: o.client_name,
-          body: `${o.service_type} - ${o.amount}€ (${statusLabel})`,
+          type: "order" as NotifType,
+          title: `${o.client_name} - ${statusLabel}`,
+          body: `${o.service_type} - ${o.amount}€`,
           time: new Date(),
           link: "/orders",
           read: false,
-        }, ...prev].slice(0, 30));
+        }, ...prev].slice(0, 40));
+      })
+      .subscribe();
+
+    // New tasks
+    const taskChannel = supabase
+      .channel("notif-center-tasks")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "tasks" }, (payload) => {
+        const t = payload.new as any;
+        setNotifications(prev => [{
+          id: `task-new-${t.id}`,
+          type: "task" as NotifType,
+          title: t.title,
+          body: `Nouvelle tache - Priorite ${t.priority === "high" ? "haute" : t.priority === "medium" ? "moyenne" : "basse"}`,
+          time: new Date(t.created_at || Date.now()),
+          link: "/tasks",
+          read: false,
+        }, ...prev].slice(0, 40));
+      })
+      .subscribe();
+
+    // New tickets
+    const ticketChannel = supabase
+      .channel("notif-center-tickets")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "tickets" }, (payload) => {
+        const t = payload.new as any;
+        setNotifications(prev => [{
+          id: `ticket-new-${t.id}`,
+          type: "ticket" as NotifType,
+          title: t.subject,
+          body: `${t.priority === "urgent" ? "URGENT" : "Normal"} - Nouvelle reclamation`,
+          time: new Date(t.created_at || Date.now()),
+          link: "/complaints",
+          read: false,
+        }, ...prev].slice(0, 40));
       })
       .subscribe();
 
@@ -206,13 +360,14 @@ export function NotificationCenter() {
       supabase.removeChannel(dmChannel);
       supabase.removeChannel(groupChannel);
       supabase.removeChannel(orderChannel);
+      supabase.removeChannel(taskChannel);
+      supabase.removeChannel(ticketChannel);
     };
-  }, [currentUserId, numericUserId]);
+  }, [supaUserId, user?.id, numericUserId]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleClick = (notif: Notification) => {
-    // Mark as read
     setNotifications(prev =>
       prev.map(n => n.id === notif.id ? { ...n, read: true } : n)
     );
@@ -233,7 +388,8 @@ export function NotificationCenter() {
     const hours = Math.floor(mins / 60);
     if (hours < 24) return `${hours}h`;
     const days = Math.floor(hours / 24);
-    return `${days}j`;
+    if (days < 7) return `${days}j`;
+    return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
   };
 
   return (
@@ -251,7 +407,7 @@ export function NotificationCenter() {
         )}
       </button>
 
-      {/* Dropdown Panel - opens to the right on desktop */}
+      {/* Dropdown Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -263,8 +419,15 @@ export function NotificationCenter() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
-              <h3 className="text-sm font-black text-white uppercase tracking-widest">Notifications</h3>
               <div className="flex items-center gap-2">
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">Notifications</h3>
+                {unreadCount > 0 && (
+                  <span className="h-5 min-w-[20px] px-1.5 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-[9px] font-black text-white">{unreadCount}</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
@@ -280,54 +443,59 @@ export function NotificationCenter() {
             </div>
 
             {/* Notification List */}
-            <div className="overflow-y-auto max-h-[420px] custom-scrollbar">
+            <div className="overflow-y-auto max-h-[420px] custom-scrollbar divide-y divide-white/[0.04]">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <Bell size={32} className="text-white/10 mx-auto mb-3" />
                   <p className="text-white/30 text-sm">Aucune notification</p>
                 </div>
               ) : (
-                notifications.map((notif) => (
-                  <button
-                    key={notif.id}
-                    onClick={() => handleClick(notif)}
-                    className={`w-full flex items-start gap-3 px-5 py-3.5 text-left transition-colors hover:bg-white/[0.03] border-b border-white/[0.04] ${
-                      !notif.read ? "bg-gold/[0.03]" : ""
-                    }`}
-                  >
-                    {/* Icon / Avatar */}
-                    {notif.type === "message" ? (
-                      <Avatar className="h-9 w-9 border border-white/10 shrink-0 mt-0.5">
-                        <AvatarImage src={notif.avatar} className="object-cover" />
-                        <AvatarFallback className="bg-[#111] text-gold text-[10px] font-black">
-                          {notif.title?.[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <div className="h-9 w-9 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <ShoppingCart size={16} className="text-gold" />
-                      </div>
-                    )}
+                notifications.map((notif) => {
+                  const Icon = TYPE_ICONS[notif.type];
+                  const colorClass = TYPE_COLORS[notif.type];
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={`text-xs font-bold truncate ${!notif.read ? "text-white" : "text-white/60"}`}>
-                          {notif.title}
-                        </span>
-                        <span className="text-[10px] text-white/30 shrink-0">{formatTime(notif.time)}</span>
-                      </div>
-                      <p className={`text-[11px] mt-0.5 truncate ${!notif.read ? "text-white/50" : "text-white/30"}`}>
-                        {notif.body}
-                      </p>
-                    </div>
+                  return (
+                    <button
+                      key={notif.id}
+                      onClick={() => handleClick(notif)}
+                      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.04] ${
+                        !notif.read ? "bg-gold/[0.04]" : ""
+                      }`}
+                    >
+                      {/* Icon / Avatar */}
+                      {notif.type === "message" && notif.avatar ? (
+                        <Avatar className="h-9 w-9 border border-white/10 shrink-0 mt-0.5">
+                          <AvatarImage src={notif.avatar} className="object-cover" />
+                          <AvatarFallback className="bg-[#111] text-gold text-[10px] font-black">
+                            {notif.title?.[0]?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <div className={`h-9 w-9 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${colorClass}`}>
+                          <Icon size={15} />
+                        </div>
+                      )}
 
-                    {/* Unread dot */}
-                    {!notif.read && (
-                      <div className="w-2 h-2 rounded-full bg-gold shrink-0 mt-2" />
-                    )}
-                  </button>
-                ))
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`text-xs font-bold truncate ${!notif.read ? "text-white" : "text-white/50"}`}>
+                            {notif.title}
+                          </span>
+                          <span className="text-[10px] text-white/25 shrink-0">{formatTime(notif.time)}</span>
+                        </div>
+                        <p className={`text-[11px] mt-0.5 truncate ${!notif.read ? "text-white/40" : "text-white/25"}`}>
+                          {notif.body}
+                        </p>
+                      </div>
+
+                      {/* Unread dot */}
+                      {!notif.read && (
+                        <div className="w-2 h-2 rounded-full bg-gold shrink-0 mt-2.5" />
+                      )}
+                    </button>
+                  );
+                })
               )}
             </div>
           </motion.div>
