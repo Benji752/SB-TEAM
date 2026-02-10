@@ -27,6 +27,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { supabase } from "@/lib/supabaseClient";
 import { HeartbeatTracker, useHeartbeatStatus } from "@/components/HeartbeatTracker";
 import { useGlobalUnread } from "@/hooks/useGlobalUnread";
+import { NotificationCenter } from "@/components/NotificationCenter";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -161,15 +162,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <img src="/logo.png" alt="SB" className="w-9 h-9 object-contain" />
           <span className="text-lg font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          data-testid="button-mobile-menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </Button>
+        <div className="flex items-center gap-1">
+          <NotificationCenter />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            data-testid="button-mobile-menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </Button>
+        </div>
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -260,7 +264,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-8">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="SB" className="w-9 h-9 object-contain" />
-            <span className="text-xl font-black text-white uppercase tracking-tighter italic">SB <span className="text-gold">Digital</span></span>
+            <span className="text-xl font-black text-white uppercase tracking-tighter italic flex-1">SB <span className="text-gold">Digital</span></span>
+            <NotificationCenter />
           </div>
           
           {user && (
