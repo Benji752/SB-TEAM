@@ -243,15 +243,15 @@ export function NotificationCenter() {
         onClick={() => setOpen(!open)}
         className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors group"
       >
-        <Bell size={22} className="text-white/50 group-hover:text-gold transition-colors" />
+        <Bell size={20} className="text-white/50 group-hover:text-gold transition-colors" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
-            <span className="text-[9px] font-black text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>
+          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
+            <span className="text-[8px] font-black text-white">{unreadCount > 99 ? "99+" : unreadCount}</span>
           </span>
         )}
       </button>
 
-      {/* Dropdown Panel */}
+      {/* Dropdown Panel - opens to the right on desktop */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -259,7 +259,7 @@ export function NotificationCenter() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-[380px] max-h-[500px] bg-[#0A0A0A] border border-white/[0.1] rounded-2xl shadow-2xl shadow-black/60 z-[9999] overflow-hidden"
+            className="fixed md:absolute left-4 right-4 md:left-0 md:right-auto top-20 md:top-full md:mt-2 w-auto md:w-[360px] max-h-[70vh] md:max-h-[500px] bg-[#0A0A0A] border border-white/[0.1] rounded-2xl shadow-2xl shadow-black/60 z-[9999] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
