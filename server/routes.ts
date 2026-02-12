@@ -906,11 +906,11 @@ Exemple: ["Post 1...", "Post 2...", "Post 3..."]`;
       const profile = await db.select().from(gamificationProfiles)
         .where(eq(gamificationProfiles.userId, userId))
         .limit(1);
-      
+
       if (!profile.length) {
         // First, try to get role from profiles table (persisted role)
         const userProfile = await db.select().from(profiles)
-          .where(eq(profiles.id, userId))
+          .where(eq(profiles.id, req.params.userId))
           .limit(1);
         
         let userRole = userProfile.length ? userProfile[0].role?.toLowerCase() : null;

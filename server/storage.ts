@@ -43,7 +43,7 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // Profiles
   async getProfile(id: string): Promise<Profile | undefined> {
-    const [profile] = await db.select().from(profiles).where(eq(profiles.id, parseInt(id)));
+    const [profile] = await db.select().from(profiles).where(eq(profiles.id, id));
     return profile;
   }
 
@@ -56,7 +56,7 @@ export class DatabaseStorage implements IStorage {
     const [updated] = await db
       .update(profiles)
       .set(updates)
-      .where(eq(profiles.id, parseInt(id)))
+      .where(eq(profiles.id, id))
       .returning();
     return updated;
   }
