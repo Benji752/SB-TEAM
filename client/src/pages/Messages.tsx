@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, Loader2, Eye, EyeOff, Users, User, ArrowLeft, Send, Bell } from "lucide-react";
+import { MessageSquare, Loader2, Eye, EyeOff, Users, User, ArrowLeft, Send, Paperclip, Image as ImageIcon, X, Download } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useGamificationData } from "@/hooks/useGamificationData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,28 @@ function playNotificationSound() {
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 0.3);
   } catch {}
+}
+
+// Check if content is an image URL
+function isImageUrl(content: string): boolean {
+  return content.startsWith('[IMG]') && content.endsWith('[/IMG]');
+}
+
+// Check if content is a file URL
+function isFileUrl(content: string): boolean {
+  return content.startsWith('[FILE:') && content.includes(']') && content.endsWith('[/FILE]');
+}
+
+// Extract URL from image tag
+function extractImageUrl(content: string): string {
+  return content.replace('[IMG]', '').replace('[/IMG]', '');
+}
+
+// Extract file info from file tag
+function extractFileInfo(content: string): { name: string; url: string } {
+  const match = content.match(/\[FILE:(.+?)\](.+?)\[\/FILE\]/);
+  if (match) return { name: match[1], url: match[2] };
+  return { name: 'fichier', url: '' };
 }
 
 export default function Messages() {
@@ -46,10 +68,14 @@ export default function Messages() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadBySender, setUnreadBySender] = useState<Record<string, number>>({});
   const [unreadGroup, setUnreadGroup] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const groupScrollRef = useRef<HTMLDivElement>(null);
   const selectedUserRef = useRef<any>(null);
   const chatModeRef = useRef<'dm' | 'group'>('group');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const groupFileInputRef = useRef<HTMLInputElement>(null);
 
   const { isUserOnline } = useGamificationData();
 
@@ -68,6 +94,114 @@ export default function Messages() {
 
   useEffect(() => { scrollToBottom(scrollRef); }, [messages, scrollToBottom]);
   useEffect(() => { scrollToBottom(groupScrollRef); }, [groupMessages, scrollToBottom]);
+
+  // ========== FILE UPLOAD ==========
+  const uploadFile = async (file: File): Promise<string | null> => {
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const cleanName = `chat/${Date.now()}_${baseName.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
+
+      const { error } = await supabase.storage
+        .from('sb-drive')
+        .upload(cleanName, file, { upsert: true });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from('sb-drive').getPublicUrl(cleanName);
+      return data.publicUrl;
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileAttach = async (e: React.ChangeEvent<HTMLInputElement>, mode: 'dm' | 'group') => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    const url = await uploadFile(file);
+    if (!url) return;
+
+    const isImage = file.type.startsWith('image/');
+    const content = isImage ? `[IMG]${url}[/IMG]` : `[FILE:${file.name}]${url}[/FILE]`;
+
+    if (mode === 'group' && currentUserProfile) {
+      const { error } = await supabase
+        .from('group_messages')
+        .insert({
+          sender_id: currentUser.id,
+          sender_username: currentUserProfile.username,
+          content,
+        });
+      if (error) console.error("Send file error:", error);
+    } else if (mode === 'dm' && selectedUser) {
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          sender_id: currentUser.id,
+          receiver_id: selectedUser.id,
+          content,
+          is_read: false,
+        });
+      if (error) console.error("Send file error:", error);
+    }
+
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (groupFileInputRef.current) groupFileInputRef.current.value = '';
+  };
+
+  // ========== MESSAGE CONTENT RENDERER ==========
+  const renderMessageContent = (content: string, isMe: boolean) => {
+    if (isImageUrl(content)) {
+      const url = extractImageUrl(content);
+      return (
+        <div
+          className="cursor-pointer rounded-xl overflow-hidden max-w-[280px]"
+          onClick={() => setPreviewImage(url)}
+        >
+          <img
+            src={url}
+            alt="Image partagée"
+            className="w-full h-auto max-h-[300px] object-cover hover:opacity-90 transition-opacity"
+            loading="lazy"
+          />
+        </div>
+      );
+    }
+
+    if (isFileUrl(content)) {
+      const { name, url } = extractFileInfo(content);
+      return (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center gap-3 p-3 rounded-xl border transition-all hover:scale-[1.02] ${
+            isMe
+              ? 'bg-black/10 border-black/20'
+              : 'bg-white/[0.05] border-white/[0.1]'
+          }`}
+        >
+          <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+            isMe ? 'bg-black/20' : 'bg-gold/10'
+          }`}>
+            <Download size={18} className={isMe ? 'text-black/70' : 'text-gold'} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className={`text-sm font-bold truncate ${isMe ? 'text-black' : 'text-white'}`}>{name}</p>
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${isMe ? 'text-black/50' : 'text-white/30'}`}>Fichier partage</p>
+          </div>
+        </a>
+      );
+    }
+
+    return <div className="font-medium break-words">{content}</div>;
+  };
 
   // ========== INIT ==========
   useEffect(() => {
@@ -102,7 +236,6 @@ export default function Messages() {
   useEffect(() => {
     if (!currentUser) return;
 
-    // Channel for DM messages (INSERT + UPDATE for read status)
     const dmChannel = supabase
       .channel('dm-messages')
       .on('postgres_changes', {
@@ -124,14 +257,12 @@ export default function Messages() {
               if (prev.some(m => m.id === newMsg.id)) return prev;
               return [...prev, newMsg];
             });
-            // Auto mark as read if it's incoming and we're viewing the convo
             if (newMsg.sender_id !== currentUser.id) {
               supabase.from('messages').update({ is_read: true }).eq('id', newMsg.id);
             }
           }
         }
 
-        // Notification: only if not viewing this convo right now
         if (newMsg.sender_id !== currentUser.id) {
           const sel = selectedUserRef.current;
           const isViewingThisConvo = chatModeRef.current === 'dm' && sel?.id === newMsg.sender_id;
@@ -151,12 +282,10 @@ export default function Messages() {
         table: 'messages',
       }, (payload) => {
         const updated = payload.new as any;
-        // Update is_read status in local state (for "Vu" indicator)
         setMessages(prev => prev.map(m => m.id === updated.id ? { ...m, is_read: updated.is_read } : m));
       })
       .subscribe();
 
-    // Channel for group messages
     const groupChannel = supabase
       .channel('group-messages')
       .on('postgres_changes', {
@@ -170,7 +299,6 @@ export default function Messages() {
           return [...prev, newMsg];
         });
 
-        // Notification if not from me and not currently viewing group chat
         if (newMsg.sender_id !== currentUser.id) {
           const isViewingGroup = chatModeRef.current === 'group';
           if (!isViewingGroup) {
@@ -211,7 +339,6 @@ export default function Messages() {
   async function fetchGroupMessages() {
     try {
       setIsLoadingGroupMessages(true);
-      // Fetch directly from Supabase for real-time compatibility
       const { data, error } = await supabase
         .from('group_messages')
         .select('*')
@@ -221,7 +348,6 @@ export default function Messages() {
       if (error) throw error;
       setGroupMessages(data || []);
     } catch {
-      // Fallback to API
       try {
         const response = await fetch('/api/group-messages');
         if (response.ok) {
@@ -247,7 +373,6 @@ export default function Messages() {
       if (error) throw error;
       setMessages(data || []);
 
-      // Mark incoming messages as read
       await supabase
         .from('messages')
         .update({ is_read: true })
@@ -286,7 +411,6 @@ export default function Messages() {
     setMessageText("");
 
     try {
-      // Insert directly into Supabase (Realtime will pick it up)
       const { error } = await supabase
         .from('group_messages')
         .insert({
@@ -296,7 +420,6 @@ export default function Messages() {
         });
 
       if (error) {
-        // Fallback to API
         await fetch('/api/group-messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -307,11 +430,10 @@ export default function Messages() {
           }),
           credentials: 'include',
         });
-        // Refetch since Realtime won't catch API inserts from server
         await fetchGroupMessages();
       }
     } catch {
-      setMessageText(text); // Restore on error
+      setMessageText(text);
     }
   }
 
@@ -339,10 +461,9 @@ export default function Messages() {
         }
         throw error;
       }
-      // Realtime subscription will add the message to state
     } catch (err: any) {
       console.error("Error sending message:", err);
-      setMessageText(text); // Restore on error
+      setMessageText(text);
     }
   };
 
@@ -402,7 +523,7 @@ export default function Messages() {
                 className={`flex-1 gap-2 relative ${chatMode === 'group' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
               >
                 <Users size={16} />
-                Chat Équipe
+                <span className="hidden sm:inline">Chat</span> Equipe
                 {unreadGroup > 0 && chatMode !== 'group' && (
                   <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
                     <span className="text-[9px] font-black text-white">{unreadGroup}</span>
@@ -416,7 +537,7 @@ export default function Messages() {
                 className={`flex-1 gap-2 relative ${chatMode === 'dm' ? 'bg-gold/20 text-gold border border-gold/30' : 'text-muted-foreground'}`}
               >
                 <User size={16} />
-                Privé
+                Prive
                 {Object.values(unreadBySender).reduce((a, b) => a + b, 0) > 0 && chatMode !== 'dm' && (
                   <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 bg-red-500 rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/30">
                     <span className="text-[9px] font-black text-white">{Object.values(unreadBySender).reduce((a, b) => a + b, 0)}</span>
@@ -462,7 +583,7 @@ export default function Messages() {
                 <Loader2 className="animate-spin text-gold" />
               </div>
             ) : profiles.length === 0 ? (
-              <div className="text-center p-8 text-muted-foreground">Aucun membre trouvé</div>
+              <div className="text-center p-8 text-muted-foreground">Aucun membre trouve</div>
             ) : (
               profiles.map((profile) => {
                 const online = isUserOnline(profile.user_id ?? 0);
@@ -472,7 +593,6 @@ export default function Messages() {
                     onClick={() => {
                       setSelectedUser(profile);
                       setMobileView('chat');
-                      // Clear unread badge for this sender
                       const senderUnread = unreadBySender[profile.id] || 0;
                       if (senderUnread > 0) {
                         setUnreadBySender(prev => ({ ...prev, [profile.id]: 0 }));
@@ -516,8 +636,8 @@ export default function Messages() {
               <div className="h-16 w-16 bg-gold/10 rounded-full flex items-center justify-center mb-4 border border-gold/20">
                 <Users size={28} className="text-gold" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Chat Équipe</h3>
-              <p className="text-sm text-muted-foreground">Messages en temps réel pour toute l'équipe.</p>
+              <h3 className="text-lg font-bold text-white mb-2">Chat Equipe</h3>
+              <p className="text-sm text-muted-foreground">Messages en temps reel pour toute l'equipe.</p>
               <div className="mt-4 flex gap-2">
                 {profiles.map(p => (
                   <div key={p.id} className="relative">
@@ -548,18 +668,18 @@ export default function Messages() {
                   <Users size={20} className="text-gold" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-sm md:text-base">Chat Équipe SB Digital</h3>
-                  <p className="text-[10px] md:text-xs text-emerald-400 font-bold">En temps réel</p>
+                  <h3 className="font-bold text-white text-sm md:text-base">Chat Equipe SB Digital</h3>
+                  <p className="text-[10px] md:text-xs text-emerald-400 font-bold">En temps reel</p>
                 </div>
               </div>
 
-              <div ref={groupScrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-3 custom-scrollbar">
+              <div ref={groupScrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-3 custom-scrollbar">
                 {isLoadingGroupMessages && groupMessages.length === 0 ? (
                   <div className="flex justify-center p-8"><Loader2 className="animate-spin text-gold" /></div>
                 ) : groupMessages.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground opacity-50 italic">
                     <MessageSquare size={48} className="mb-4" />
-                    <p>Aucun message. Soyez le premier à écrire !</p>
+                    <p>Aucun message. Soyez le premier a ecrire !</p>
                   </div>
                 ) : (
                   groupMessages.map((msg) => {
@@ -567,7 +687,7 @@ export default function Messages() {
                     return (
                       <div
                         key={msg.id}
-                        className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${
+                        className={`max-w-[85%] md:max-w-[75%] px-4 py-3 rounded-2xl text-sm ${
                           isMe
                             ? 'self-end bg-gold text-black rounded-tr-none shadow-[0_5px_15px_rgba(201,162,77,0.1)]'
                             : 'self-start bg-white/[0.05] text-white rounded-tl-none border border-white/[0.08]'
@@ -576,7 +696,7 @@ export default function Messages() {
                         {!isMe && (
                           <div className="text-[10px] font-bold mb-1 text-gold">{msg.sender_username}</div>
                         )}
-                        <div className="font-medium break-words">{msg.content}</div>
+                        {renderMessageContent(msg.content, isMe)}
                         <div className={`text-[9px] mt-1 opacity-50 text-right ${isMe ? 'text-black/70' : 'text-white/50'}`}>
                           {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
@@ -586,25 +706,41 @@ export default function Messages() {
                 )}
               </div>
 
-              <form onSubmit={handleSendGroupMessage} className="p-4 md:p-6 border-t border-white/[0.05] flex gap-3 bg-white/[0.01]">
+              <form onSubmit={handleSendGroupMessage} className="p-3 md:p-4 border-t border-white/[0.05] flex gap-2 md:gap-3 bg-white/[0.01]">
+                <input
+                  ref={groupFileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+                  onChange={(e) => handleFileAttach(e, 'group')}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={uploading}
+                  onClick={() => groupFileInputRef.current?.click()}
+                  className="text-white/30 hover:text-gold hover:bg-gold/10 h-12 w-12 shrink-0"
+                >
+                  {uploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
+                </Button>
                 <Input
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Écrivez à l'équipe..."
+                  placeholder="Ecrivez a l'equipe..."
                   className="flex-1 bg-black/40 border-white/[0.1] text-white h-12 rounded-xl px-4 focus:border-gold/50"
                   autoComplete="off"
                 />
                 <Button
                   type="submit"
                   disabled={!messageText.trim()}
-                  className="luxury-button h-12 px-6 rounded-xl"
+                  className="luxury-button h-12 px-4 md:px-6 rounded-xl"
                 >
                   <Send size={18} />
                 </Button>
               </form>
             </>
           ) : adminViewMode && adminViewUser1 && adminViewUser2 ? (
-            /* Admin view mode */
             <>
               <div className="p-6 border-b border-white/[0.05] flex items-center gap-4 bg-gold/5">
                 <Eye size={20} className="text-gold" />
@@ -644,7 +780,7 @@ export default function Messages() {
                         }`}
                       >
                         <div className="text-[10px] font-bold mb-1 opacity-70">{senderName}</div>
-                        <div className="font-medium break-words">{msg.content}</div>
+                        {renderMessageContent(msg.content, false)}
                         <div className="text-[9px] mt-1 opacity-50 text-right">
                           {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
@@ -658,7 +794,6 @@ export default function Messages() {
               </div>
             </>
           ) : selectedUser && !adminViewMode ? (
-            /* DM Chat */
             <>
               <div className="p-4 md:p-6 border-b border-white/[0.05] flex items-center gap-3 md:gap-4 bg-white/[0.01]">
                 <Button variant="ghost" size="icon" onClick={() => setMobileView('contacts')} className="md:hidden text-white/60">
@@ -683,7 +818,7 @@ export default function Messages() {
                 </div>
               </div>
 
-              <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 md:p-8 flex flex-col gap-4 custom-scrollbar">
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4 custom-scrollbar">
                 {isLoadingMessages && messages.length === 0 ? (
                   <div className="flex justify-center p-8"><Loader2 className="animate-spin text-gold" /></div>
                 ) : messages.length === 0 ? (
@@ -697,13 +832,13 @@ export default function Messages() {
                     return (
                       <div
                         key={msg.id}
-                        className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm ${
+                        className={`max-w-[85%] md:max-w-[75%] px-4 py-3 rounded-2xl text-sm ${
                           isMe
                             ? 'self-end bg-gold text-black rounded-tr-none shadow-[0_5px_15px_rgba(201,162,77,0.1)]'
                             : 'self-start bg-white/[0.05] text-white rounded-tl-none border border-white/[0.08]'
                         }`}
                       >
-                        <div className="font-medium break-words">{msg.content}</div>
+                        {renderMessageContent(msg.content, isMe)}
                         <div className={`text-[9px] mt-1 flex items-center justify-end gap-1 ${isMe ? 'text-black/60' : 'text-white/40'}`}>
                           {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           {isMe && (
@@ -718,35 +853,51 @@ export default function Messages() {
                 )}
               </div>
 
-              <form onSubmit={handleSend} className="p-4 md:p-6 border-t border-white/[0.05] flex gap-3 bg-white/[0.01]">
+              <form onSubmit={handleSend} className="p-3 md:p-4 border-t border-white/[0.05] flex gap-2 md:gap-3 bg-white/[0.01]">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+                  onChange={(e) => handleFileAttach(e, 'dm')}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-white/30 hover:text-gold hover:bg-gold/10 h-12 w-12 shrink-0"
+                >
+                  {uploading ? <Loader2 size={18} className="animate-spin" /> : <Paperclip size={18} />}
+                </Button>
                 <Input
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Écrivez votre message..."
+                  placeholder="Ecrivez votre message..."
                   className="flex-1 bg-black/40 border-white/[0.1] text-white h-12 rounded-xl px-4 focus:border-gold/50"
                   autoComplete="off"
                 />
                 <Button
                   type="submit"
                   disabled={!messageText.trim()}
-                  className="luxury-button h-12 px-6 rounded-xl"
+                  className="luxury-button h-12 px-4 md:px-6 rounded-xl"
                 >
                   <Send size={18} />
                 </Button>
               </form>
             </>
           ) : (
-            /* No conversation selected */
             <div className="flex-1 flex items-center justify-center text-center p-8">
               <div>
                 <div className="h-20 w-20 bg-white/[0.03] rounded-full flex items-center justify-center mx-auto mb-6 border border-white/[0.05] text-gold">
                   {adminViewMode ? <Eye size={32} /> : <MessageSquare size={32} />}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  {adminViewMode ? "Sélectionnez deux utilisateurs" : "Sélectionnez une conversation"}
+                  {adminViewMode ? "Selectionnez deux utilisateurs" : "Selectionnez une conversation"}
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  {adminViewMode ? "Choisissez deux membres pour voir leur conversation." : "Choisissez un membre pour commencer à discuter."}
+                  {adminViewMode ? "Choisissez deux membres pour voir leur conversation." : "Choisissez un membre pour commencer a discuter."}
                 </p>
                 <Button
                   variant="outline"
@@ -761,6 +912,30 @@ export default function Messages() {
           )}
         </Card>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -top-12 right-0 text-white/50 hover:text-white"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X size={24} />
+            </Button>
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

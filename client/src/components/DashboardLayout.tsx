@@ -134,20 +134,26 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     window.location.href = '/';
   };
 
-  const menuItems = [
-    { label: "Tableau de bord", icon: LayoutDashboard, href: "/", testId: "link-dashboard" },
-    { label: "Hunter League", icon: Trophy, href: "/leaderboard", testId: "link-leaderboard" },
-    { label: "IA Studio", icon: Sparkles, href: "/ai-studio", testId: "link-ai-studio" },
-    { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects" },
-    { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders" },
-    { label: "Ressources", icon: FileText, href: "/resources", testId: "link-resources" },
-    { label: "Messages", icon: MessageSquare, href: "/messages", testId: "link-messages", badge: globalUnread },
-    { label: "Calendrier", icon: Calendar, href: "/calendar", testId: "link-calendar" },
-    { label: "Équipe", icon: Users, href: "/models", testId: "link-models" },
-    { label: "Tâches", icon: CheckSquare, href: "/tasks", testId: "link-tasks" },
-    { label: "Drive", icon: HardDrive, href: "/drive", testId: "link-drive" },
-    { label: "Réclamations", icon: AlertCircle, href: "/complaints", testId: "link-complaints" },
+  const userRole = user?.role?.toLowerCase() || 'staff';
+
+  // Role-based menu: roles = which roles can see this menu item
+  // admin sees everything, model sees limited set, staff sees most
+  const allMenuItems = [
+    { label: "Tableau de bord", icon: LayoutDashboard, href: "/", testId: "link-dashboard", roles: ['admin', 'model', 'staff'] },
+    { label: "Hunter League", icon: Trophy, href: "/leaderboard", testId: "link-leaderboard", roles: ['admin', 'model', 'staff'] },
+    { label: "IA Studio", icon: Sparkles, href: "/ai-studio", testId: "link-ai-studio", roles: ['admin', 'staff'] },
+    { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects", roles: ['admin', 'staff'] },
+    { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders", roles: ['admin', 'staff'] },
+    { label: "Ressources", icon: FileText, href: "/resources", testId: "link-resources", roles: ['admin', 'model', 'staff'] },
+    { label: "Messages", icon: MessageSquare, href: "/messages", testId: "link-messages", badge: globalUnread, roles: ['admin', 'model', 'staff'] },
+    { label: "Calendrier", icon: Calendar, href: "/calendar", testId: "link-calendar", roles: ['admin', 'model', 'staff'] },
+    { label: "Equipe", icon: Users, href: "/models", testId: "link-models", roles: ['admin'] },
+    { label: "Taches", icon: CheckSquare, href: "/tasks", testId: "link-tasks", roles: ['admin', 'model', 'staff'] },
+    { label: "Drive", icon: HardDrive, href: "/drive", testId: "link-drive", roles: ['admin', 'model', 'staff'] },
+    { label: "Reclamations", icon: AlertCircle, href: "/complaints", testId: "link-complaints", roles: ['admin', 'staff'] },
   ];
+
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
   const isAdmin = user?.role === "admin" || user?.role?.toLowerCase() === "admin";
   const isActive = useHeartbeatStatus();

@@ -3,28 +3,38 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/Dashboard";
-import Orders from "@/pages/Orders";
-import CalendarPage from "@/pages/CalendarPage";
-import Tasks from "@/pages/Tasks";
-import Drive from "@/pages/Drive";
-import ResourcesPage from "@/pages/ResourcesPage";
-import ComplaintsPage from "@/pages/ComplaintsPage";
-import ProfilePage from "@/pages/ProfilePage";
-import LogsPage from "@/pages/LogsPage";
-import Messages from "@/pages/Messages";
-import Models from "@/pages/Models";
-import Projects from "@/pages/Projects";
-import Landing from "@/pages/Landing";
-import ResetPassword from "@/pages/ResetPassword";
-import AITools from "@/pages/AITools";
-import Leaderboard from "@/pages/Leaderboard";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { apiRequest } from "./lib/queryClient";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+
+// Code-splitting: lazy load all page components
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const Orders = lazy(() => import("@/pages/Orders"));
+const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
+const Tasks = lazy(() => import("@/pages/Tasks"));
+const Drive = lazy(() => import("@/pages/Drive"));
+const ResourcesPage = lazy(() => import("@/pages/ResourcesPage"));
+const ComplaintsPage = lazy(() => import("@/pages/ComplaintsPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const LogsPage = lazy(() => import("@/pages/LogsPage"));
+const Messages = lazy(() => import("@/pages/Messages"));
+const Models = lazy(() => import("@/pages/Models"));
+const Projects = lazy(() => import("@/pages/Projects"));
+const Landing = lazy(() => import("@/pages/Landing"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const AITools = lazy(() => import("@/pages/AITools"));
+const Leaderboard = lazy(() => import("@/pages/Leaderboard"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+function PageLoader() {
+  return (
+    <div className="h-screen w-full flex items-center justify-center bg-[#050505]">
+      <Loader2 className="h-10 w-10 animate-spin text-gold" />
+    </div>
+  );
+}
 
 function InactivityHandler() {
   const [user, setUser] = useState<any>(null);
@@ -265,61 +275,63 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {isResetPasswordPage ? (
-          <ResetPassword />
-        ) : !session ? (
-          <Landing />
-        ) : (
-          <>
-            <OnboardingTutorial />
-            <InactivityHandler />
-            <Switch>
-              <Route path="/">
-                <Dashboard />
-              </Route>
-              <Route path="/orders">
-                <Orders />
-              </Route>
-              <Route path="/calendar">
-                <CalendarPage />
-              </Route>
-              <Route path="/tasks">
-                <Tasks />
-              </Route>
-              <Route path="/drive">
-                <Drive />
-              </Route>
-              <Route path="/resources">
-                <ResourcesPage />
-              </Route>
-              <Route path="/complaints">
-                <ComplaintsPage />
-              </Route>
-              <Route path="/projects">
-                <Projects />
-              </Route>
-              <Route path="/ai-studio">
-                <AITools />
-              </Route>
-              <Route path="/profile">
-                <ProfilePage />
-              </Route>
-              <Route path="/messages">
-                <Messages />
-              </Route>
-              <Route path="/models">
-                <Models />
-              </Route>
-              <Route path="/logs">
-                <LogsPage />
-              </Route>
-              <Route path="/leaderboard">
-                <Leaderboard />
-              </Route>
-              <Route component={NotFound} />
-            </Switch>
-          </>
-        )}
+        <Suspense fallback={<PageLoader />}>
+          {isResetPasswordPage ? (
+            <ResetPassword />
+          ) : !session ? (
+            <Landing />
+          ) : (
+            <>
+              <OnboardingTutorial />
+              <InactivityHandler />
+              <Switch>
+                <Route path="/">
+                  <Dashboard />
+                </Route>
+                <Route path="/orders">
+                  <Orders />
+                </Route>
+                <Route path="/calendar">
+                  <CalendarPage />
+                </Route>
+                <Route path="/tasks">
+                  <Tasks />
+                </Route>
+                <Route path="/drive">
+                  <Drive />
+                </Route>
+                <Route path="/resources">
+                  <ResourcesPage />
+                </Route>
+                <Route path="/complaints">
+                  <ComplaintsPage />
+                </Route>
+                <Route path="/projects">
+                  <Projects />
+                </Route>
+                <Route path="/ai-studio">
+                  <AITools />
+                </Route>
+                <Route path="/profile">
+                  <ProfilePage />
+                </Route>
+                <Route path="/messages">
+                  <Messages />
+                </Route>
+                <Route path="/models">
+                  <Models />
+                </Route>
+                <Route path="/logs">
+                  <LogsPage />
+                </Route>
+                <Route path="/leaderboard">
+                  <Leaderboard />
+                </Route>
+                <Route component={NotFound} />
+              </Switch>
+            </>
+          )}
+        </Suspense>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

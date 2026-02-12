@@ -19,12 +19,14 @@ export const authLogs = pgTable("auth_logs", {
 });
 
 export const profiles = pgTable("profiles", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  id: text("id").primaryKey(), // UUID from Supabase auth.users
+  userId: integer("user_id"),
   username: text("username").notNull(),
   role: text("role", { enum: ["admin", "model", "staff"] }).default("model").notNull(),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
+  isOnline: boolean("is_online").default(false),
+  googleCalendarSrc: text("google_calendar_src"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
