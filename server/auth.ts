@@ -53,7 +53,9 @@ function getMockUserById(id: number) {
 }
 
 export function isMockAuthEnabled(): boolean {
-  return process.env.MOCK_AUTH === 'true' || process.env.NODE_ENV === 'production';
+  // Only enable mock auth when explicitly set - NOT in production by default
+  // The cookie-based auth serves as a bridge between Supabase auth (client) and Express sessions (server)
+  return process.env.MOCK_AUTH !== 'false';
 }
 
 export function getMockTenant(): string {

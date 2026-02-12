@@ -74,6 +74,7 @@ export default function Dashboard() {
   const { leaderboard } = useGamificationData();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [hourlyRevenueInput, setHourlyRevenueInput] = useState("");
+  const [chartRange, setChartRange] = useState<'24h' | '7d' | '30d'>('24h');
 
   // Orders from API
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
@@ -188,10 +189,28 @@ export default function Dashboard() {
   const roomTitle = liveStats?.roomTitle || "WildgirlShow Live";
   const avatarUrl = "https://ui-avatars.com/api/?name=Wild+Girl&background=0A0A0A&color=C9A24D&size=256&bold=true";
 
-  const chartData = Array.isArray(historyData) ? historyData.map((s: any) => ({
-    time: format(new Date(s.createdAt), "HH:mm"),
-    revenue: s.hourlyRevenue
-  })) : [];
+  const filterChartData = (data: any[], range: '24h' | '7d' | '30d') => {
+    if (!Array.isArray(data)) return [];
+    const now = new Date();
+    const cutoff = new Date();
+    if (range === '24h') cutoff.setHours(cutoff.getHours() - 24);
+    else if (range === '7d') cutoff.setDate(cutoff.getDate() - 7);
+    else cutoff.setDate(cutoff.getDate() - 30);
+
+    return data
+      .filter((s: any) => new Date(s.createdAt) >= cutoff)
+      .map((s: any) => ({
+        time: range === '24h'
+          ? format(new Date(s.createdAt), "HH:mm")
+          : format(new Date(s.createdAt), "dd/MM HH:mm"),
+        revenue: s.hourlyRevenue,
+        date: new Date(s.createdAt),
+      }));
+  };
+
+  const chartData = filterChartData(historyData as any[] || [], chartRange);
+  const totalChartRevenue = chartData.reduce((sum, d) => sum + (d.revenue || 0), 0);
+  const avgChartRevenue = chartData.length > 0 ? Math.round(totalChartRevenue / chartData.length) : 0;
 
   if (historyLoading) {
     return (
@@ -205,7 +224,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-10 py-4">
+      <div className="space-y-6 md:space-y-10 py-2 md:py-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -340,7 +359,7 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="md:w-2/5 p-10 flex flex-col justify-between bg-white/[0.01]">
+              <div className="md:w-2/5 p-6 md:p-10 flex flex-col justify-between bg-white/[0.01]">
                 <div className="space-y-6">
                   <div>
                     <span className={cn(
@@ -422,17 +441,39 @@ export default function Dashboard() {
           className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]"
         >
           <div className="space-y-8">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
-                <TrendingUp size={18} className="text-gold" />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
+                  <TrendingUp size={18} className="text-gold" />
+                </div>
+                <div>
+                  <h3 className="text-base md:text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
+                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">
+                    {chartData.length} points • Moy: {avgChartRevenue} EUR • Total: {totalChartRevenue} EUR
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
-                <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Évolution du revenu horaire (€)</p>
+              <div className="flex gap-2">
+                {(['24h', '7d', '30d'] as const).map(range => (
+                  <Button
+                    key={range}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setChartRange(range)}
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-widest h-8 px-3 rounded-lg",
+                      chartRange === range
+                        ? "bg-gold/20 text-gold border border-gold/30"
+                        : "text-white/30 hover:text-white"
+                    )}
+                  >
+                    {range}
+                  </Button>
+                ))}
               </div>
             </div>
 
-            <div className="h-[400px] w-full mt-4">
+            <div className="h-[250px] md:h-[400px] w-full mt-4">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData}>

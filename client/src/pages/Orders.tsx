@@ -2,15 +2,18 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  Trash2, 
-  Loader2, 
+import {
+  Plus,
+  Trash2,
+  Loader2,
   ShoppingBag,
   Calendar as CalendarIcon,
   User,
   Euro,
-  MoreVertical
+  MoreVertical,
+  Download,
+  TrendingUp,
+  Filter
 } from "lucide-react";
 import { 
   Table, 
@@ -68,6 +71,24 @@ export default function Orders() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const exportCSV = () => {
+    if (!orders || orders.length === 0) return;
+    const filtered = statusFilter === 'all' ? orders : orders.filter(o => o.status === statusFilter);
+    const header = "Date,Client,Type,Montant,Statut\n";
+    const rows = filtered.map(o =>
+      `${o.createdAt ? format(new Date(o.createdAt), "dd/MM/yyyy", { locale: fr }) : "-"},${o.clientName},${o.serviceType},${o.amount},${o.status}`
+    ).join("\n");
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `commandes_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Export CSV", description: `${filtered.length} commandes exportees` });
+  };
 
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
@@ -132,9 +153,13 @@ export default function Orders() {
     );
   }
 
+  const filteredOrders = orders ? (statusFilter === 'all' ? orders : orders.filter(o => o.status === statusFilter)) : [];
+  const totalRevenue = filteredOrders.filter(o => o.status === 'paid').reduce((s, o) => s + (o.amount || 0), 0);
+  const pendingRevenue = filteredOrders.filter(o => o.status === 'pending').reduce((s, o) => s + (o.amount || 0), 0);
+
   return (
     <DashboardLayout>
-      <div className="space-y-8 py-6">
+      <div className="space-y-6 md:space-y-8 py-4 md:py-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic mb-2">
@@ -145,12 +170,21 @@ export default function Orders() {
             </p>
           </div>
 
-          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-4 md:px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)] w-full md:w-auto">
-                <Plus size={16} /> Nouvelle Commande
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              onClick={exportCSV}
+              variant="outline"
+              className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-11 px-4 rounded-xl text-xs font-bold"
+            >
+              <Download size={14} /> <span className="hidden sm:inline">Export</span> CSV
+            </Button>
+
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-4 md:px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
+                  <Plus size={16} /> <span className="hidden sm:inline">Nouvelle</span> Commande
+                </Button>
+              </DialogTrigger>
             <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-[2rem]">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">
@@ -242,10 +276,49 @@ export default function Orders() {
                 </form>
               </Form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
-        <Card className="bg-[#0A0A0A] border-white/[0.05] rounded-[2rem] overflow-hidden">
+        {/* Stats summary */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <Card className="bg-[#0A0A0A] border-white/[0.05] p-4 rounded-2xl">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Total commandes</p>
+            <p className="text-2xl font-black text-white">{filteredOrders.length}</p>
+          </Card>
+          <Card className="bg-[#0A0A0A] border-white/[0.05] p-4 rounded-2xl">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-green-500/50 mb-1">CA encaisse</p>
+            <p className="text-2xl font-black text-green-400">{totalRevenue} EUR</p>
+          </Card>
+          <Card className="bg-[#0A0A0A] border-white/[0.05] p-4 rounded-2xl">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-yellow-500/50 mb-1">En attente</p>
+            <p className="text-2xl font-black text-yellow-400">{pendingRevenue} EUR</p>
+          </Card>
+          <Card className="bg-[#0A0A0A] border-white/[0.05] p-4 rounded-2xl">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gold/50 mb-1">Taux conversion</p>
+            <p className="text-2xl font-black text-gold">
+              {filteredOrders.length > 0 ? Math.round((filteredOrders.filter(o => o.status === 'paid').length / filteredOrders.length) * 100) : 0}%
+            </p>
+          </Card>
+        </div>
+
+        {/* Filter */}
+        <div className="flex items-center gap-3">
+          <Filter size={14} className="text-white/20" />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="bg-white/[0.03] border-white/[0.08] text-white h-9 w-44 rounded-xl text-xs">
+              <SelectValue placeholder="Filtrer par statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes</SelectItem>
+              <SelectItem value="paid">Payees</SelectItem>
+              <SelectItem value="pending">En attente</SelectItem>
+              <SelectItem value="cancelled">Annulees</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Card className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl md:rounded-[2rem] overflow-hidden">
           <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-white/[0.02]">
@@ -259,7 +332,7 @@ export default function Orders() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders?.map((order) => (
+              {filteredOrders?.map((order) => (
                 <TableRow key={order.id} className="border-white/[0.05] hover:bg-white/[0.01] transition-colors">
                   <TableCell className="font-bold text-white/60 text-xs">
                     {order.createdAt ? format(new Date(order.createdAt), "dd/MM", { locale: fr }) : "-"}
@@ -316,7 +389,7 @@ export default function Orders() {
                   </TableCell>
                 </TableRow>
               ))}
-              {(!orders || orders.length === 0) && (
+              {filteredOrders.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-white/20 font-black uppercase tracking-widest text-[10px]">
                     Aucune commande enregistrée

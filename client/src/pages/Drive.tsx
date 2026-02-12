@@ -18,11 +18,16 @@ import {
   Eye,
   Film,
   Music,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FolderOpen,
+  FolderPlus,
+  ChevronRight,
+  Home,
+  ArrowLeft
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabaseClient";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 function cn(...classes: any[]) {
@@ -47,15 +52,18 @@ export default function Drive() {
   const [previewFile, setPreviewFile] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [currentFolder, setCurrentFolder] = useState<string>(""); // "" = root
+  const [newFolderName, setNewFolderName] = useState("");
+  const [showNewFolder, setShowNewFolder] = useState(false);
 
   const { data: files, isLoading, refetch } = useQuery({
-    queryKey: ["drive-files"],
+    queryKey: ["drive-files", currentFolder],
     queryFn: async () => {
       const { data: storageFiles, error } = await supabase.storage
         .from('sb-drive')
-        .list('', { sortBy: { column: 'created_at', order: 'desc' } });
+        .list(currentFolder || '', { sortBy: { column: 'created_at', order: 'desc' } });
       if (error) throw error;
-      return (storageFiles || []).filter(item => item.id !== null);
+      return (storageFiles || []).filter(item => item.id !== null || item.name === '.emptyFolderPlaceholder' === false);
     }
   });
 
@@ -64,7 +72,8 @@ export default function Drive() {
     try {
       const fileExt = file.name.split('.').pop();
       const baseName = file.name.replace(/\.[^/.]+$/, "");
-      const cleanName = `${Date.now()}_${baseName.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
+      const prefix = currentFolder ? `${currentFolder}/` : '';
+      const cleanName = `${prefix}${Date.now()}_${baseName.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
 
       const { error } = await supabase.storage
         .from('sb-drive')
@@ -83,6 +92,49 @@ export default function Drive() {
     }
   };
 
+  const createFolder = async () => {
+    if (!newFolderName.trim()) return;
+    try {
+      const folderPath = currentFolder
+        ? `${currentFolder}/${newFolderName.trim()}/.emptyFolderPlaceholder`
+        : `${newFolderName.trim()}/.emptyFolderPlaceholder`;
+
+      const { error } = await supabase.storage
+        .from('sb-drive')
+        .upload(folderPath, new Blob([''], { type: 'text/plain' }), { upsert: true });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["drive-files"] });
+      toast({ title: "Dossier cree", description: newFolderName.trim() });
+      setNewFolderName("");
+      setShowNewFolder(false);
+    } catch (err: any) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const navigateToFolder = (folderName: string) => {
+    const newPath = currentFolder ? `${currentFolder}/${folderName}` : folderName;
+    setCurrentFolder(newPath);
+    setSearchQuery("");
+  };
+
+  const navigateUp = () => {
+    if (!currentFolder) return;
+    const parts = currentFolder.split('/');
+    parts.pop();
+    setCurrentFolder(parts.join('/'));
+    setSearchQuery("");
+  };
+
+  const navigateToRoot = () => {
+    setCurrentFolder("");
+    setSearchQuery("");
+  };
+
+  const breadcrumbs = currentFolder ? currentFolder.split('/') : [];
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) uploadFile(e.target.files[0]);
   };
@@ -94,13 +146,16 @@ export default function Drive() {
   };
 
   const getFileUrl = (file: any) => {
-    const { data } = supabase.storage.from('sb-drive').getPublicUrl(file.path || file.name);
+    const path = currentFolder ? `${currentFolder}/${file.name}` : file.name;
+    const { data } = supabase.storage.from('sb-drive').getPublicUrl(path);
     return data.publicUrl;
   };
 
   const getMimeType = (file: any) => file.metadata?.mimetype || '';
+  const isFolder = (file: any) => file.id === null || file.metadata === null;
 
   const getIcon = (file: any) => {
+    if (isFolder(file)) return <FolderOpen className="text-gold" size={22} />;
     const type = getMimeType(file);
     if (type.startsWith('image/')) return <ImageIcon className="text-blue-400" size={22} />;
     if (type.includes('pdf')) return <FileText className="text-red-400" size={22} />;
@@ -111,6 +166,7 @@ export default function Drive() {
   };
 
   const getIconColor = (file: any) => {
+    if (isFolder(file)) return "border-gold/20 bg-gold/10";
     const type = getMimeType(file);
     if (type.startsWith('image/')) return "border-blue-500/20 bg-blue-500/10";
     if (type.includes('pdf')) return "border-red-500/20 bg-red-500/10";
@@ -136,7 +192,8 @@ export default function Drive() {
 
   const deleteFile = async (file: any) => {
     try {
-      const { error } = await supabase.storage.from('sb-drive').remove([file.name]);
+      const path = currentFolder ? `${currentFolder}/${file.name}` : file.name;
+      const { error } = await supabase.storage.from('sb-drive').remove([path]);
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["drive-files"] });
       toast({ title: "Fichier supprime" });
@@ -146,11 +203,17 @@ export default function Drive() {
   };
 
   const getDisplayName = (name: string) => {
-    // Remove timestamp prefix: "1707465600_my_file.pdf" -> "my_file.pdf"
     return name.replace(/^\d+_/, '').replace(/_/g, ' ');
   };
 
-  const filteredFiles = (files || []).filter((f: any) =>
+  const allFiles = (files || []).filter((f: any) => f.name !== '.emptyFolderPlaceholder');
+  const folders = allFiles.filter((f: any) => isFolder(f));
+  const regularFiles = allFiles.filter((f: any) => !isFolder(f));
+
+  const filteredFolders = folders.filter((f: any) =>
+    !searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredFiles = regularFiles.filter((f: any) =>
     !searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -173,21 +236,29 @@ export default function Drive() {
               SB <span className="text-gold">Drive</span>
             </h1>
             <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px]">
-              {files?.length || 0} fichiers stockes
+              {regularFiles.length} fichiers • {folders.length} dossiers
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={() => { setShowNewFolder(!showNewFolder); }}
+              className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-11 px-4 rounded-xl"
+            >
+              <FolderPlus className="w-4 h-4" />
+              <span className="hidden sm:inline">Dossier</span>
+            </Button>
             <Button
               variant="outline"
               onClick={() => refetch()}
               disabled={uploading}
-              className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-11 px-5 rounded-xl"
+              className="border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.05] gap-2 h-11 px-4 rounded-xl"
             >
               <RotateCcw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-              Actualiser
+              <span className="hidden sm:inline">Actualiser</span>
             </Button>
             <label className={cn("cursor-pointer", uploading && "opacity-50 cursor-not-allowed")}>
-              <Button asChild disabled={uploading} className="luxury-button px-6 h-11">
+              <Button asChild disabled={uploading} className="luxury-button px-4 md:px-6 h-11">
                 <span>
                   {uploading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Envoi...</>
@@ -201,13 +272,72 @@ export default function Drive() {
           </div>
         </motion.div>
 
+        {/* Breadcrumb navigation */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-1 text-sm overflow-x-auto"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={navigateToRoot}
+            className={cn(
+              "text-xs font-bold uppercase tracking-widest gap-1 px-3 h-8 rounded-lg shrink-0",
+              !currentFolder ? "text-gold" : "text-white/40 hover:text-white"
+            )}
+          >
+            <Home size={14} /> Racine
+          </Button>
+          {breadcrumbs.map((part, i) => (
+            <div key={i} className="flex items-center gap-1 shrink-0">
+              <ChevronRight size={14} className="text-white/20" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const newPath = breadcrumbs.slice(0, i + 1).join('/');
+                  setCurrentFolder(newPath);
+                }}
+                className={cn(
+                  "text-xs font-bold uppercase tracking-widest px-3 h-8 rounded-lg",
+                  i === breadcrumbs.length - 1 ? "text-gold" : "text-white/40 hover:text-white"
+                )}
+              >
+                {part}
+              </Button>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* New folder input */}
+        {showNewFolder && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="flex gap-3"
+          >
+            <Input
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Nom du dossier..."
+              className="bg-black/50 border-white/[0.08] text-white h-11 rounded-xl flex-1"
+              onKeyDown={(e) => e.key === 'Enter' && createFolder()}
+            />
+            <Button onClick={createFolder} className="luxury-button h-11 px-6">Creer</Button>
+            <Button variant="ghost" onClick={() => setShowNewFolder(false)} className="h-11 text-white/30">
+              <X size={18} />
+            </Button>
+          </motion.div>
+        )}
+
         {/* Search + Drag Zone */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className={cn(
-            "p-6 rounded-2xl border transition-all duration-300",
+            "p-4 md:p-6 rounded-2xl border transition-all duration-300",
             dragOver
               ? "border-gold/50 bg-gold/[0.05] shadow-[0_0_30px_rgba(201,162,77,0.1)]"
               : "border-white/[0.05] bg-white/[0.02]"
@@ -232,12 +362,23 @@ export default function Drive() {
           )}
         </motion.div>
 
+        {/* Back button for subfolders */}
+        {currentFolder && (
+          <Button
+            variant="ghost"
+            onClick={navigateUp}
+            className="text-white/40 hover:text-white gap-2 h-9 px-3"
+          >
+            <ArrowLeft size={16} /> Retour
+          </Button>
+        )}
+
         {/* File Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[300px]">
             <Loader2 className="h-10 w-10 animate-spin text-gold" />
           </div>
-        ) : filteredFiles.length === 0 ? (
+        ) : filteredFolders.length === 0 && filteredFiles.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -245,26 +386,42 @@ export default function Drive() {
           >
             <File size={48} className="text-white/10 mx-auto mb-4" />
             <p className="text-white/30 text-sm font-bold uppercase tracking-widest">
-              {searchQuery ? "Aucun resultat" : "Aucun fichier"}
+              {searchQuery ? "Aucun resultat" : "Dossier vide"}
             </p>
           </motion.div>
         ) : (
           <motion.div
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
+            {/* Folders first */}
+            {filteredFolders.map((folder: any) => (
+              <motion.div key={folder.name} variants={cardVariants} layout>
+                <Card
+                  className="glass-card p-5 border-none group transition-all duration-300 hover:bg-gold/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(201,162,77,0.05)] relative overflow-hidden cursor-pointer"
+                  onClick={() => navigateToFolder(folder.name)}
+                >
+                  <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center border mb-4 transition-all group-hover:scale-110", getIconColor(folder))}>
+                    {getIcon(folder)}
+                  </div>
+                  <p className="font-bold text-white truncate text-sm">{folder.name}</p>
+                  <p className="text-[10px] text-gold/50 font-bold uppercase tracking-wide mt-1">Dossier</p>
+                </Card>
+              </motion.div>
+            ))}
+
+            {/* Files */}
             {filteredFiles.map((file: any) => (
-              <motion.div key={file.id} variants={cardVariants} layout>
-                <Card className="glass-card p-5 border-none group transition-all duration-300 hover:bg-white/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(201,162,77,0.05)] relative overflow-hidden">
-                  {/* Thumbnail / Icon */}
+              <motion.div key={file.id || file.name} variants={cardVariants} layout>
+                <Card className="glass-card p-4 md:p-5 border-none group transition-all duration-300 hover:bg-white/[0.06] hover:border-gold/20 hover:shadow-[0_0_20px_rgba(201,162,77,0.05)] relative overflow-hidden">
                   <div
                     className="cursor-pointer"
                     onClick={() => canPreview(file) ? openPreview(file) : downloadFile(file)}
                   >
                     {getMimeType(file).startsWith('image/') ? (
-                      <div className="h-32 rounded-xl overflow-hidden mb-4 bg-black/50">
+                      <div className="h-28 md:h-32 rounded-xl overflow-hidden mb-4 bg-black/50">
                         <img
                           src={getFileUrl(file)}
                           alt={file.name}
@@ -273,42 +430,41 @@ export default function Drive() {
                         />
                       </div>
                     ) : (
-                      <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center border mb-4 transition-all group-hover:scale-110", getIconColor(file))}>
+                      <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-2xl flex items-center justify-center border mb-4 transition-all group-hover:scale-110", getIconColor(file))}>
                         {getIcon(file)}
                       </div>
                     )}
-                    <div className="space-y-1 pr-16">
-                      <p className="font-bold text-white truncate text-sm">{getDisplayName(file.name)}</p>
+                    <div className="space-y-1 pr-10 md:pr-16">
+                      <p className="font-bold text-white truncate text-xs md:text-sm">{getDisplayName(file.name)}</p>
                       <p className="text-[10px] text-white/30 font-medium uppercase tracking-wide">
                         {file.metadata?.size ? (file.metadata.size / 1024 / 1024).toFixed(2) + " MB" : "?"} • {new Date(file.created_at).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="absolute top-5 right-5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-4 right-4 md:top-5 md:right-5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {canPreview(file) && (
                       <Button
                         variant="ghost" size="icon"
                         onClick={(e) => { e.stopPropagation(); openPreview(file); }}
-                        className="h-8 w-8 text-white/30 hover:text-gold hover:bg-gold/10"
+                        className="h-7 w-7 md:h-8 md:w-8 text-white/30 hover:text-gold hover:bg-gold/10"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </Button>
                     )}
                     <Button
                       variant="ghost" size="icon"
                       onClick={(e) => { e.stopPropagation(); downloadFile(file); }}
-                      className="h-8 w-8 text-white/30 hover:text-gold hover:bg-gold/10"
+                      className="h-7 w-7 md:h-8 md:w-8 text-white/30 hover:text-gold hover:bg-gold/10"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </Button>
                     <Button
                       variant="ghost" size="icon"
                       onClick={(e) => { e.stopPropagation(); deleteFile(file); }}
-                      className="h-8 w-8 text-white/10 hover:text-red-500 hover:bg-red-500/10"
+                      className="h-7 w-7 md:h-8 md:w-8 text-white/10 hover:text-red-500 hover:bg-red-500/10"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </Button>
                   </div>
                 </Card>
@@ -336,8 +492,7 @@ export default function Drive() {
               className="relative w-full max-w-5xl max-h-[90vh] bg-[#0A0A0A] border border-white/[0.1] rounded-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Preview Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08]">
+              <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-white/[0.08]">
                 <div className="flex items-center gap-3 min-w-0">
                   {getIcon(previewFile)}
                   <span className="text-sm font-bold text-white truncate">{getDisplayName(previewFile.name)}</span>
@@ -348,7 +503,7 @@ export default function Drive() {
                     onClick={() => downloadFile(previewFile)}
                     className="text-white/50 hover:text-gold gap-2 text-xs font-bold uppercase tracking-widest"
                   >
-                    <Download size={14} /> Telecharger
+                    <Download size={14} /> <span className="hidden sm:inline">Telecharger</span>
                   </Button>
                   <Button
                     variant="ghost" size="icon"
@@ -360,10 +515,9 @@ export default function Drive() {
                 </div>
               </div>
 
-              {/* Preview Content */}
               <div className="overflow-auto" style={{ maxHeight: 'calc(90vh - 70px)' }}>
                 {previewFile.mimeType?.startsWith('image/') ? (
-                  <div className="flex items-center justify-center p-6 bg-black/50">
+                  <div className="flex items-center justify-center p-4 md:p-6 bg-black/50">
                     <img
                       src={previewFile.url}
                       alt={previewFile.name}

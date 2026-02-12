@@ -13,7 +13,7 @@ export function useTasks() {
           .from('tasks')
           .select('*')
           .order('created_at', { ascending: false });
-        
+
         if (error) {
           console.warn("[useTasks] Supabase error:", error.message);
           return [];
@@ -46,10 +46,14 @@ export function useTasks() {
   }, [queryClient]);
 
   const createTask = useMutation({
-    mutationFn: async (title: string) => {
+    mutationFn: async (input: string | { title: string; assigned_to?: string | null; priority?: string }) => {
+      const taskData = typeof input === 'string'
+        ? { title: input, is_done: false }
+        : { title: input.title, is_done: false, assigned_to: input.assigned_to || null, priority: input.priority || 'normal' };
+
       const { error } = await supabase
         .from('tasks')
-        .insert([{ title, is_done: false }]);
+        .insert([taskData]);
       if (error) throw error;
     },
     onSuccess: () => {
