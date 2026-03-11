@@ -82,7 +82,7 @@ export function NotificationCenter() {
           .limit(15);
 
         // Get sender profiles
-        const senderIds = [...new Set((dms || []).map((m: any) => m.sender_id))];
+        const senderIds = Array.from(new Set((dms || []).map((m: any) => m.sender_id)));
         let profileMap: Record<string, any> = {};
         if (senderIds.length > 0) {
           const { data: profiles } = await supabase

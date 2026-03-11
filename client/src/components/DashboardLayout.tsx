@@ -141,16 +141,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const allMenuItems = [
     { label: "Tableau de bord", icon: LayoutDashboard, href: "/", testId: "link-dashboard", roles: ['admin', 'model', 'staff'] },
     { label: "Hunter League", icon: Trophy, href: "/leaderboard", testId: "link-leaderboard", roles: ['admin', 'model', 'staff'] },
-    { label: "IA Studio", icon: Sparkles, href: "/ai-studio", testId: "link-ai-studio", roles: ['admin', 'staff'] },
-    { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects", roles: ['admin', 'staff'] },
-    { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders", roles: ['admin', 'staff'] },
+    { label: "IA Studio", icon: Sparkles, href: "/ai-studio", testId: "link-ai-studio", roles: ['admin', 'model', 'staff'] },
+    { label: "Projets", icon: Briefcase, href: "/projects", testId: "link-projects", roles: ['admin', 'model', 'staff'] },
+    { label: "Commandes", icon: ShoppingCart, href: "/orders", testId: "link-orders", roles: ['admin', 'model', 'staff'] },
     { label: "Ressources", icon: FileText, href: "/resources", testId: "link-resources", roles: ['admin', 'model', 'staff'] },
     { label: "Messages", icon: MessageSquare, href: "/messages", testId: "link-messages", badge: globalUnread, roles: ['admin', 'model', 'staff'] },
     { label: "Calendrier", icon: Calendar, href: "/calendar", testId: "link-calendar", roles: ['admin', 'model', 'staff'] },
-    { label: "Equipe", icon: Users, href: "/models", testId: "link-models", roles: ['admin'] },
+    { label: "Equipe", icon: Users, href: "/models", testId: "link-models", roles: ['admin', 'model', 'staff'] },
     { label: "Taches", icon: CheckSquare, href: "/tasks", testId: "link-tasks", roles: ['admin', 'model', 'staff'] },
     { label: "Drive", icon: HardDrive, href: "/drive", testId: "link-drive", roles: ['admin', 'model', 'staff'] },
-    { label: "Reclamations", icon: AlertCircle, href: "/complaints", testId: "link-complaints", roles: ['admin', 'staff'] },
+    { label: "Reclamations", icon: AlertCircle, href: "/complaints", testId: "link-complaints", roles: ['admin'] },
   ];
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));

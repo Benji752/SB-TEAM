@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, RotateCcw, Loader2, User, Flag, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabaseClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Tasks() {
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -17,6 +18,7 @@ export default function Tasks() {
   const [filterAssignee, setFilterAssignee] = useState<string>("all");
   const [profiles, setProfiles] = useState<any[]>([]);
   const { tasks, isLoading, createTask, toggleTask, deleteTask, resetDailyRoutine } = useTasks();
+  const { toast } = useToast();
 
   useEffect(() => {
     async function loadProfiles() {
@@ -36,8 +38,15 @@ export default function Tasks() {
         priority: newTaskPriority,
       });
       setNewTaskTitle("");
-    } catch (err) {
+      setNewTaskAssignee("all");
+      setNewTaskPriority("normal");
+    } catch (err: any) {
       console.error("Error adding task:", err);
+      toast({
+        title: "Erreur",
+        description: err?.message || "Impossible de creer la tache.",
+        variant: "destructive",
+      });
     }
   };
 
