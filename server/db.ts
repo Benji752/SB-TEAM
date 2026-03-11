@@ -104,13 +104,22 @@ export async function initializeDatabase() {
         title TEXT NOT NULL,
         description TEXT,
         is_done BOOLEAN NOT NULL DEFAULT FALSE,
-        priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
-        assigned_to INTEGER,
+        priority TEXT NOT NULL DEFAULT 'normal',
+        assigned_to TEXT,
         model_id INTEGER,
         due_date TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
+
+    // Add missing columns to tasks if table already exists with old schema
+    await safeQuery(client, "tasks+assigned_to", `ALTER TABLE tasks ADD COLUMN IF NOT EXISTS assigned_to TEXT`);
+    await safeQuery(client, "tasks+priority", `ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority TEXT NOT NULL DEFAULT 'normal'`);
+    // Drop old priority CHECK constraint and update to allow new values
+    await safeQuery(client, "tasks~priority_check_drop", `ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_priority_check`);
+    await safeQuery(client, "tasks~priority_check_new", `ALTER TABLE tasks ADD CONSTRAINT tasks_priority_check CHECK (priority IN ('low', 'normal', 'high', 'urgent'))`);
+    // If assigned_to was INTEGER, change it to TEXT
+    await safeQuery(client, "tasks~assigned_to_type", `ALTER TABLE tasks ALTER COLUMN assigned_to TYPE TEXT USING assigned_to::TEXT`);
 
     await safeQuery(client, "agency_stats", `
       CREATE TABLE IF NOT EXISTS agency_stats (
