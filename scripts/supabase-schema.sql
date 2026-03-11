@@ -223,6 +223,23 @@ CREATE TABLE group_messages (
 );
 
 -- =============================================
+-- FINANCE ENTRIES TABLE
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS finance_entries (
+  id SERIAL PRIMARY KEY,
+  month TEXT NOT NULL,
+  label TEXT NOT NULL,
+  ca DOUBLE PRECISION NOT NULL DEFAULT 0,
+  factures DOUBLE PRECISION NOT NULL DEFAULT 0,
+  retards INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Enable realtime for finance_entries
+ALTER PUBLICATION supabase_realtime ADD TABLE finance_entries;
+
+-- =============================================
 -- GAMIFICATION TABLES (SB HUNTER LEAGUE)
 -- =============================================
 

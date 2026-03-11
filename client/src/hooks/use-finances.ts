@@ -1,13 +1,15 @@
-import { useState, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
+import { useEffect, useMemo } from "react";
 
 export interface FinanceEntry {
-  id: string;
+  id: number;
   month: string; // "2026-03" format
   label: string;
   ca: number; // Chiffre d'affaires
   factures: number; // Factures/charges
   retards: number; // Nombre de retards du modèle
-  createdAt: string;
+  created_at: string;
 }
 
 export interface FinanceCalculations {
@@ -16,21 +18,6 @@ export interface FinanceCalculations {
   partModele: number;
   urssaf: number;
   netFinal: number;
-}
-
-const STORAGE_KEY = "sb-finance-entries";
-
-function loadEntries(): FinanceEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveEntries(entries: FinanceEntry[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
 export function calculateFinance(entry: FinanceEntry): FinanceCalculations {
@@ -43,43 +30,109 @@ export function calculateFinance(entry: FinanceEntry): FinanceCalculations {
 }
 
 export function useFinances() {
-  const [entries, setEntries] = useState<FinanceEntry[]>(loadEntries);
+  const queryClient = useQueryClient();
 
-  const addEntry = useCallback((entry: Omit<FinanceEntry, "id" | "createdAt">) => {
-    const newEntry: FinanceEntry = {
-      ...entry,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
+  const { data: entries = [], isLoading } = useQuery({
+    queryKey: ["financeEntries"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("finance_entries")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.warn("[useFinances] Supabase error:", error.message);
+          return [];
+        }
+        return (data || []) as FinanceEntry[];
+      } catch (error) {
+        console.error("[useFinances] Error:", error);
+        return [];
+      }
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  // Realtime sync — changes on any device trigger a refetch
+  useEffect(() => {
+    const channel = supabase
+      .channel("finance-entries-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "finance_entries" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["financeEntries"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    setEntries((prev) => {
-      const next = [newEntry, ...prev];
-      saveEntries(next);
-      return next;
-    });
-  }, []);
+  }, [queryClient]);
 
-  const updateEntry = useCallback((id: string, updates: Partial<Omit<FinanceEntry, "id" | "createdAt">>) => {
-    setEntries((prev) => {
-      const next = prev.map((e) => (e.id === id ? { ...e, ...updates } : e));
-      saveEntries(next);
-      return next;
-    });
-  }, []);
+  const addEntryMutation = useMutation({
+    mutationFn: async (entry: { month: string; label: string; ca: number; factures: number; retards: number }) => {
+      const { error } = await supabase
+        .from("finance_entries")
+        .insert([entry]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["financeEntries"] });
+    },
+  });
 
-  const deleteEntry = useCallback((id: string) => {
-    setEntries((prev) => {
-      const next = prev.filter((e) => e.id !== id);
-      saveEntries(next);
-      return next;
-    });
-  }, []);
+  const updateEntryMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<{ month: string; label: string; ca: number; factures: number; retards: number }> }) => {
+      const { error } = await supabase
+        .from("finance_entries")
+        .update(updates)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["financeEntries"] });
+    },
+  });
+
+  const deleteEntryMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from("finance_entries")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["financeEntries"] });
+    },
+  });
+
+  // Wrapper functions matching the old API signature
+  const addEntry = (entry: { month: string; label: string; ca: number; factures: number; retards: number }) => {
+    addEntryMutation.mutate(entry);
+  };
+
+  const updateEntry = (id: number, updates: Partial<{ month: string; label: string; ca: number; factures: number; retards: number }>) => {
+    updateEntryMutation.mutate({ id, updates });
+  };
+
+  const deleteEntry = (id: number) => {
+    deleteEntryMutation.mutate(id);
+  };
 
   // Aggregated stats
-  const totalCA = entries.reduce((sum, e) => sum + e.ca, 0);
-  const totalBenefice = entries.reduce((sum, e) => sum + calculateFinance(e).beneficeBrut, 0);
-  const totalURSSAF = entries.reduce((sum, e) => sum + calculateFinance(e).urssaf, 0);
-  const totalNet = entries.reduce((sum, e) => sum + calculateFinance(e).netFinal, 0);
-  const avgBenefice = entries.length > 0 ? totalBenefice / entries.length : 0;
+  const stats = useMemo(() => {
+    const totalCA = entries.reduce((sum, e) => sum + e.ca, 0);
+    const totalBenefice = entries.reduce((sum, e) => sum + calculateFinance(e).beneficeBrut, 0);
+    const totalURSSAF = entries.reduce((sum, e) => sum + calculateFinance(e).urssaf, 0);
+    const totalNet = entries.reduce((sum, e) => sum + calculateFinance(e).netFinal, 0);
+    const avgBenefice = entries.length > 0 ? totalBenefice / entries.length : 0;
+    return { totalCA, avgBenefice, totalURSSAF, totalNet };
+  }, [entries]);
 
   // Latest entry for payment summary
   const latestEntry = entries.length > 0 ? entries[0] : null;
@@ -87,10 +140,11 @@ export function useFinances() {
 
   return {
     entries,
+    isLoading,
     addEntry,
     updateEntry,
     deleteEntry,
-    stats: { totalCA, avgBenefice, totalURSSAF, totalNet },
+    stats,
     latestEntry,
     latestCalc,
   };
