@@ -18,7 +18,8 @@ import {
   Sparkles,
   Trophy,
   Menu,
-  X
+  X,
+  Wallet
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -150,6 +151,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { label: "Equipe", icon: Users, href: "/models", testId: "link-models", roles: ['admin', 'model', 'staff'] },
     { label: "Taches", icon: CheckSquare, href: "/tasks", testId: "link-tasks", roles: ['admin', 'model', 'staff'] },
     { label: "Drive", icon: HardDrive, href: "/drive", testId: "link-drive", roles: ['admin', 'model', 'staff'] },
+    { label: "Finances", icon: Wallet, href: "/finances", testId: "link-finances", roles: ['admin'] },
     { label: "Reclamations", icon: AlertCircle, href: "/complaints", testId: "link-complaints", roles: ['admin'] },
   ];
 
