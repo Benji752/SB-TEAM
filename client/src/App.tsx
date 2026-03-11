@@ -26,6 +26,7 @@ const Landing = lazy(() => import("@/pages/Landing"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const AITools = lazy(() => import("@/pages/AITools"));
 const Leaderboard = lazy(() => import("@/pages/Leaderboard"));
+const Finances = lazy(() => import("@/pages/Finances"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function PageLoader() {
@@ -326,6 +327,9 @@ export default function App() {
                 </Route>
                 <Route path="/leaderboard">
                   <Leaderboard />
+                </Route>
+                <Route path="/finances">
+                  <Finances />
                 </Route>
                 <Route component={NotFound} />
               </Switch>
