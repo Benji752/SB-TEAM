@@ -175,6 +175,11 @@ export default function TeamPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
+      // Delete dependent records first (foreign key constraints)
+      await supabase.from("activity_logs").delete().eq("user_id", deleteTarget.id);
+      await supabase.from("messages").delete().eq("sender_id", deleteTarget.id);
+      await supabase.from("messages").delete().eq("receiver_id", deleteTarget.id);
+
       // Delete profile from Supabase
       const { error } = await supabase.from("profiles").delete().eq("id", deleteTarget.id);
       if (error) throw error;
