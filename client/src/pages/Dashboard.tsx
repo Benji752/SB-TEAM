@@ -1,88 +1,135 @@
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area
-} from "recharts";
+import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Users,
-  TrendingUp,
-  DollarSign,
-  Edit2,
-  Eye,
-  Activity,
-  Loader2,
   ArrowRight,
-  CheckSquare,
-  Star,
-  Heart
+  Zap,
+  MessageSquare,
+  CalendarDays,
+  AlertCircle,
+  CheckCircle2,
+  ShoppingBag,
+  FolderOpen,
+  Sparkles,
+  Plus,
+  ClipboardList,
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/hooks/use-auth";
-import { format } from "date-fns";
+import { format, isToday, isTomorrow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useEffect, useRef } from "react";
+import { queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LeadValidation } from "@/components/LeadValidation";
 import { useGamificationData } from "@/hooks/useGamificationData";
-import { Trophy, Crown } from "lucide-react";
+import { useGlobalUnread } from "@/hooks/useGlobalUnread";
+import { Trophy, Crown, Medal, Award } from "lucide-react";
 
+/* ── Animation Variants ── */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1
-    }
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
   }
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 24, scale: 0.97 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15
-    }
+    scale: 1,
+    transition: { type: "spring", stiffness: 100, damping: 16 }
+  }
+};
+
+const quickActionVariants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: "spring", stiffness: 200, damping: 20 }
   }
 };
 
 const MotionCard = motion(Card);
 
+/* ── Animated Counter ── */
+function AnimatedNumber({ value, duration = 1.2 }: { value: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const motionVal = useMotionValue(0);
+  const rounded = useTransform(motionVal, (v) => Math.round(v));
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (isInView) {
+      const controls = animate(motionVal, value, {
+        duration,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      });
+      return controls.stop;
+    }
+  }, [isInView, value, motionVal, duration]);
+
+  useEffect(() => {
+    const unsub = rounded.on("change", (v) => {
+      if (ref.current) ref.current.textContent = String(v);
+    });
+    return unsub;
+  }, [rounded]);
+
+  return <span ref={ref}>0</span>;
+}
+
+/* ── Skeleton Loader ── */
+function SkeletonRow({ count = 4 }: { count?: number }) {
+  return (
+    <div className="space-y-2.5">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02]">
+          <div className="h-8 w-8 rounded-full bg-white/[0.04] animate-pulse" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-3 w-2/3 rounded bg-white/[0.04] animate-pulse" />
+            <div className="h-2 w-1/3 rounded bg-white/[0.03] animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Quick Actions ── */
+const quickActions = [
+  { label: "Tâche", icon: Plus, href: "/tasks", color: "amber" },
+  { label: "Message", icon: MessageSquare, href: "/messages", color: "blue" },
+  { label: "Commande", icon: ShoppingBag, href: "/orders", color: "emerald" },
+  { label: "Calendrier", icon: CalendarDays, href: "/calendar", color: "purple" },
+  { label: "Drive", icon: FolderOpen, href: "/drive", color: "cyan" },
+  { label: "IA Studio", icon: Sparkles, href: "/ai-studio", color: "pink" },
+];
+
+const actionColorMap: Record<string, string> = {
+  amber: "bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/30 hover:shadow-amber-500/10",
+  blue: "bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-500/30 hover:shadow-blue-500/10",
+  emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/30 hover:shadow-emerald-500/10",
+  purple: "bg-purple-500/10 text-purple-400 border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/30 hover:shadow-purple-500/10",
+  cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20 hover:border-cyan-500/30 hover:shadow-cyan-500/10",
+  pink: "bg-pink-500/10 text-pink-400 border-pink-500/20 hover:bg-pink-500/20 hover:border-pink-500/30 hover:shadow-pink-500/10",
+};
+
+/* ── Main Dashboard ── */
 export default function Dashboard() {
   const { user } = useAuth();
   const { leaderboard } = useGamificationData();
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [hourlyRevenueInput, setHourlyRevenueInput] = useState("");
-  const [chartRange, setChartRange] = useState<'24h' | '7d' | '30d'>('24h');
+  const unreadCount = useGlobalUnread();
 
-  // Orders from API
-  const { data: recentOrders, isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/orders"],
-    select: (data: any) => Array.isArray(data) ? data.slice(0, 5) : []
-  });
-
-  // Tasks from Supabase
+  // Tasks
   const { data: recentTasks, isLoading: tasksLoading } = useQuery({
     queryKey: ["dashboard-tasks"],
     queryFn: async () => {
@@ -91,596 +138,544 @@ export default function Dashboard() {
         .select('*')
         .eq('is_done', false)
         .order('created_at', { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const { data: openTasksCount } = useQuery({
+    queryKey: ["dashboard-tasks-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_done', false);
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
+  const { data: openTicketsCount } = useQuery({
+    queryKey: ["dashboard-tickets-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('tickets')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+      if (error) throw error;
+      return count || 0;
+    }
+  });
+
+  const { data: recentOrders, isLoading: ordersLoading } = useQuery({
+    queryKey: ["dashboard-orders"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('client_requests')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(5);
       if (error) throw error;
       return data || [];
     }
   });
 
-  // Live Stripchat data (auto from server API)
-  const [isOnline, setIsOnline] = useState(false);
-  const [liveStats, setLiveStats] = useState<any>(null);
-
-  // Chart history
-  const { data: historyData, isLoading: historyLoading } = useQuery({
-    queryKey: ["/api/model-stats"],
-  });
-
-  // Last manual stats (for hourly revenue)
-  const [manualData, setManualData] = useState<any>(null);
-
-  const loadManualData = async () => {
-    try {
-      const res = await fetch("/api/model-stats/latest", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        if (data) setManualData(data);
-      }
-    } catch {}
-  };
-
-  // Auto-fetch live status from our server endpoint (Stripchat API)
-  const fetchStatus = async () => {
-    try {
-      const res = await fetch("/api/monitor/wildgirl", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setLiveStats(data);
-        setIsOnline(data.isOnline || false);
-      }
-    } catch {
-      setIsOnline(false);
-    }
-  };
-
-  useEffect(() => {
-    loadManualData();
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Manual update: only hourly revenue (everything else is auto)
-  const updateMutation = useMutation({
-    mutationFn: async (data: { hourlyRevenue: string }) => {
-      const res = await fetch("/api/model-stats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          hourlyRevenue: data.hourlyRevenue,
-          subscribers: liveStats?.subscribers || manualData?.subscribers || 0,
-          stripScore: liveStats?.stripScore || manualData?.stripScore || 0,
-          favorites: liveStats?.favorites || manualData?.favorites || 0,
-          isOnline: isOnline,
-        }),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to save");
-      return res.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/model-stats"] });
-      setManualData(data);
-      setIsUpdateModalOpen(false);
-      setHourlyRevenueInput("");
+  const { data: upcomingEvents, isLoading: eventsLoading } = useQuery({
+    queryKey: ["dashboard-events"],
+    queryFn: async () => {
+      const now = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('date', now)
+        .order('date', { ascending: true })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
     }
   });
+
+  const onlineCount = leaderboard.filter((m: any) => m.is_online).length;
 
   const updateTaskStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       const is_done = status === 'completed';
-      const { error } = await supabase
-        .from('tasks')
-        .update({ is_done })
-        .eq('id', id);
+      const { error } = await supabase.from('tasks').update({ is_done }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dashboard-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-tasks-count"] });
     },
   });
 
-  // Display values: live API data first, manual fallback
-  const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
-  const displaySubscribers = liveStats?.subscribers || manualData?.subscribers || 0;
-  const displayStripScore = liveStats?.stripScore || manualData?.stripScore || 0;
-  const displayFavorites = liveStats?.favorites || manualData?.favorites || 0;
-  const viewersCount = liveStats?.viewersCount || 0;
-  const roomTitle = liveStats?.roomTitle || "WildgirlShow Live";
-  const avatarUrl = "https://ui-avatars.com/api/?name=Wild+Girl&background=0A0A0A&color=C9A24D&size=256&bold=true";
+  const kpiCards = [
+    { label: "Tâches en cours", value: openTasksCount ?? 0, icon: ClipboardList, color: "amber", href: "/tasks" },
+    { label: "Messages non lus", value: unreadCount ?? 0, icon: MessageSquare, color: "blue", href: "/messages" },
+    { label: "Équipe en ligne", value: onlineCount, icon: Users, color: "emerald", href: "/leaderboard" },
+    { label: "Tickets ouverts", value: openTicketsCount ?? 0, icon: AlertCircle, color: "red", href: "/reclamations" },
+  ];
 
-  const filterChartData = (data: any[], range: '24h' | '7d' | '30d') => {
-    if (!Array.isArray(data)) return [];
-    const now = new Date();
-    const cutoff = new Date();
-    if (range === '24h') cutoff.setHours(cutoff.getHours() - 24);
-    else if (range === '7d') cutoff.setDate(cutoff.getDate() - 7);
-    else cutoff.setDate(cutoff.getDate() - 30);
-
-    return data
-      .filter((s: any) => new Date(s.createdAt) >= cutoff)
-      .map((s: any) => ({
-        time: range === '24h'
-          ? format(new Date(s.createdAt), "HH:mm")
-          : format(new Date(s.createdAt), "dd/MM HH:mm"),
-        revenue: s.hourlyRevenue,
-        date: new Date(s.createdAt),
-      }));
+  const kpiColorMap: Record<string, { bg: string; text: string; border: string; pulse: string }> = {
+    amber: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20", pulse: "bg-amber-400" },
+    blue: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", pulse: "bg-blue-400" },
+    emerald: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", pulse: "bg-emerald-400" },
+    red: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", pulse: "bg-red-400" },
   };
 
-  const chartData = filterChartData(historyData as any[] || [], chartRange);
-  const totalChartRevenue = chartData.reduce((sum, d) => sum + (d.revenue || 0), 0);
-  const avgChartRevenue = chartData.length > 0 ? Math.round(totalChartRevenue / chartData.length) : 0;
-
-  if (historyLoading) {
-    return (
-      <DashboardLayout>
-        <div className="h-full w-full flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const getEventDateLabel = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isToday(date)) return "Aujourd'hui";
+    if (isTomorrow(date)) return "Demain";
+    return format(date, "EEE dd MMM", { locale: fr });
+  };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 md:space-y-10 py-2 md:py-4">
+      <div className="space-y-6 py-2 md:py-4">
+
+        {/* ── Header ── */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div>
-            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic mb-2">SB <span className="text-gold">Dashboard</span></h1>
-            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">Monitoring Stripchat : WildgirlShow</p>
-          </div>
-          <div className="flex gap-4">
-            {/* Only hourly revenue needs manual update */}
-            <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
-              setIsUpdateModalOpen(open);
-              if (open) {
-                setHourlyRevenueInput(manualData?.hourlyRevenue?.toString() || "");
-              }
-            }}>
-              <DialogTrigger asChild>
-                <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
-                  <Edit2 size={14} /> Revenu Horaire
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white overflow-y-auto max-h-[90vh] rounded-[2rem]">
-                <DialogHeader>
-                  <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">Mise à jour du Revenu Horaire</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <p className="text-sm text-white/40">Les autres stats (StripScore, Favoris, Abonnés, Statut Live) sont mises à jour automatiquement via l'API Stripchat.</p>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire (€)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={hourlyRevenueInput}
-                      onChange={e => setHourlyRevenueInput(e.target.value)}
-                      className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
-                      placeholder="ex: 22.3"
-                    />
-                  </div>
-                  <Button
-                    onClick={() => updateMutation.mutate({ hourlyRevenue: hourlyRevenueInput })}
-                    disabled={updateMutation.isPending}
-                    className="w-full bg-gold text-black font-black uppercase tracking-widest text-[10px] h-12 rounded-xl mt-4"
-                  >
-                    {updateMutation.isPending ? <Loader2 className="animate-spin" /> : "Sauvegarder"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
+              Bonjour, <motion.span
+                className="text-gold inline-block"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+              >
+                {user?.username || 'Team'}
+              </motion.span>
+            </h1>
+            <motion.p
+              className="text-white/30 text-xs mt-0.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {format(new Date(), "EEEE dd MMMM yyyy", { locale: fr })}
+            </motion.p>
           </div>
         </motion.div>
 
-        {/* Welcome Banner */}
+        {/* ── Quick Actions Bar ── */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-          className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-gold/5 via-transparent to-gold/5 border border-gold/10 p-6 md:p-8"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
-                Bonjour, <span className="text-gold">{user?.username || 'Team'}</span>
-              </h2>
-              <p className="text-white/30 text-sm mt-1">
-                {isOnline ? '🔴 WildgirlShow est en LIVE maintenant !' : 'WildgirlShow est hors ligne. Tout est sous controle.'}
-              </p>
-            </div>
-            <div className="hidden md:flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Aujourd'hui</p>
-                <p className="text-lg font-black text-white">{format(new Date(), "dd MMMM yyyy", { locale: fr })}</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Main model card + stats */}
-        <motion.div
-          className="grid gap-6 lg:grid-cols-12"
+          className="flex gap-2 overflow-x-auto pb-1 scrollbar-none"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <MotionCard variants={cardVariants} className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
-            <div className="relative h-full flex flex-col md:flex-row">
-              <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center min-h-[350px]">
-                {isOnline ? (
-                  <iframe
-                    src="https://stripchat.com/wildgirlshow/embed"
-                    className="absolute inset-0 w-full h-full border-0"
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                  />
-                ) : (
-                  <div className="relative w-full h-full">
-                    <img
-                      src={avatarUrl}
-                      alt="Profile Avatar"
-                      className="w-full h-full object-cover scale-110 blur-xl opacity-30 pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gold/10 blur-3xl rounded-full" />
-                        <Avatar className="h-48 w-48 border-4 border-white/5 shadow-2xl relative bg-[#050505]">
-                          <AvatarImage src={avatarUrl} className="object-cover" />
-                          <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">WG</AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </div>
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <motion.div key={action.label} variants={quickActionVariants}>
+                <Link href={action.href}>
+                  <button className={cn(
+                    "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[11px] font-bold whitespace-nowrap",
+                    "transition-all duration-300 hover:shadow-lg hover:scale-[1.03] active:scale-[0.97]",
+                    actionColorMap[action.color]
+                  )}>
+                    <Icon size={14} />
+                    {action.label}
+                  </button>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {/* ── KPI Cards Row ── */}
+        <motion.div
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {kpiCards.map((kpi) => {
+            const colors = kpiColorMap[kpi.color];
+            const Icon = kpi.icon;
+            const hasAlert = typeof kpi.value === 'number' && kpi.value > 0 && kpi.color !== 'emerald';
+            return (
+              <Link key={kpi.label} href={kpi.href}>
+                <MotionCard
+                  variants={cardVariants}
+                  whileHover={{ scale: 1.03, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    "bg-[#0A0A0A] border-white/[0.05] p-4 md:p-5 rounded-2xl flex flex-col gap-3 cursor-pointer",
+                    "hover:border-white/[0.15] transition-colors duration-300",
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <motion.div
+                      className={cn("h-9 w-9 rounded-xl flex items-center justify-center border", colors.bg, colors.border)}
+                      whileHover={{ rotate: [0, -8, 8, 0] }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <Icon size={16} className={colors.text} />
+                    </motion.div>
+                    {hasAlert && (
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", colors.pulse)} />
+                        <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", colors.pulse)} />
+                      </span>
+                    )}
                   </div>
-                )}
-
-                <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none z-10">
-                  <div className={cn(
-                    "h-2.5 w-2.5 rounded-full transition-all duration-500",
-                    isOnline ? "bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" : "bg-gray-500"
-                  )} />
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                    {isOnline ? 'LIVE' : 'HORS LIGNE'}
-                  </span>
-                </div>
-
-                {isOnline && viewersCount > 0 && (
-                  <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 z-10">
-                    <Eye size={14} className="text-gold" />
-                    <span className="text-xs font-black text-white">{viewersCount} <span className="text-white/40 font-bold ml-1">VIEWERS</span></span>
-                  </div>
-                )}
-              </div>
-
-              <div className="md:w-2/5 p-6 md:p-10 flex flex-col justify-between bg-white/[0.01]">
-                <div className="space-y-6">
                   <div>
-                    <span className={cn(
-                      "text-[10px] font-black uppercase tracking-[0.3em] mb-4 block",
-                      isOnline ? "text-red-400" : "text-gold"
-                    )}>
-                      {isOnline ? 'NOW STREAMING' : 'OFFLINE'}
-                    </span>
-                    <h2 className="text-2xl font-black text-white leading-tight tracking-tighter italic uppercase mb-2">
-                      {isOnline && roomTitle ? roomTitle : "WildgirlShow"}
-                    </h2>
-                    <p className="text-white/40 text-sm font-medium">WildgirlShow sur Stripchat</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/30">{kpi.label}</p>
+                    <p className="text-2xl md:text-3xl font-black text-white tracking-tight mt-0.5">
+                      <AnimatedNumber value={kpi.value as number} />
+                    </p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/[0.05]">
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">REVENU HORAIRE</span>
-                      <div className="text-xl font-black text-white">{displayHourlyRevenue} €</div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">STRIPSCORE</span>
-                      <div className="text-xl font-black text-gold">{displayStripScore}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">FAVORIS</span>
-                      <div className="text-xl font-black text-white">{typeof displayFavorites === 'number' ? displayFavorites.toLocaleString() : displayFavorites}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">ABONNÉS</span>
-                      <div className="text-xl font-black text-white">{displaySubscribers}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-8">
-                  <Button
-                    asChild
-                    variant="outline"
-                    className={cn(
-                      "w-full font-black uppercase tracking-widest text-[9px] h-12 rounded-xl",
-                      isOnline
-                        ? "border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400"
-                        : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white"
-                    )}
-                  >
-                    <a href="https://stripchat.com/wildgirlshow" target="_blank" rel="noopener noreferrer">
-                      {isOnline ? "Voir le live en plein écran" : "Ouvrir la plateforme"}
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </MotionCard>
-
-          {/* Side stats cards */}
-          <motion.div variants={cardVariants} className="lg:col-span-4 flex flex-col gap-4">
-            <Card className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
-              <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
-                <DollarSign size={18} className="text-gold" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Revenu Horaire</span>
-              <span className="text-3xl font-black text-white tracking-tighter italic">{displayHourlyRevenue} €</span>
-            </Card>
-            <Card className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
-              <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
-                <Users size={18} className="text-gold" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Abonnés (Fan)</span>
-              <span className="text-3xl font-black text-white tracking-tighter italic">{displaySubscribers}</span>
-            </Card>
-          </motion.div>
+                </MotionCard>
+              </Link>
+            );
+          })}
         </motion.div>
 
-        {/* Performance Chart */}
-        <MotionCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]"
-        >
-          <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
-                  <TrendingUp size={18} className="text-gold" />
-                </div>
-                <div>
-                  <h3 className="text-base md:text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">
-                    {chartData.length} points • Moy: {avgChartRevenue} EUR • Total: {totalChartRevenue} EUR
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {(['24h', '7d', '30d'] as const).map(range => (
-                  <Button
-                    key={range}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setChartRange(range)}
-                    className={cn(
-                      "text-[10px] font-black uppercase tracking-widest h-8 px-3 rounded-lg",
-                      chartRange === range
-                        ? "bg-gold/20 text-gold border border-gold/30"
-                        : "text-white/30 hover:text-white"
-                    )}
-                  >
-                    {range}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="h-[250px] md:h-[400px] w-full mt-4">
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                    <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
-                    <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "rgba(10, 10, 10, 0.95)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(10px)",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: "#fff"
-                      }}
-                      itemStyle={{ color: "#C9A24D" }}
-                      formatter={(value: any) => [`${value} €`, "Revenu"]}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#C9A24D"
-                      fillOpacity={1}
-                      fill="url(#colorRevenueDashboard)"
-                      strokeWidth={4}
-                      activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-white/20 text-[10px] font-black uppercase tracking-widest">
-                  Aucune donnée de performance. Mettez à jour le revenu horaire pour commencer.
-                </div>
-              )}
-            </div>
-          </div>
-        </MotionCard>
-
-        {/* Hunter League Mini Widget */}
-        <MotionCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          className="bg-gradient-to-r from-[#0A0A0A] to-[#1a1a2e] border border-purple-500/20 rounded-[2rem] p-6 hover:border-purple-500/40 transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                <Crown className="w-6 h-6 text-black" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">SB Hunter League</p>
-                <h3 className="text-xl font-black text-white tracking-tight">
-                  {leaderboard[0]?.username || 'En attente...'}
-                </h3>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/30">#1 Leader</p>
-              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">
-                {leaderboard[0]?.xp_total || 0} XP
-              </p>
-            </div>
-            <Link href="/leaderboard">
-              <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10">
-                <Trophy className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </MotionCard>
-
-        {/* Orders + Tasks grid */}
+        {/* ── Team Activity + Upcoming Events ── */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          className="grid gap-4 lg:grid-cols-12"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Recent Orders */}
-          <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-                  <DollarSign size={18} className="text-emerald-500" />
+          {/* Team Activity */}
+          <MotionCard
+            variants={cardVariants}
+            className="lg:col-span-7 bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5 hover:border-white/[0.1] transition-colors duration-300"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                  <Users size={14} className="text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Dernières Commandes</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Flux de revenus récents</p>
+                  <h3 className="text-sm font-bold text-white">Équipe</h3>
+                  <p className="text-[10px] text-white/30">{onlineCount} en ligne</p>
                 </div>
               </div>
-              <Link href="/orders">
-                <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
-                  Voir tout <ArrowRight size={12} />
+              <Link href="/leaderboard">
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Voir tout <ArrowRight size={10} />
                 </Button>
               </Link>
             </div>
 
-            <div className="space-y-4">
-              {ordersLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
-              ) : recentOrders && recentOrders.length > 0 ? (
-                recentOrders.map((order: any) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-bold text-white uppercase tracking-tight">{order.clientName}</div>
-                        <Badge variant="outline" className="border-white/[0.1] text-white/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
-                          {order.serviceType}
-                        </Badge>
+            <div className="space-y-2">
+              {leaderboard.length > 0 ? (
+                leaderboard.slice(0, 6).map((member: any, idx: number) => (
+                  <motion.div
+                    key={member.id || idx}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.05 }}
+                    whileHover={{ x: 4, backgroundColor: "rgba(255,255,255,0.03)" }}
+                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] transition-all cursor-default"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="h-8 w-8 rounded-full bg-white/[0.05] flex items-center justify-center text-xs font-black text-white/50 uppercase">
+                          {member.username?.slice(0, 2)}
+                        </div>
+                        <div className={cn(
+                          "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0A0A0A]",
+                          member.is_online ? "bg-emerald-400" : "bg-white/20"
+                        )}>
+                          {member.is_online && (
+                            <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-40" />
+                          )}
+                        </div>
                       </div>
-                      <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                        {order.createdAt ? format(new Date(order.createdAt), "dd MMM yyyy", { locale: fr }) : "-"}
+                      <div>
+                        <p className="text-xs font-bold text-white">{member.username}</p>
+                        <p className="text-[10px] text-white/30">
+                          {member.is_online ? "En ligne" : "Hors ligne"}
+                          {" • Niv. " + (member.level || 1)}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-lg font-black text-white">{order.amount} €</div>
-                      <Badge className={cn(
-                        "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-none",
-                        order.status === 'paid' ? "bg-emerald-500/10 text-emerald-500" :
-                        order.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" :
-                        "bg-amber-500/10 text-amber-500"
-                      )}>
-                        {order.status === 'paid' ? 'PAID' : order.status}
-                      </Badge>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-white/40">{member.xp_total} XP</span>
+                      {idx === 0 && (
+                        <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}>
+                          <Crown size={12} className="text-yellow-400" />
+                        </motion.div>
+                      )}
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               ) : (
-                <div className="text-center py-12 text-white/20 border border-dashed border-white/[0.08] rounded-2xl">
-                  Aucune commande récente.
-                </div>
+                <SkeletonRow count={4} />
               )}
             </div>
           </MotionCard>
 
-          {/* Urgent Tasks */}
-          <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
-                  <CheckSquare size={18} className="text-amber-500" />
+          {/* Upcoming Events */}
+          <MotionCard
+            variants={cardVariants}
+            className="lg:col-span-5 bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5 hover:border-white/[0.1] transition-colors duration-300"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-purple-500/10 rounded-lg flex items-center justify-center border border-purple-500/20">
+                  <CalendarDays size={14} className="text-purple-400" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Tâches Urgentes</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Priorités de l'agence</p>
+                <h3 className="text-sm font-bold text-white">Événements</h3>
+              </div>
+              <Link href="/calendar">
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Calendrier <ArrowRight size={10} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-2.5">
+              {eventsLoading ? (
+                <SkeletonRow count={3} />
+              ) : upcomingEvents && upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event: any, idx: number) => (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + idx * 0.06 }}
+                    whileHover={{ x: -4, backgroundColor: "rgba(255,255,255,0.03)" }}
+                    className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] transition-all cursor-default"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-white truncate">{event.title}</p>
+                        {event.description && (
+                          <p className="text-[10px] text-white/30 mt-0.5 line-clamp-1">{event.description}</p>
+                        )}
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className={cn(
+                          "text-[10px] font-black uppercase",
+                          isToday(new Date(event.date)) ? "text-gold" : "text-white/40"
+                        )}>
+                          {getEventDateLabel(event.date)}
+                        </p>
+                        {event.time && <p className="text-[10px] text-white/30">{event.time}</p>}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-10 text-white/15 text-[10px] font-bold">
+                  Aucun événement prévu
                 </div>
+              )}
+            </div>
+          </MotionCard>
+        </motion.div>
+
+        {/* ── Bottom Grid: Tasks + Orders + Hunter League ── */}
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Tasks */}
+          <MotionCard variants={cardVariants} className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5 hover:border-white/[0.1] transition-colors duration-300">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-amber-500/10 rounded-lg flex items-center justify-center border border-amber-500/20">
+                  <Zap size={14} className="text-amber-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white">Tâches</h3>
               </div>
               <Link href="/tasks">
-                <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
-                  Gérer <ArrowRight size={12} />
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Gérer <ArrowRight size={10} />
                 </Button>
               </Link>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {tasksLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
+                <SkeletonRow count={4} />
               ) : recentTasks && recentTasks.length > 0 ? (
-                recentTasks.map((task: any) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all group">
-                    <div className="flex items-center gap-4">
+                recentTasks.map((task: any, idx: number) => (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.04 }}
+                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className={cn(
-                        "h-2 w-2 rounded-full",
-                        task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                        "h-2 w-2 rounded-full shrink-0",
+                        task.priority === 'high' || task.priority === 'urgent' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
                       )} />
-                      <div className="text-sm font-bold text-white uppercase tracking-tight">{task.title}</div>
+                      <p className="text-xs font-bold text-white truncate">{task.title}</p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <Select
-                        value={task.is_done ? 'completed' : 'todo'}
-                        onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
-                        disabled={updateTaskStatusMutation.isPending}
-                      >
-                        <SelectTrigger className={cn(
-                          "h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest",
-                          task.is_done ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                        )}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
-                          <SelectItem value="todo">À faire</SelectItem>
-                          <SelectItem value="completed">Terminé</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                    <motion.button
+                      onClick={() => updateTaskStatusMutation.mutate({ id: task.id, status: 'completed' })}
+                      disabled={updateTaskStatusMutation.isPending}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.85 }}
+                      className="shrink-0 h-6 w-6 rounded-md bg-white/[0.03] border border-white/[0.06] group-hover:border-emerald-500/40 group-hover:bg-emerald-500/10 flex items-center justify-center transition-all"
+                    >
+                      <CheckCircle2 size={12} className="text-white/20 group-hover:text-emerald-400 transition-colors" />
+                    </motion.button>
+                  </motion.div>
                 ))
               ) : (
-                <div className="text-center py-8 text-white/20 text-[10px] font-black uppercase tracking-widest">Tout est à jour !</div>
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-center py-10 text-white/15 text-[10px] font-bold"
+                >
+                  Tout est fait !
+                </motion.div>
               )}
             </div>
           </MotionCard>
 
-          {/* Lead Validation for Admin */}
-          {user?.role === 'admin' && (
-            <motion.div variants={cardVariants}>
-              <LeadValidation />
-            </motion.div>
-          )}
+          {/* Orders (no amounts) */}
+          <MotionCard variants={cardVariants} className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5 hover:border-white/[0.1] transition-colors duration-300">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
+                  <ShoppingBag size={14} className="text-blue-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white">Commandes</h3>
+              </div>
+              <Link href="/orders">
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Tout <ArrowRight size={10} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-2.5">
+              {ordersLoading ? (
+                <SkeletonRow count={4} />
+              ) : recentOrders && recentOrders.length > 0 ? (
+                recentOrders.map((order: any, idx: number) => (
+                  <motion.div
+                    key={order.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + idx * 0.04 }}
+                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-all"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{order.client_name}</p>
+                      <p className="text-[10px] text-white/30 mt-0.5">
+                        {order.created_at ? format(new Date(order.created_at), "dd MMM", { locale: fr }) : "-"} • {order.service_type}
+                      </p>
+                    </div>
+                    <div className={cn(
+                      "text-[8px] font-black uppercase tracking-wider px-2 py-1 rounded-md",
+                      order.status === 'paid' || order.status === 'completed'
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : order.status === 'cancelled'
+                        ? "bg-red-500/10 text-red-400"
+                        : "bg-amber-500/10 text-amber-400"
+                    )}>
+                      {order.status === 'paid' ? 'Payé' :
+                       order.status === 'completed' ? 'Terminé' :
+                       order.status === 'cancelled' ? 'Annulé' :
+                       order.status === 'pending_payment' ? 'En attente' :
+                       order.status}
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-10 text-white/15 text-[10px] font-bold">
+                  Aucune commande récente
+                </div>
+              )}
+            </div>
+          </MotionCard>
+
+          {/* Hunter League */}
+          <MotionCard variants={cardVariants} className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5 hover:border-white/[0.1] transition-colors duration-300">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <motion.div
+                  className="h-8 w-8 bg-gradient-to-br from-yellow-500/20 to-amber-600/20 rounded-lg flex items-center justify-center border border-yellow-500/20"
+                  animate={{ boxShadow: ["0 0 0px rgba(234,179,8,0)", "0 0 12px rgba(234,179,8,0.15)", "0 0 0px rgba(234,179,8,0)"] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                >
+                  <Trophy size={14} className="text-yellow-400" />
+                </motion.div>
+                <h3 className="text-sm font-bold text-white">Hunter League</h3>
+              </div>
+              <Link href="/leaderboard">
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Voir <ArrowRight size={10} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-2.5">
+              {leaderboard.slice(0, 5).map((entry: any, idx: number) => {
+                const medals = [
+                  <Crown key="c" size={14} className="text-yellow-400" />,
+                  <Medal key="m" size={14} className="text-gray-300" />,
+                  <Award key="a" size={14} className="text-amber-600" />,
+                ];
+                return (
+                  <motion.div
+                    key={entry.id || idx}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + idx * 0.06 }}
+                    whileHover={{ x: 4 }}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-xl border transition-all cursor-default",
+                      idx === 0
+                        ? "bg-yellow-500/[0.06] border-yellow-500/15"
+                        : "bg-white/[0.02] border-white/[0.04] hover:border-white/[0.08]"
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-5 flex justify-center">
+                        {idx < 3 ? medals[idx] : (
+                          <span className="text-[10px] font-black text-white/30">#{idx + 1}</span>
+                        )}
+                      </div>
+                      <p className={cn(
+                        "text-xs font-bold",
+                        idx === 0 ? "text-yellow-400" : "text-white"
+                      )}>{entry.username}</p>
+                    </div>
+                    <span className={cn(
+                      "text-xs font-black",
+                      idx === 0 ? "text-yellow-400" : "text-white/50"
+                    )}>{entry.xp_total} XP</span>
+                  </motion.div>
+                );
+              })}
+              {leaderboard.length === 0 && (
+                <SkeletonRow count={3} />
+              )}
+            </div>
+          </MotionCard>
         </motion.div>
+
+        {/* ── Lead Validation (Admin only) ── */}
+        {user?.role === 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
+          >
+            <LeadValidation />
+          </motion.div>
+        )}
       </div>
     </DashboardLayout>
   );
