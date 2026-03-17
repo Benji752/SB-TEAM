@@ -225,6 +225,22 @@ export const insertGroupMessageSchema = createInsertSchema(groupMessages).omit({
 export type GroupMessage = typeof groupMessages.$inferSelect;
 export type InsertGroupMessage = z.infer<typeof insertGroupMessageSchema>;
 
+// ========== Finance Entries ==========
+
+export const financeEntries = pgTable("finance_entries", {
+  id: serial("id").primaryKey(),
+  month: text("month").notNull(),
+  label: text("label").notNull(),
+  ca: doublePrecision("ca").notNull().default(0),
+  factures: doublePrecision("factures").notNull().default(0),
+  retards: integer("retards").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFinanceEntrySchema = createInsertSchema(financeEntries).omit({ id: true, createdAt: true });
+export type FinanceEntry = typeof financeEntries.$inferSelect;
+export type InsertFinanceEntry = z.infer<typeof insertFinanceEntrySchema>;
+
 // ========== SB HUNTER LEAGUE - Gamification ==========
 
 // Gamification Profiles

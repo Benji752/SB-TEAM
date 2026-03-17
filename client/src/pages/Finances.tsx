@@ -42,7 +42,7 @@ function monthLabel(m: string) {
 }
 
 export default function Finances() {
-  const { entries, addEntry, updateEntry, deleteEntry, stats, latestEntry, latestCalc } = useFinances();
+  const { entries, isLoading, addEntry, updateEntry, deleteEntry, stats, latestEntry, latestCalc } = useFinances();
   const { toast } = useToast();
 
   // Form state
@@ -54,7 +54,7 @@ export default function Finances() {
   const [showForm, setShowForm] = useState(false);
 
   // Edit state
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editData, setEditData] = useState<Partial<FinanceEntry>>({});
 
   const handleAdd = (e: React.FormEvent) => {
@@ -266,7 +266,12 @@ export default function Finances() {
         {/* History Table */}
         <Card className="bg-[#0A0A0A]/60 border-white/[0.08] backdrop-blur-xl p-4 md:p-6">
           <h2 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-4">Historique complet</h2>
-          {entries.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-16">
+              <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-white/30 text-sm">Chargement...</p>
+            </div>
+          ) : entries.length === 0 ? (
             <div className="text-center py-16">
               <AlertTriangle className="w-10 h-10 text-white/10 mx-auto mb-4" />
               <p className="text-white/30 text-sm">Aucune entree financiere.</p>
