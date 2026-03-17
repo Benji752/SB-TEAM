@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Users,
   TrendingUp,
+  TrendingDown,
   DollarSign,
   Edit2,
   Eye,
@@ -23,7 +24,10 @@ import {
   ArrowRight,
   CheckSquare,
   Star,
-  Heart
+  Heart,
+  Radio,
+  ExternalLink,
+  Zap,
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
@@ -41,29 +45,22 @@ import { Link } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LeadValidation } from "@/components/LeadValidation";
 import { useGamificationData } from "@/hooks/useGamificationData";
-import { Trophy, Crown } from "lucide-react";
+import { Trophy, Crown, Medal, Award } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1
-    }
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 }
   }
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15
-    }
+    transition: { type: "spring", stiffness: 120, damping: 18 }
   }
 };
 
@@ -74,7 +71,7 @@ export default function Dashboard() {
   const { leaderboard } = useGamificationData();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [hourlyRevenueInput, setHourlyRevenueInput] = useState("");
-  const [chartRange, setChartRange] = useState<'24h' | '7d' | '30d'>('24h');
+  const [chartRange, setChartRange] = useState<'24h' | '7d' | '30d'>('7d');
 
   // Orders from API
   const { data: recentOrders, isLoading: ordersLoading } = useQuery({
@@ -97,7 +94,7 @@ export default function Dashboard() {
     }
   });
 
-  // Live Stripchat data (auto from server API)
+  // Live Stripchat data
   const [isOnline, setIsOnline] = useState(false);
   const [liveStats, setLiveStats] = useState<any>(null);
 
@@ -119,7 +116,6 @@ export default function Dashboard() {
     } catch {}
   };
 
-  // Auto-fetch live status from our server endpoint (Stripchat API)
   const fetchStatus = async () => {
     try {
       const res = await fetch("/api/monitor/wildgirl", { credentials: "include" });
@@ -140,7 +136,7 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Manual update: only hourly revenue (everything else is auto)
+  // Manual update mutation
   const updateMutation = useMutation({
     mutationFn: async (data: { hourlyRevenue: string }) => {
       const res = await fetch("/api/model-stats", {
@@ -180,7 +176,7 @@ export default function Dashboard() {
     },
   });
 
-  // Display values: live API data first, manual fallback
+  // Display values
   const displayHourlyRevenue = manualData?.hourlyRevenue || 0;
   const displaySubscribers = liveStats?.subscribers || manualData?.subscribers || 0;
   const displayStripScore = liveStats?.stripScore || manualData?.stripScore || 0;
@@ -191,7 +187,6 @@ export default function Dashboard() {
 
   const filterChartData = (data: any[], range: '24h' | '7d' | '30d') => {
     if (!Array.isArray(data)) return [];
-    const now = new Date();
     const cutoff = new Date();
     if (range === '24h') cutoff.setHours(cutoff.getHours() - 24);
     else if (range === '7d') cutoff.setDate(cutoff.getDate() - 7);
@@ -212,63 +207,132 @@ export default function Dashboard() {
   const totalChartRevenue = chartData.reduce((sum, d) => sum + (d.revenue || 0), 0);
   const avgChartRevenue = chartData.length > 0 ? Math.round(totalChartRevenue / chartData.length) : 0;
 
+  // Trend calculation: compare latest vs previous entry
+  const getTrend = (data: any[], key: string) => {
+    if (!Array.isArray(data) || data.length < 2) return null;
+    const sorted = [...data].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const current = sorted[0]?.[key] || 0;
+    const previous = sorted[1]?.[key] || 0;
+    if (previous === 0) return null;
+    const pct = Math.round(((current - previous) / previous) * 100);
+    return pct;
+  };
+
+  const revenueTrend = getTrend(historyData as any[] || [], 'hourlyRevenue');
+
   if (historyLoading) {
     return (
       <DashboardLayout>
         <div className="h-full w-full flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-gold" />
         </div>
       </DashboardLayout>
     );
   }
 
+  const kpiCards = [
+    {
+      label: "Revenu Horaire",
+      value: `${displayHourlyRevenue} €`,
+      icon: DollarSign,
+      trend: revenueTrend,
+      color: "gold",
+      manual: true,
+    },
+    {
+      label: "StripScore",
+      value: displayStripScore,
+      icon: Activity,
+      trend: null,
+      color: "purple",
+    },
+    {
+      label: "Favoris",
+      value: typeof displayFavorites === 'number' ? displayFavorites.toLocaleString() : displayFavorites,
+      icon: Heart,
+      trend: null,
+      color: "pink",
+    },
+    {
+      label: "Abonnés",
+      value: displaySubscribers,
+      icon: Users,
+      trend: null,
+      color: "blue",
+    },
+  ];
+
+  const colorMap: Record<string, { bg: string; text: string; border: string; glow: string }> = {
+    gold: { bg: "bg-gold/10", text: "text-gold", border: "border-gold/20", glow: "shadow-gold/5" },
+    purple: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", glow: "shadow-purple-500/5" },
+    pink: { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20", glow: "shadow-pink-500/5" },
+    blue: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", glow: "shadow-blue-500/5" },
+  };
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 md:space-y-10 py-2 md:py-4">
+      <div className="space-y-6 py-2 md:py-4">
+
+        {/* ── Header ── */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          transition={{ duration: 0.4 }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div>
-            <h1 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic mb-2">SB <span className="text-gold">Dashboard</span></h1>
-            <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs">Monitoring Stripchat : WildgirlShow</p>
+            <h1 className="text-xl md:text-2xl font-black text-white tracking-tight">
+              Bonjour, <span className="text-gold">{user?.username || 'Team'}</span>
+            </h1>
+            <p className="text-white/30 text-xs mt-0.5">
+              {format(new Date(), "EEEE dd MMMM yyyy", { locale: fr })} • Monitoring WildgirlShow
+            </p>
           </div>
-          <div className="flex gap-4">
-            {/* Only hourly revenue needs manual update */}
+          <div className="flex items-center gap-3">
+            {/* Live indicator */}
+            <div className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
+              isOnline
+                ? "bg-red-500/10 text-red-400 border-red-500/30"
+                : "bg-white/[0.03] text-white/40 border-white/[0.08]"
+            )}>
+              <div className={cn(
+                "h-2 w-2 rounded-full",
+                isOnline ? "bg-red-500 animate-pulse" : "bg-white/20"
+              )} />
+              {isOnline ? 'LIVE' : 'OFFLINE'}
+            </div>
+
             <Dialog open={isUpdateModalOpen} onOpenChange={(open) => {
               setIsUpdateModalOpen(open);
-              if (open) {
-                setHourlyRevenueInput(manualData?.hourlyRevenue?.toString() || "");
-              }
+              if (open) setHourlyRevenueInput(manualData?.hourlyRevenue?.toString() || "");
             }}>
               <DialogTrigger asChild>
-                <Button className="bg-gold hover:bg-gold/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6 rounded-xl gap-2 shadow-[0_0_20px_rgba(201,162,77,0.2)]">
-                  <Edit2 size={14} /> Revenu Horaire
+                <Button size="sm" className="bg-gold hover:bg-gold-light text-black font-black uppercase tracking-widest text-[10px] h-9 px-4 rounded-xl gap-1.5">
+                  <Edit2 size={12} /> MAJ Revenu
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white overflow-y-auto max-h-[90vh] rounded-[2rem]">
+              <DialogContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-2xl">
                 <DialogHeader>
-                  <DialogTitle className="text-xl font-bold uppercase tracking-tight italic">Mise à jour du Revenu Horaire</DialogTitle>
+                  <DialogTitle className="text-lg font-bold">Mise à jour du Revenu Horaire</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <p className="text-sm text-white/40">Les autres stats (StripScore, Favoris, Abonnés, Statut Live) sont mises à jour automatiquement via l'API Stripchat.</p>
+                <div className="space-y-4 py-2">
+                  <p className="text-xs text-white/40">Les autres stats sont automatiques via l'API Stripchat.</p>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu Horaire (€)</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">Revenu (€)</Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={hourlyRevenueInput}
                       onChange={e => setHourlyRevenueInput(e.target.value)}
-                      className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-12"
+                      className="bg-white/[0.03] border-white/[0.1] text-white rounded-xl h-11"
                       placeholder="ex: 22.3"
                     />
                   </div>
                   <Button
                     onClick={() => updateMutation.mutate({ hourlyRevenue: hourlyRevenueInput })}
                     disabled={updateMutation.isPending}
-                    className="w-full bg-gold text-black font-black uppercase tracking-widest text-[10px] h-12 rounded-xl mt-4"
+                    className="w-full bg-gold text-black font-black uppercase tracking-widest text-[10px] h-11 rounded-xl"
                   >
                     {updateMutation.isPending ? <Loader2 className="animate-spin" /> : "Sauvegarder"}
                   </Button>
@@ -278,409 +342,379 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* Welcome Banner */}
+        {/* ── KPI Cards Row ── */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-          className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-gold/5 via-transparent to-gold/5 border border-gold/10 p-6 md:p-8"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="relative flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
-                Bonjour, <span className="text-gold">{user?.username || 'Team'}</span>
-              </h2>
-              <p className="text-white/30 text-sm mt-1">
-                {isOnline ? '🔴 WildgirlShow est en LIVE maintenant !' : 'WildgirlShow est hors ligne. Tout est sous controle.'}
-              </p>
-            </div>
-            <div className="hidden md:flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Aujourd'hui</p>
-                <p className="text-lg font-black text-white">{format(new Date(), "dd MMMM yyyy", { locale: fr })}</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Main model card + stats */}
-        <motion.div
-          className="grid gap-6 lg:grid-cols-12"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <MotionCard variants={cardVariants} className="lg:col-span-8 bg-[#0A0A0A] border-white/[0.05] rounded-[2.5rem] overflow-hidden group hover:border-gold/20 transition-all duration-500">
-            <div className="relative h-full flex flex-col md:flex-row">
-              <div className="relative md:w-3/5 h-[300px] md:h-auto overflow-hidden bg-black flex items-center justify-center min-h-[350px]">
-                {isOnline ? (
+          {kpiCards.map((kpi) => {
+            const colors = colorMap[kpi.color];
+            const Icon = kpi.icon;
+            return (
+              <MotionCard
+                key={kpi.label}
+                variants={cardVariants}
+                className={cn(
+                  "bg-[#0A0A0A] border-white/[0.05] p-4 md:p-5 rounded-2xl flex flex-col gap-3",
+                  "hover:border-white/[0.12] transition-all duration-300",
+                  `hover:shadow-lg ${colors.glow}`
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center border", colors.bg, colors.border)}>
+                    <Icon size={16} className={colors.text} />
+                  </div>
+                  {kpi.trend !== null && kpi.trend !== undefined && (
+                    <div className={cn(
+                      "flex items-center gap-0.5 text-[10px] font-black px-2 py-0.5 rounded-full",
+                      kpi.trend >= 0
+                        ? "bg-emerald-500/10 text-emerald-400"
+                        : "bg-red-500/10 text-red-400"
+                    )}>
+                      {kpi.trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                      {kpi.trend > 0 ? "+" : ""}{kpi.trend}%
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-white/30">{kpi.label}</p>
+                  <p className="text-xl md:text-2xl font-black text-white tracking-tight mt-0.5">{kpi.value}</p>
+                </div>
+              </MotionCard>
+            );
+          })}
+        </motion.div>
+
+        {/* ── Live Status + Chart ── */}
+        <motion.div
+          className="grid gap-4 lg:grid-cols-12"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Live Status Card */}
+          <MotionCard
+            variants={cardVariants}
+            className={cn(
+              "bg-[#0A0A0A] border-white/[0.05] rounded-2xl overflow-hidden",
+              isOnline ? "lg:col-span-5" : "lg:col-span-4"
+            )}
+          >
+            {isOnline ? (
+              /* ── Online: show embed ── */
+              <div className="flex flex-col h-full">
+                <div className="relative w-full aspect-video bg-black">
                   <iframe
                     src="https://stripchat.com/wildgirlshow/embed"
                     className="absolute inset-0 w-full h-full border-0"
                     allow="autoplay; encrypted-media"
                     allowFullScreen
                   />
-                ) : (
-                  <div className="relative w-full h-full">
-                    <img
-                      src={avatarUrl}
-                      alt="Profile Avatar"
-                      className="w-full h-full object-cover scale-110 blur-xl opacity-30 pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gold/10 blur-3xl rounded-full" />
-                        <Avatar className="h-48 w-48 border-4 border-white/5 shadow-2xl relative bg-[#050505]">
-                          <AvatarImage src={avatarUrl} className="object-cover" />
-                          <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-4xl italic">WG</AvatarFallback>
-                        </Avatar>
-                      </div>
+                  {viewersCount > 0 && (
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10 z-10">
+                      <Eye size={12} className="text-gold" />
+                      <span className="text-[10px] font-black text-white">{viewersCount}</span>
                     </div>
-                  </div>
-                )}
-
-                <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 pointer-events-none z-10">
-                  <div className={cn(
-                    "h-2.5 w-2.5 rounded-full transition-all duration-500",
-                    isOnline ? "bg-red-500 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.8)]" : "bg-gray-500"
-                  )} />
-                  <span className="text-[10px] font-black text-white uppercase tracking-widest">
-                    {isOnline ? 'LIVE' : 'HORS LIGNE'}
-                  </span>
+                  )}
                 </div>
-
-                {isOnline && viewersCount > 0 && (
-                  <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 z-10">
-                    <Eye size={14} className="text-gold" />
-                    <span className="text-xs font-black text-white">{viewersCount} <span className="text-white/40 font-bold ml-1">VIEWERS</span></span>
-                  </div>
-                )}
-              </div>
-
-              <div className="md:w-2/5 p-6 md:p-10 flex flex-col justify-between bg-white/[0.01]">
-                <div className="space-y-6">
+                <div className="p-4 flex items-center justify-between">
                   <div>
-                    <span className={cn(
-                      "text-[10px] font-black uppercase tracking-[0.3em] mb-4 block",
-                      isOnline ? "text-red-400" : "text-gold"
-                    )}>
-                      {isOnline ? 'NOW STREAMING' : 'OFFLINE'}
-                    </span>
-                    <h2 className="text-2xl font-black text-white leading-tight tracking-tighter italic uppercase mb-2">
-                      {isOnline && roomTitle ? roomTitle : "WildgirlShow"}
-                    </h2>
-                    <p className="text-white/40 text-sm font-medium">WildgirlShow sur Stripchat</p>
+                    <p className="text-xs font-black text-red-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <Radio size={12} className="animate-pulse" /> EN DIRECT
+                    </p>
+                    <p className="text-sm font-bold text-white mt-0.5 line-clamp-1">{roomTitle}</p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/[0.05]">
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">REVENU HORAIRE</span>
-                      <div className="text-xl font-black text-white">{displayHourlyRevenue} €</div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">STRIPSCORE</span>
-                      <div className="text-xl font-black text-gold">{displayStripScore}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">FAVORIS</span>
-                      <div className="text-xl font-black text-white">{typeof displayFavorites === 'number' ? displayFavorites.toLocaleString() : displayFavorites}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[8px] font-black uppercase tracking-widest text-white/30">ABONNÉS</span>
-                      <div className="text-xl font-black text-white">{displaySubscribers}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-8">
-                  <Button
-                    asChild
-                    variant="outline"
-                    className={cn(
-                      "w-full font-black uppercase tracking-widest text-[9px] h-12 rounded-xl",
-                      isOnline
-                        ? "border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400"
-                        : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.05] text-white"
-                    )}
-                  >
+                  <Button asChild size="sm" variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-[9px] font-black uppercase tracking-widest h-8 rounded-lg gap-1">
                     <a href="https://stripchat.com/wildgirlshow" target="_blank" rel="noopener noreferrer">
-                      {isOnline ? "Voir le live en plein écran" : "Ouvrir la plateforme"}
+                      <ExternalLink size={10} /> Plein écran
                     </a>
                   </Button>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* ── Offline: compact card ── */
+              <div className="p-5 md:p-6 flex items-center gap-4">
+                <Avatar className="h-16 w-16 border-2 border-white/[0.06] bg-[#050505] shrink-0">
+                  <AvatarImage src={avatarUrl} className="object-cover" />
+                  <AvatarFallback className="bg-[#0A0A0A] text-gold font-black text-lg">WG</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">WildgirlShow</p>
+                  <p className="text-sm font-bold text-white">Hors ligne</p>
+                  <p className="text-xs text-white/30 mt-0.5">Les stats sont mises à jour automatiquement quand le live commence.</p>
+                </div>
+                <Button asChild size="sm" variant="outline" className="border-white/[0.08] text-white/50 hover:text-white text-[9px] font-black uppercase tracking-widest h-8 rounded-lg shrink-0">
+                  <a href="https://stripchat.com/wildgirlshow" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink size={10} />
+                  </a>
+                </Button>
+              </div>
+            )}
           </MotionCard>
 
-          {/* Side stats cards */}
-          <motion.div variants={cardVariants} className="lg:col-span-4 flex flex-col gap-4">
-            <Card className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
-              <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
-                <DollarSign size={18} className="text-gold" />
+          {/* Performance Chart */}
+          <MotionCard
+            variants={cardVariants}
+            className={cn(
+              "bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5 md:p-6",
+              isOnline ? "lg:col-span-7" : "lg:col-span-8"
+            )}
+          >
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 bg-gold/10 rounded-lg flex items-center justify-center border border-gold/20">
+                    <TrendingUp size={14} className="text-gold" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Performance</h3>
+                    <p className="text-[10px] text-white/30 font-bold">
+                      {chartData.length} pts • Moy: {avgChartRevenue}€ • Total: {totalChartRevenue}€
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  {(['24h', '7d', '30d'] as const).map(range => (
+                    <Button
+                      key={range}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setChartRange(range)}
+                      className={cn(
+                        "text-[10px] font-black uppercase tracking-wider h-7 px-2.5 rounded-lg",
+                        chartRange === range
+                          ? "bg-gold/15 text-gold border border-gold/25"
+                          : "text-white/30 hover:text-white/60"
+                      )}
+                    >
+                      {range}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Revenu Horaire</span>
-              <span className="text-3xl font-black text-white tracking-tighter italic">{displayHourlyRevenue} €</span>
-            </Card>
-            <Card className="flex-1 bg-[#0A0A0A] border-white/[0.05] p-8 rounded-[2rem] flex flex-col justify-center gap-2 hover:border-gold/30 transition-all hover-elevate">
-              <div className="h-10 w-10 rounded-xl bg-white/[0.03] flex items-center justify-center border border-white/[0.05] mb-2">
-                <Users size={18} className="text-gold" />
+
+              <div className="flex-1 min-h-[200px] md:min-h-[280px]">
+                {chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData}>
+                      <defs>
+                        <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                      <XAxis dataKey="time" stroke="rgba(255,255,255,0.15)" fontSize={9} fontWeight="700" tickLine={false} axisLine={false} dy={8} />
+                      <YAxis stroke="rgba(255,255,255,0.15)" fontSize={9} fontWeight="700" tickLine={false} axisLine={false} tickFormatter={(v) => `${v}€`} width={40} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(10, 10, 10, 0.95)",
+                          border: "1px solid rgba(255, 255, 255, 0.08)",
+                          borderRadius: "12px",
+                          fontSize: "11px",
+                          fontWeight: "bold",
+                          color: "#fff"
+                        }}
+                        itemStyle={{ color: "#C9A24D" }}
+                        formatter={(value: any) => [`${value} €`, "Revenu"]}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#C9A24D"
+                        fillOpacity={1}
+                        fill="url(#colorRevenueDashboard)"
+                        strokeWidth={2.5}
+                        activeDot={{ r: 5, fill: "#C9A24D", stroke: "#000", strokeWidth: 2 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-white/20 text-[10px] font-black uppercase tracking-widest">
+                    Aucune donnée. Mettez à jour le revenu horaire.
+                  </div>
+                )}
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Abonnés (Fan)</span>
-              <span className="text-3xl font-black text-white tracking-tighter italic">{displaySubscribers}</span>
-            </Card>
-          </motion.div>
+            </div>
+          </MotionCard>
         </motion.div>
 
-        {/* Performance Chart */}
-        <MotionCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          className="glass-card p-10 border-none rounded-[2.5rem] bg-white/[0.01]"
-        >
-          <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-gold/10 rounded-full flex items-center justify-center border border-gold/20">
-                  <TrendingUp size={18} className="text-gold" />
-                </div>
-                <div>
-                  <h3 className="text-base md:text-lg font-bold text-white uppercase tracking-widest italic">Analyse de Performance</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">
-                    {chartData.length} points • Moy: {avgChartRevenue} EUR • Total: {totalChartRevenue} EUR
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {(['24h', '7d', '30d'] as const).map(range => (
-                  <Button
-                    key={range}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setChartRange(range)}
-                    className={cn(
-                      "text-[10px] font-black uppercase tracking-widest h-8 px-3 rounded-lg",
-                      chartRange === range
-                        ? "bg-gold/20 text-gold border border-gold/30"
-                        : "text-white/30 hover:text-white"
-                    )}
-                  >
-                    {range}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="h-[250px] md:h-[400px] w-full mt-4">
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorRevenueDashboard" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#C9A24D" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#C9A24D" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="0" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                    <XAxis dataKey="time" stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} dy={10} />
-                    <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `${v} €`} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "rgba(10, 10, 10, 0.95)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(10px)",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: "#fff"
-                      }}
-                      itemStyle={{ color: "#C9A24D" }}
-                      formatter={(value: any) => [`${value} €`, "Revenu"]}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#C9A24D"
-                      fillOpacity={1}
-                      fill="url(#colorRevenueDashboard)"
-                      strokeWidth={4}
-                      activeDot={{ r: 8, fill: "#C9A24D", stroke: "#000", strokeWidth: 3 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-white/20 text-[10px] font-black uppercase tracking-widest">
-                  Aucune donnée de performance. Mettez à jour le revenu horaire pour commencer.
-                </div>
-              )}
-            </div>
-          </div>
-        </MotionCard>
-
-        {/* Hunter League Mini Widget */}
-        <MotionCard
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
-          className="bg-gradient-to-r from-[#0A0A0A] to-[#1a1a2e] border border-purple-500/20 rounded-[2rem] p-6 hover:border-purple-500/40 transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
-                <Crown className="w-6 h-6 text-black" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">SB Hunter League</p>
-                <h3 className="text-xl font-black text-white tracking-tight">
-                  {leaderboard[0]?.username || 'En attente...'}
-                </h3>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/30">#1 Leader</p>
-              <p className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500">
-                {leaderboard[0]?.xp_total || 0} XP
-              </p>
-            </div>
-            <Link href="/leaderboard">
-              <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10">
-                <Trophy className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </MotionCard>
-
-        {/* Orders + Tasks grid */}
+        {/* ── Bottom Grid: Orders + Tasks + Hunter League ── */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-4"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Recent Orders */}
-          <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-                  <DollarSign size={18} className="text-emerald-500" />
+          <MotionCard variants={cardVariants} className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                  <DollarSign size={14} className="text-emerald-400" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Dernières Commandes</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Flux de revenus récents</p>
-                </div>
+                <h3 className="text-sm font-bold text-white">Commandes</h3>
               </div>
               <Link href="/orders">
-                <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
-                  Voir tout <ArrowRight size={12} />
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Tout <ArrowRight size={10} />
                 </Button>
               </Link>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {ordersLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" size={18} /></div>
               ) : recentOrders && recentOrders.length > 0 ? (
                 recentOrders.map((order: any) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-bold text-white uppercase tracking-tight">{order.clientName}</div>
-                        <Badge variant="outline" className="border-white/[0.1] text-white/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
-                          {order.serviceType}
-                        </Badge>
-                      </div>
-                      <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                        {order.createdAt ? format(new Date(order.createdAt), "dd MMM yyyy", { locale: fr }) : "-"}
-                      </div>
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-all">
+                    <div>
+                      <p className="text-xs font-bold text-white">{order.clientName}</p>
+                      <p className="text-[10px] text-white/30 mt-0.5">
+                        {order.createdAt ? format(new Date(order.createdAt), "dd MMM", { locale: fr }) : "-"} • {order.serviceType}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-lg font-black text-white">{order.amount} €</div>
-                      <Badge className={cn(
-                        "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-none",
-                        order.status === 'paid' ? "bg-emerald-500/10 text-emerald-500" :
-                        order.status === 'completed' ? "bg-emerald-500/10 text-emerald-500" :
-                        "bg-amber-500/10 text-amber-500"
-                      )}>
-                        {order.status === 'paid' ? 'PAID' : order.status}
-                      </Badge>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-white">{order.amount}€</span>
+                      <div className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        order.status === 'paid' || order.status === 'completed' ? "bg-emerald-400" : "bg-amber-400"
+                      )} />
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 text-white/20 border border-dashed border-white/[0.08] rounded-2xl">
-                  Aucune commande récente.
+                <div className="text-center py-8 text-white/20 text-[10px] font-bold">
+                  Aucune commande récente
                 </div>
               )}
             </div>
           </MotionCard>
 
           {/* Urgent Tasks */}
-          <MotionCard variants={cardVariants} className="glass-card p-8 border-none rounded-[2.5rem] bg-white/[0.01]">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
-                  <CheckSquare size={18} className="text-amber-500" />
+          <MotionCard variants={cardVariants} className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-amber-500/10 rounded-lg flex items-center justify-center border border-amber-500/20">
+                  <Zap size={14} className="text-amber-400" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white uppercase tracking-widest italic">Tâches Urgentes</h3>
-                  <p className="text-[10px] text-white/30 font-black uppercase tracking-[0.2em]">Priorités de l'agence</p>
-                </div>
+                <h3 className="text-sm font-bold text-white">Tâches</h3>
               </div>
               <Link href="/tasks">
-                <Button variant="ghost" className="text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2">
-                  Gérer <ArrowRight size={12} />
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Gérer <ArrowRight size={10} />
                 </Button>
               </Link>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {tasksLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" /></div>
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-white/20" size={18} /></div>
               ) : recentTasks && recentTasks.length > 0 ? (
                 recentTasks.map((task: any) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/[0.03] hover:border-white/10 transition-all group">
-                    <div className="flex items-center gap-4">
+                  <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-all">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className={cn(
-                        "h-2 w-2 rounded-full",
+                        "h-2 w-2 rounded-full shrink-0",
                         task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
                       )} />
-                      <div className="text-sm font-bold text-white uppercase tracking-tight">{task.title}</div>
+                      <p className="text-xs font-bold text-white truncate">{task.title}</p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <Select
-                        value={task.is_done ? 'completed' : 'todo'}
-                        onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
-                        disabled={updateTaskStatusMutation.isPending}
-                      >
-                        <SelectTrigger className={cn(
-                          "h-8 w-[110px] border-none text-[8px] font-black uppercase tracking-widest",
-                          task.is_done ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                        )}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
-                          <SelectItem value="todo">À faire</SelectItem>
-                          <SelectItem value="completed">Terminé</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Select
+                      value={task.is_done ? 'completed' : 'todo'}
+                      onValueChange={(value) => updateTaskStatusMutation.mutate({ id: task.id, status: value })}
+                      disabled={updateTaskStatusMutation.isPending}
+                    >
+                      <SelectTrigger className={cn(
+                        "h-6 w-[80px] border-none text-[8px] font-black uppercase tracking-wider rounded-md shrink-0",
+                        task.is_done ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                      )}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#0A0A0A] border-white/[0.08] text-white rounded-xl">
+                        <SelectItem value="todo">À faire</SelectItem>
+                        <SelectItem value="completed">Fait</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-white/20 text-[10px] font-black uppercase tracking-widest">Tout est à jour !</div>
+                <div className="text-center py-8 text-white/20 text-[10px] font-bold">
+                  Tout est à jour !
+                </div>
               )}
             </div>
           </MotionCard>
 
-          {/* Lead Validation for Admin */}
-          {user?.role === 'admin' && (
-            <motion.div variants={cardVariants}>
-              <LeadValidation />
-            </motion.div>
-          )}
+          {/* Hunter League */}
+          <MotionCard variants={cardVariants} className="bg-[#0A0A0A] border-white/[0.05] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 bg-gradient-to-br from-yellow-500/20 to-amber-600/20 rounded-lg flex items-center justify-center border border-yellow-500/20">
+                  <Trophy size={14} className="text-yellow-400" />
+                </div>
+                <h3 className="text-sm font-bold text-white">Hunter League</h3>
+              </div>
+              <Link href="/leaderboard">
+                <Button variant="ghost" size="sm" className="text-white/30 hover:text-white text-[9px] font-bold h-7 gap-1">
+                  Voir <ArrowRight size={10} />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="space-y-2.5">
+              {leaderboard.slice(0, 5).map((entry: any, idx: number) => {
+                const medals = [
+                  <Crown key="crown" size={14} className="text-yellow-400" />,
+                  <Medal key="medal" size={14} className="text-gray-300" />,
+                  <Award key="award" size={14} className="text-amber-600" />,
+                ];
+                return (
+                  <div key={entry.id || idx} className={cn(
+                    "flex items-center justify-between p-3 rounded-xl border transition-all",
+                    idx === 0
+                      ? "bg-yellow-500/[0.06] border-yellow-500/15"
+                      : "bg-white/[0.02] border-white/[0.04] hover:border-white/[0.08]"
+                  )}>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-5 flex justify-center">
+                        {idx < 3 ? medals[idx] : (
+                          <span className="text-[10px] font-black text-white/30">#{idx + 1}</span>
+                        )}
+                      </div>
+                      <p className={cn(
+                        "text-xs font-bold",
+                        idx === 0 ? "text-yellow-400" : "text-white"
+                      )}>{entry.username}</p>
+                    </div>
+                    <span className={cn(
+                      "text-xs font-black",
+                      idx === 0 ? "text-yellow-400" : "text-white/50"
+                    )}>{entry.xp_total} XP</span>
+                  </div>
+                );
+              })}
+              {leaderboard.length === 0 && (
+                <div className="text-center py-8 text-white/20 text-[10px] font-bold">
+                  En attente de participants...
+                </div>
+              )}
+            </div>
+          </MotionCard>
         </motion.div>
+
+        {/* ── Lead Validation (Admin only) ── */}
+        {user?.role === 'admin' && (
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <LeadValidation />
+          </motion.div>
+        )}
       </div>
     </DashboardLayout>
   );
