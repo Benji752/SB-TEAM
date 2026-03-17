@@ -261,8 +261,11 @@ export default function SavingsGoalsSection() {
                     </div>
                     <div className="h-3 w-full rounded-full bg-white/[0.06] overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${isComplete ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : "bg-gradient-to-r from-gold/80 to-gold"}`}
-                        style={{ width: `${pct}%` }}
+                        className={`h-full rounded-full transition-all duration-500 ${isComplete ? "bg-gradient-to-r from-emerald-500 to-emerald-400" : ""}`}
+                        style={{
+                          width: `${pct}%`,
+                          ...(!isComplete ? { background: "linear-gradient(to right, #c8a44e, #e2c06d)" } : {}),
+                        }}
                       />
                     </div>
                   </div>
