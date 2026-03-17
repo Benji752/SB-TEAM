@@ -307,3 +307,22 @@ export const xpActivityLog = pgTable("xp_activity_log", {
 export const insertXpActivityLogSchema = createInsertSchema(xpActivityLog).omit({ id: true, createdAt: true });
 export type XpActivityLog = typeof xpActivityLog.$inferSelect;
 export type InsertXpActivityLog = z.infer<typeof insertXpActivityLogSchema>;
+
+// ========== Savings Goals (Objectifs d'Epargne) ==========
+
+export const savingsGoals = pgTable("savings_goals", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  productUrl: text("product_url"),
+  targetAmount: doublePrecision("target_amount").notNull().default(0),
+  savedAmount: doublePrecision("saved_amount").notNull().default(0),
+  priority: text("priority", { enum: ["high", "medium", "low"] }).default("medium").notNull(),
+  status: text("status", { enum: ["in_progress", "completed"] }).default("in_progress").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSavingsGoalSchema = createInsertSchema(savingsGoals).omit({ id: true, createdAt: true });
+export type SavingsGoal = typeof savingsGoals.$inferSelect;
+export type InsertSavingsGoal = z.infer<typeof insertSavingsGoalSchema>;

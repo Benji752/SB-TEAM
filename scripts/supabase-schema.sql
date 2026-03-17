@@ -240,6 +240,26 @@ CREATE TABLE IF NOT EXISTS finance_entries (
 ALTER PUBLICATION supabase_realtime ADD TABLE finance_entries;
 
 -- =============================================
+-- SAVINGS GOALS TABLE (Objectifs d'Epargne)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS savings_goals (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  image_url TEXT,
+  product_url TEXT,
+  target_amount DOUBLE PRECISION NOT NULL DEFAULT 0,
+  saved_amount DOUBLE PRECISION NOT NULL DEFAULT 0,
+  priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('high', 'medium', 'low')),
+  status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed')),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Enable realtime for savings_goals
+ALTER PUBLICATION supabase_realtime ADD TABLE savings_goals;
+
+-- =============================================
 -- GAMIFICATION TABLES (SB HUNTER LEAGUE)
 -- =============================================
 
