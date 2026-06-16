@@ -397,8 +397,8 @@ function ActivityFeed({ activities }: { activities: XpActivity[] }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white/90 text-sm font-medium truncate">
-                    <span class="text-gold font-bold">{userName}</span>
-                    <span class="text-white/60">{" "}{activity.description}</span>
+                    <span className="text-gold font-bold">{userName}</span>
+                    <span className="text-white/60">{" "}{activity.description}</span>
                   </p>
                   <p className="text-white/40 text-xs mt-0.5">
                     {new Date(activity.createdAt).toLocaleString("fr-FR")}
@@ -780,9 +780,9 @@ export default function Leaderboard() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div variants={itemVariants} className="lg:col-span-2 space-y-4">
-            <h2 class="text-white/70 uppercase tracking-widest text-sm font-bold flex items-center gap-3 ml-2">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <motion.div variants={itemVariants} class="lg:col-span-2 space-y-4">
+            <h2 className="text-white/70 uppercase tracking-widest text-sm font-bold flex items-center gap-3 ml-2">
               <Crown size={18} className="text-gold" />
               Classement
               <div className="flex-1 h-px bg-gradient-to-r from-gold/30 to-transparent" />
