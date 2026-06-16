@@ -134,7 +134,25 @@ export function useGamificationData() {
     return () => clearInterval(interval);
   }, [currentUserId]);
 
-  const currentUser = leaderboard.find(u => u.isCurrentUser) || null;
+  const fallbackCurrentUser: LeaderboardUser | null = user ? {
+    id: currentUserId || 0,
+    user_id: currentUserId || 0,
+    username: currentUsername || "Utilisateur",
+    xp: 0,
+    xp_total: 0,
+    level: 1,
+    current_streak: 0,
+    role_multiplier: ["admin", "staff"].includes(((user as any)?.role || "").toLowerCase()) ? 2 : 1,
+    badges: [],
+    last_active_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    seconds_since_active: 0,
+    isOnline: true,
+    isCurrentUser: true,
+  } : null;
+
+  const currentUser = leaderboard.find(u => u.isCurrentUser) || fallbackCurrentUser;
 
   const isUserOnline = (userId: number): boolean => {
     if (userId === currentUserId) return true;
