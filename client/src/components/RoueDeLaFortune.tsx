@@ -145,6 +145,16 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
   const [hasSpun, setHasSpun] = useState(false);
   const [prize, setPrize] = useState<Lot | null>(null);
   const [hotelStatus, setHotelStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [manualPoints, setManualPoints] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = window.localStorage.getItem('hunterLeagueManualScore');
+    if (!saved) return null;
+    const parsed = Number(saved);
+    return Number.isFinite(parsed) ? parsed : null;
+  });
+
+  const pointsForWheel = manualPoints ?? pointsActuels;
+  const manualScoreValue = String(manualPoints ?? pointsActuels);
 
   const getDirectPrize = (points: number): Lot | null => {
     for (const lot of LOTS_CONFIG) {
@@ -153,7 +163,7 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
     return null;
   };
 
-  const activeLot = getDirectPrize(pointsActuels);
+  const activeLot = getDirectPrize(pointsForWheel);
 
   const getSliceAngles = () => {
     let currentAngle = 0;
@@ -229,7 +239,7 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
   }, [activeLot, hasSpun]);
 
   const spinTheWheel = () => {
-    if (spinning || hasSpun || pointsActuels !== 20001) return;
+    if (spinning || hasSpun || pointsForWheel !== 20001) return;
 
     setSpinning(true);
     const rand = Math.random();
@@ -291,31 +301,63 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
     audio.playFail();
   };
 
+  const updateManualScore = (value: string) => {
+    const parsed = Number(value);
+    const nextScore = Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0;
+    setManualPoints(nextScore);
+    setHasSpun(false);
+    setPrize(null);
+    setHotelStatus('pending');
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('hunterLeagueManualScore', String(nextScore));
+    }
+  };
+
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 text-white p-6 bg-[#0d0d0e] rounded-2xl border border-white/10 shadow-lg">
       <div className="lg:col-span-2 space-y-4">
         <div className="p-5 bg-[#111113] border border-white/5 rounded-xl">
           <div className="flex items-center justify-between mb-4">
             <span className="text-xs font-bold uppercase tracking-wider text-[#e6ad12]">
-              🎯 Score actuel de la semaine
+              🎯 Score Hunter manuel
             </span>
             <span className="text-xs font-mono font-bold text-gray-400">
-              {pointsActuels.toLocaleString()} PTS
+              {pointsForWheel.toLocaleString()} PTS
             </span>
           </div>
 
+          {roleUtilisateur === 'admin' && (
+            <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:items-center">
+              <input
+                type="number"
+                min="0"
+                value={manualScoreValue}
+                onChange={(event) => updateManualScore(event.target.value)}
+                className="h-10 flex-1 rounded-lg border border-[#e6ad12]/30 bg-black/40 px-3 text-sm font-bold text-white outline-none focus:border-[#e6ad12]"
+                aria-label="Score Hunter manuel"
+              />
+              <button
+                type="button"
+                onClick={() => updateManualScore('20001')}
+                className="h-10 rounded-lg bg-[#e6ad12] px-4 text-xs font-black uppercase tracking-wider text-black transition hover:bg-amber-400"
+              >
+                Activer roue
+              </button>
+            </div>
+          )}
+
           <div className="w-full bg-[#1c1c1e] rounded-full h-3 overflow-hidden">
-            <div
+            <div 
               className="bg-[#e6ad12] h-full transition-all duration-500 shadow-[0_0_10px_rgba(230,173,18,0.5)]"
-              style={{ width: `${Math.min(100, (pointsActuels / 20000) * 100)}%` }}
+              style={{ width: `${Math.min(100, (pointsForWheel / 20000) * 100)}%` }}
             />
           </div>
 
-          {pointsActuels < 20000 ? (
+          {pointsForWheel < 20000 ? (
             <p className="text-xs text-gray-400 mt-3">
-              Encore <strong className="text-amber-400">{(20000 - pointsActuels).toLocaleString()} pts</strong> requis pour débloquer l&#039;accès secret à la Roue.
+              Encore <strong className="text-amber-400">{(20000 - pointsForWheel).toLocaleString()} pts</strong> requis pour débloquer l&#039;accès secret à la Roue.
             </p>
-          ) : pointsActuels === 20001 ? (
+          ) : pointsForWheel === 20001 ? (
             <p className="text-xs text-emerald-400 mt-3 font-semibold flex items-center gap-1.5 animate-pulse">
               ✨ Score magique atteint ! La Roue de la Fortune est activée ci-contre.
             </p>
@@ -332,7 +374,7 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {LOTS_CONFIG.map((lot) => {
-              const isReached = pointsActuels >= lot.val;
+              const isReached = pointsForWheel >= lot.val;
               const isExact = activeLot?.id === lot.id;
 
               return (
