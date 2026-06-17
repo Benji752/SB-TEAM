@@ -8,6 +8,7 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { apiRequest } from "./lib/queryClient";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Code-splitting: lazy load all page components
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -337,6 +338,7 @@ export default function App() {
           )}
         </Suspense>
         <Toaster />
+        <SpeedInsights />
       </TooltipProvider>
     </QueryClientProvider>
   );
