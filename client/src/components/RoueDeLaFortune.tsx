@@ -138,6 +138,30 @@ interface RoueProps {
   roleUtilisateur: 'admin' | 'model' | 'staff';
 }
 
+const getLotPower = (lot?: Lot | null) => {
+  if (!lot) return 0;
+  if (lot.id === 'hotel') return 3;
+  if (lot.id === 'fellation') return 2;
+  if (lot.id === 'calin') return 1;
+  return 0;
+};
+
+const getRewardAnimationClass = (lot?: Lot | null) => {
+  const power = getLotPower(lot);
+  if (power === 3) return 'hunter-reward-legendary';
+  if (power === 2) return 'hunter-reward-epic';
+  if (power === 1) return 'hunter-reward-rare';
+  return '';
+};
+
+const getRewardHaloClass = (lot?: Lot | null) => {
+  const power = getLotPower(lot);
+  if (power === 3) return 'hunter-halo-legendary';
+  if (power === 2) return 'hunter-halo-epic';
+  if (power === 1) return 'hunter-halo-rare';
+  return '';
+};
+
 export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: RoueProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [spinning, setSpinning] = useState(false);
@@ -315,6 +339,55 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
 
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6 text-white p-6 bg-[#0d0d0e] rounded-2xl border border-white/10 shadow-lg">
+      <style>{`
+        @keyframes hunterRewardRare {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(51,255,255,0.18); }
+          50% { transform: scale(1.035); box-shadow: 0 0 30px rgba(51,255,255,0.36); }
+        }
+        @keyframes hunterRewardEpic {
+          0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 24px rgba(204,102,255,0.22); }
+          35% { transform: translateY(-3px) scale(1.045); box-shadow: 0 0 42px rgba(204,102,255,0.48); }
+          70% { transform: translateY(1px) scale(1.02); box-shadow: 0 0 32px rgba(255,153,255,0.34); }
+        }
+        @keyframes hunterRewardLegendary {
+          0%, 100% { transform: scale(1) rotate(0deg); box-shadow: 0 0 28px rgba(230,173,18,0.28), inset 0 0 20px rgba(230,173,18,0.08); }
+          25% { transform: scale(1.06) rotate(-1deg); box-shadow: 0 0 52px rgba(230,173,18,0.62), inset 0 0 26px rgba(230,173,18,0.16); }
+          55% { transform: scale(1.025) rotate(1deg); box-shadow: 0 0 70px rgba(255,202,40,0.44), inset 0 0 30px rgba(255,202,40,0.14); }
+          80% { transform: scale(1.045) rotate(0deg); box-shadow: 0 0 44px rgba(230,173,18,0.52), inset 0 0 24px rgba(230,173,18,0.12); }
+        }
+        @keyframes hunterHaloSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .hunter-reward-rare { animation: hunterRewardRare 1.8s ease-in-out infinite; }
+        .hunter-reward-epic { animation: hunterRewardEpic 1.35s ease-in-out infinite; }
+        .hunter-reward-legendary { animation: hunterRewardLegendary 1s ease-in-out infinite; }
+        .hunter-halo-rare::before,
+        .hunter-halo-epic::before,
+        .hunter-halo-legendary::before {
+          content: '';
+          position: absolute;
+          inset: -7px;
+          border-radius: 9999px;
+          pointer-events: none;
+          opacity: 0.8;
+          animation: hunterHaloSpin 2.8s linear infinite;
+        }
+        .hunter-halo-rare::before {
+          border: 1px dashed rgba(51,255,255,0.55);
+        }
+        .hunter-halo-epic::before {
+          inset: -9px;
+          border: 2px dashed rgba(204,102,255,0.7);
+          animation-duration: 2s;
+        }
+        .hunter-halo-legendary::before {
+          inset: -12px;
+          border: 2px solid rgba(230,173,18,0.75);
+          box-shadow: 0 0 24px rgba(230,173,18,0.55);
+          animation-duration: 1.35s;
+        }
+      `}</style>
       <div className="lg:col-span-2 space-y-4">
         <div className="p-5 bg-[#111113] border border-white/5 rounded-xl">
           <div className="flex items-center justify-between mb-4">
@@ -457,10 +530,10 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
               </>
             ) : (
               <div className="text-center space-y-4 w-full">
-                <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mx-auto">
+                <div className={`relative w-12 h-12 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 mx-auto ${getRewardHaloClass(prize)}`}>
                   ✓
                 </div>
-                <div>
+                <div className={`rounded-xl p-3 ${getRewardAnimationClass(prize)}`}>
                   <span className="text-[9px] text-[#e6ad12] font-black tracking-widest block uppercase">TIRAGE TERMINÉ</span>
                   <h4 className="text-sm font-bold mt-1 text-white">{prize?.label}</h4>
                   <p className="text-xs text-gray-400 px-2 mt-0.5">{prize?.desc}</p>
@@ -496,8 +569,8 @@ export default function RoueDeLaFortune({ pointsActuels, roleUtilisateur }: Roue
         )}
 
         {activeLot && activeLot.id !== 'aleatoire' && (
-          <div className="text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-[#e6ad12]/30 flex items-center justify-center text-[#e6ad12] mx-auto">
+          <div className={`text-center space-y-4 rounded-xl p-4 ${getRewardAnimationClass(activeLot)}`}>
+            <div className={`relative w-14 h-14 rounded-full bg-amber-500/10 border border-[#e6ad12]/30 flex items-center justify-center text-[#e6ad12] mx-auto ${getRewardHaloClass(activeLot)}`}>
               🎁
             </div>
             <div>
